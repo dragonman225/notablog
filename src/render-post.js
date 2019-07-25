@@ -11,15 +11,14 @@ module.exports = {
   renderPost
 }
 
-async function renderPost(task) {
-  if (task != null) {
-    const pageID = task.pageID
-    const title = task.title
+async function renderPost(post) {
+  if (post != null) {
+    const pageID = post.pageID
 
     /** Download page. */
     log(`Fetch page ${pageID}.`)
     let nast = await downloadPageAsTree(pageID, new NotionAgent({ suppressWarning: true }))
-    let html = toHTML(nast)
+    let contentHTML = toHTML(nast, { contentOnly: true })
 
     /** Render with template. */
     log(`Render page ${pageID}.`)
@@ -29,10 +28,10 @@ async function renderPost(task) {
     const postTemplate = fs.readFileSync(postTemplatePath, { encoding: 'utf-8' })
     const postPath = path.join(outDir, `${pageID}.html`)
     Sqrl.autoEscaping(false)
-    const post = Sqrl.Render(postTemplate, {
-      postTitle: title,
-      content: html
+    const html = Sqrl.Render(postTemplate, {
+      ...post,
+      content: contentHTML
     })
-    fs.writeFileSync(postPath, post, { encoding: 'utf-8' })
+    fs.writeFileSync(postPath, html, { encoding: 'utf-8' })
   }
 }

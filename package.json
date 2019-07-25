@@ -1,6 +1,6 @@
 {
   "name": "notablog",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Build a blog with Notion.so.",
   "main": "index.js",
   "scripts": {},
@@ -17,7 +17,7 @@
     "@dnpr/task-manager": "^0.1.1",
     "notionapi-agent": "^0.5.1",
     "notionast-util-from-notionapi": "^0.3.1",
-    "notionast-util-to-html": "^0.0.10",
+    "notionast-util-to-html": "^0.0.11",
     "squirrelly": "^7.4.0"
   }
 }

@@ -17,12 +17,10 @@ function renderIndex(config, posts) {
   const index = Sqrl.Render(indexTemplate, {
     siteTitle: config.title,
     posts: posts.map(post => {
+      const { description, ...rest } = post
       return {
-        pageID: post.pageID,
-        title: post.title,
-        tags: post.tags,
-        description: toHTMLInternal.renderTitle(post.description),
-        date: post.date
+        description: toHTMLInternal.renderTitle(description),
+        ...rest
       }
     })
   })

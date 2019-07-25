@@ -20,7 +20,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     icon: '',
     title: rawTable.name
   }
-  
+
   /**
    * Create map for random_string -> property_name.
    * Notion uses random strings in schema to prevent probable repeated
@@ -64,7 +64,12 @@ async function parseTable(notionDatabaseURL, notionAgent) {
           color: tagColorMap[tag]
         }
       }),
-      /** Description is StyledText[]. */
+      icon: row.format
+        ? row.format['page_icon']
+          ? row.format['page_icon']
+          : ''
+        : '',
+      /** Description is StyledString[]. */
       description: row.properties[schemaMap['description']],
       date: row['created_time']
     }

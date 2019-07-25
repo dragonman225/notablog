@@ -2,7 +2,7 @@ dependencies:
   '@dnpr/task-manager': 0.1.1
   notionapi-agent: 0.5.1
   notionast-util-from-notionapi: 0.3.1
-  notionast-util-to-html: 0.0.10
+  notionast-util-to-html: 0.0.11
   squirrelly: 7.4.0
 devDependencies:
   eslint: 6.1.0
@@ -584,12 +584,12 @@ packages:
     dev: false
     resolution:
       integrity: sha512-eed5E/sADGWlQFZYCnFN/aec69Gfomo9mgD0y04st1HEsXoMmxNvauyJc2BVFaf0B1RzyoF0ZVxRgxS4q+TSQA==
-  /notionast-util-to-html/0.0.10:
+  /notionast-util-to-html/0.0.11:
     dependencies:
       prismjs: 1.17.1
     dev: false
     resolution:
-      integrity: sha512-Ty0uqCxCrx8eFSKrvv4cCjl1DYUGVBlwSElLxTGR9TE2YQZ1POI3KZStArxxFGy53s97Pd4sni+mVekRVXw4FA==
+      integrity: sha512-Nws1DkFOgsECyNLgEQT9ZGv6vYJMFUvv77ZKxSIR5phRz6raeQ6GAzYc/k9XDIOVSORunEhjHmXDsU+WyIsXVQ==
   /once/1.4.0:
     dependencies:
       wrappy: 1.0.2
@@ -898,5 +898,5 @@ specifiers:
   eslint: ^6.1.0
   notionapi-agent: ^0.5.1
   notionast-util-from-notionapi: ^0.3.1
-  notionast-util-to-html: ^0.0.10
+  notionast-util-to-html: ^0.0.11
   squirrelly: ^7.4.0

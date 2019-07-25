@@ -21,20 +21,42 @@ Generate a minimal blog from Notion.so.
   
   * Variables a user can use in `index.html` template :
   
-    |      Name       |     Type      |       Description       |
-    | :-------------: | :-----------: | :---------------------: |
-    | `{{siteTitle}}` |   `string`    | Title of the BlogTable. |
-    |   `{{posts}}`   | `Array<Post>` |  Post metadata array.   |
+    GraphQL-style overview :
+  
+    ```javascript
+    {
+    	siteTitle
+      posts {
+        pageID
+        title
+        tags {
+          value
+          color
+        }
+        icon
+        description
+        date
+      }
+    }
+    ```
+    
+    Details :
+  
+    |  Property   |   Type   |       Description       |
+    | :---------: | :------: | :---------------------: |
+    | `siteTitle` | `string` | Title of the BlogTable. |
+    |   `posts`   | `Post[]` |  Post metadata array.   |
   
     A `Post` object :
   
-    |   Property    |     Type     |                         Description                          |
-    | :-----------: | :----------: | :----------------------------------------------------------: |
-    |   `pageID`    |   `string`   |      Notion's page ID. Used as the file name of a post.      |
-    |    `title`    |   `string`   |                       Title of a post.                       |
-    |    `tags`     | `Array<Tag>` |                       Tags of a post.                        |
-    | `description` |   `string`   | Description of a post. This is a HTML string since Notion support styles here. |
-    |    `date`     |   `string`   |        Created date of the post in YYYY/MM/DD format.        |
+    |   Property    |   Type   |                         Description                          |
+    | :-----------: | :------: | :----------------------------------------------------------: |
+    |   `pageID`    | `string` |      Notion's page ID. Used as the file name of a post.      |
+    |    `title`    | `string` |                       Title of a post.                       |
+    |    `tags`     | `Tag[]`  |                       Tags of a post.                        |
+    |    `icon`     | `string` |                       Icon of a post.                        |
+    | `description` | `string` | Description of a post. This is a HTML string since Notion support styles here. |
+    |    `date`     | `string` |        Created date of the post in YYYY/MM/DD format.        |
   
     A `Tag` object :
   
@@ -45,9 +67,27 @@ Generate a minimal blog from Notion.so.
   
   * Variables a user can use in `post.html` template : 
   
-    |      Name       |   Type   |                Description                |
-    | :-------------: | :------: | :---------------------------------------: |
-    | `{{postTitle}}` | `string` |            Title of the post.             |
-    |  `{{content}}`  | `string` | HTML string of the page, including title. |
+    GraphQL-style overview :
+    
+    ```javascript
+    {
+      content
+      pageID
+      title
+      tags {
+        value
+        color
+      }
+      icon
+      description
+      date
+    }
+    ```
+    
+    Details :
+    
+    |         Property         |   Type   |                Description                |
+    | :----------------------: | :------: | :---------------------------------------: |
+    |        `content`         | `string` | HTML string of the page, including title. |
+    | See above `Post` object. |          |                                           |
   
-    **Notice** : The variables in this template is quite inflexible 😂 due to limitations in a dependency, but I'll improve that soon!
