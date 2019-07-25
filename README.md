@@ -14,7 +14,7 @@ Generate a minimal blog from Notion.so.
 4. Open `config.json`. Change `url` field to the URL of the table you've duplicated.
 5. Issue command `npm run generate`. Generated site is the `public` folder.
 
-## More Information
+## More Information of `notablog-starter`
 
 * To edit CSS styles, look for files in `public/css`. (**Notice** : This folder may be moved in the future.)
 * To edit layouts, look for files in `layout`. These are [Squirrelly](https://squirrelly.js.org/) templates.
