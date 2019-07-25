@@ -1,0 +1,23 @@
+{
+  "name": "notablog",
+  "version": "0.1.0",
+  "description": "Build a blog with Notion.so.",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [
+    "notion",
+    "blog"
+  ],
+  "author": "dragonman225",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^6.1.0"
+  },
+  "dependencies": {
+    "@dnpr/task-manager": "^0.1.1",
+    "notionapi-agent": "^0.5.1",
+    "notionast-util-from-notionapi": "^0.3.1",
+    "notionast-util-to-html": "^0.0.10",
+    "squirrelly": "^7.4.0"
+  }
+}
