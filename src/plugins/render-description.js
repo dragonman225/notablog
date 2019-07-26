@@ -1,6 +1,8 @@
+const { toHTMLInternal } = require('notionast-util-to-html')
+
 const plugin = {
-  name: 'transformDate',
-  func: transformDate,
+  name: 'renderDescription',
+  func: renderDescription,
   options: {
     // Here may define default options if a user doesn't override.
   }
@@ -8,7 +10,7 @@ const plugin = {
 
 module.exports = plugin
 
-function transformDate() {
+function renderDescription() {
   /**
    * A plugin gets `this.pageType` and `this.context` when called.
    * `this.pageType` is useful to determine what the format of the context
@@ -21,18 +23,10 @@ function transformDate() {
 
   if (pageType === 'index') {
     context.index.posts.forEach(post => {
-      post.createdTime = doTransformDate(post.createdTime)
+      post.description = toHTMLInternal.renderTitle(post.description)
     })
   } else if (pageType === 'post') {
-    context.post.createdTime = doTransformDate(context.post.createdTime)
+    context.post.description = toHTMLInternal.renderTitle(context.post.description)
   }
 
-}
-
-function doTransformDate(timestamp) {
-  let d = new Date(timestamp)
-  let date = d.getDate().toString().padStart(2, '0')
-  let month = (d.getMonth() + 1).toString().padStart(2, '0')
-  let year = d.getFullYear()
-  return `${year}.${month}.${date}`
 }

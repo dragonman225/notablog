@@ -2,6 +2,8 @@
 
 Generate a minimal blog from Notion.so.
 
+### :construction: This is under construction, there may be breaking changes every day! :construction:
+
 ## Getting Started
 
 1. Duplicate my [BlogTable template](https://www.notion.so/937c97eb6efb47f5864dc7fa66bbe88a?v=7076048baf9842238b74342f6b491c5b) on Notion.
@@ -27,27 +29,32 @@ Generate a minimal blog from Notion.so.
   
     ```javascript
     {
-    	siteTitle
-      posts {
-        pageID
+      siteMetadata {
         title
-        tags {
-          value
-          color
+      }
+      index {
+        posts {
+          pageID
+          title
+          tags {
+            value
+            color
+          }
+          icon
+          description
+          createdTime
+          lastEditedTime
         }
-        icon
-        description
-        date
       }
     }
     ```
-    
+  
     Details :
   
-    |  Property   |   Type   |       Description       |
-    | :---------: | :------: | :---------------------: |
-    | `siteTitle` | `string` | Title of the BlogTable. |
-    |   `posts`   | `Post[]` |  Post metadata array.   |
+    |       Property       |   Type   |     Description      |
+    | :------------------: | :------: | :------------------: |
+    | `siteMetadata.title` | `string` |  Title of the blog.  |
+    |    `index.posts`     | `Post[]` | Post metadata array. |
   
     A `Post` object :
   
@@ -58,7 +65,7 @@ Generate a minimal blog from Notion.so.
     |    `tags`     | `Tag[]`  |                       Tags of a post.                        |
     |    `icon`     | `string` |                       Icon of a post.                        |
     | `description` | `string` | Description of a post. This is a HTML string since Notion support styles here. |
-    |    `date`     | `string` |        Created date of the post in YYYY/MM/DD format.        |
+    | `createdTime` | `string` |        Created date of the post in YYYY.MM.DD format.        |
   
     A `Tag` object :
   
@@ -73,23 +80,29 @@ Generate a minimal blog from Notion.so.
     
     ```javascript
     {
-      content
-      pageID
-      title
-      tags {
-        value
-        color
+      siteMetadata {
+        title
       }
-      icon
-      description
-      date
+      post {
+        pageID
+        title
+        tags {
+          value
+          color
+        }
+        icon
+        description
+        createdTime
+        lastEditedTime
+      }
+      content
     }
     ```
     
     Details :
     
-    |         Property         |   Type   |                Description                |
-    | :----------------------: | :------: | :---------------------------------------: |
-    |        `content`         | `string` | HTML string of the page, including title. |
-    | See above `Post` object. |          |                                           |
-  
+    |       Property       |   Type   |                Description                |
+    | :------------------: | :------: | :---------------------------------------: |
+    | `siteMetadata.title` | `string` |            Title of the blog.             |
+    |        `post`        |  `Post`  |         See above `Post` object.          |
+    |      `content`       | `string` | HTML string of the page, including title. |

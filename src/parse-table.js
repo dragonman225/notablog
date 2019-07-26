@@ -15,7 +15,15 @@ async function parseTable(notionDatabaseURL, notionAgent) {
   let pageID = getPageIDFromNotionDatabaseURL(notionDatabaseURL)
   let rawTable = (await downloadPageAsTree(pageID, notionAgent))['raw_value']
 
-  /** The site name. */
+  /**
+   * The site metadata
+   * @typedef {Object} NotablogMetadata
+   * @property {string} icon
+   * @property {string} title
+   */
+  /**
+   * @type {NotablogMetadata}
+   */
   let global = {
     icon: '',
     title: rawTable.name
@@ -71,7 +79,8 @@ async function parseTable(notionDatabaseURL, notionAgent) {
         : '',
       /** Description is StyledString[]. */
       description: row.properties[schemaMap['description']],
-      date: row['created_time']
+      createdTime: row['created_time'],
+      lastEditedTime: row['last_edited_time']
     }
   })
 
