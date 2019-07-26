@@ -12,9 +12,11 @@ Generate a minimal blog from Notion.so.
    cd notablog-starter && npm install
    ```
 4. Open `config.json`. Change `url` field to the URL of the table you've duplicated.
-5. Issue command `npm run generate`. Generated site is the `public` folder.
+5. Issue command `npm run generate`. Generated static assets are in `public` folder. You can move that folder to your hosting location.
 
-## More Information of `notablog-starter`
+## Customize the Blog
+
+> Below folder paths are relative to the `notablog-starter` you have cloned.
 
 * To edit CSS styles, look for files in `public/css`. (**Notice** : This folder may be moved in the future.)
 * To edit layouts, look for files in `layout`. These are [Squirrelly](https://squirrelly.js.org/) templates.
