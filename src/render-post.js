@@ -2,8 +2,8 @@ const fs = require('fs')
 const fsPromises = fs.promises
 const path = require('path')
 const NotionAgent = require('notionapi-agent')
-const downloadPageAsTree = require('notionast-util-from-notionapi')
-const { toHTML } = require('notionast-util-to-html')
+const downloadPageAsTree = require('nast-util-from-notionapi')
+const { toHTML } = require('nast-util-to-html')
 const Sqrl = require('squirrelly')
 
 const { log, parseJSON } = require('./utils')

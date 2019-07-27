@@ -1,4 +1,4 @@
-const { toHTMLInternal } = require('notionast-util-to-html')
+const { toHTMLInternal } = require('nast-util-to-html')
 
 const plugin = {
   name: 'renderDescription',

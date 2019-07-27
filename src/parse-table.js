@@ -1,4 +1,4 @@
-const downloadPageAsTree = require('notionast-util-from-notionapi')
+const downloadPageAsTree = require('nast-util-from-notionapi')
 
 const { getPageIDFromNotionDatabaseURL } = require('./notion-utils')
 

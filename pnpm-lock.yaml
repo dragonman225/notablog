@@ -1,8 +1,8 @@
 dependencies:
   '@dnpr/task-manager': 0.1.1
+  nast-util-from-notionapi: 0.4.0
+  nast-util-to-html: 0.1.0
   notionapi-agent: 0.5.1
-  notionast-util-from-notionapi: 0.3.1
-  notionast-util-to-html: 0.0.11
   squirrelly: 7.4.0
 devDependencies:
   eslint: 6.1.0
@@ -566,6 +566,16 @@ packages:
     dev: true
     resolution:
       integrity: sha1-MHXOk7whuPq0PhvE2n6BFe0ee6s=
+  /nast-util-from-notionapi/0.4.0:
+    dev: false
+    resolution:
+      integrity: sha512-isHFRxIvazaBKgs9SiBolSglI/pciDTwBymlwfHrWhYLyV48JICCESFGCm4YU2tThPTC6RUc25BXiVN7pORIxA==
+  /nast-util-to-html/0.1.0:
+    dependencies:
+      prismjs: 1.17.1
+    dev: false
+    resolution:
+      integrity: sha512-0PPUe1SrqCzbbGQUFNDrizHEOkch+0daJiZIzNUvy34z6ebZXkg1Hqwal4EPUu3En0c2v8me87rDShnxs9x6Uw==
   /natural-compare/1.4.0:
     dev: true
     resolution:
@@ -580,16 +590,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-gglJ1gFN6TWmhE4jpTtrK8ozgP/Xu//I02tDj+Wlgg0quUIOZCmDv1YDfaicsWeaULvHtw6+CLUjI6pGk+vCtg==
-  /notionast-util-from-notionapi/0.3.1:
-    dev: false
-    resolution:
-      integrity: sha512-eed5E/sADGWlQFZYCnFN/aec69Gfomo9mgD0y04st1HEsXoMmxNvauyJc2BVFaf0B1RzyoF0ZVxRgxS4q+TSQA==
-  /notionast-util-to-html/0.0.11:
-    dependencies:
-      prismjs: 1.17.1
-    dev: false
-    resolution:
-      integrity: sha512-Nws1DkFOgsECyNLgEQT9ZGv6vYJMFUvv77ZKxSIR5phRz6raeQ6GAzYc/k9XDIOVSORunEhjHmXDsU+WyIsXVQ==
   /once/1.4.0:
     dependencies:
       wrappy: 1.0.2
@@ -896,7 +896,7 @@ packages:
 specifiers:
   '@dnpr/task-manager': ^0.1.1
   eslint: ^6.1.0
+  nast-util-from-notionapi: ^0.4.0
+  nast-util-to-html: ^0.1.0
   notionapi-agent: ^0.5.1
-  notionast-util-from-notionapi: ^0.3.1
-  notionast-util-to-html: ^0.0.11
   squirrelly: ^7.4.0
