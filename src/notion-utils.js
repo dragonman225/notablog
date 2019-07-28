@@ -34,11 +34,12 @@ function getBookmarkLinkFromNotionPageURL(str) {
 }
 
 function getPageIDFromNotionPageURL(str) {
-  let re = /https:\/\/www.notion.so\/.+-([a-f|\d]+)/
-  let found = str.match(re)
-  if (found != null && found[1] != null) {
-    let dashID = toDashID(found[1])
-    return dashID
+  let splitArr = str.split('/')
+  splitArr = splitArr.pop().split('-')
+
+  let pageID = splitArr.pop()
+  if (pageID.length === noDashIDLen) {
+    return toDashID(pageID)
   } else {
     return str
   }

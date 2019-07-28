@@ -27,6 +27,7 @@ module.exports = {
  * @property {StyledString[]} description
  * @property {number} createdTime
  * @property {number} lastEditedTime
+ * @property {boolean} hideFromIndex
  * @property {string} cachePath
  * @property {string} template
  */

@@ -16,20 +16,6 @@ async function parseTable(notionDatabaseURL, notionAgent) {
   let rawTable = (await downloadPageAsTree(pageID, notionAgent))['raw_value']
 
   /**
-   * The site metadata
-   * @typedef {Object} NotablogMetadata
-   * @property {string} icon
-   * @property {string} title
-   */
-  /**
-   * @type {NotablogMetadata}
-   */
-  let global = {
-    icon: '',
-    title: rawTable.name
-  }
-
-  /**
    * Create map for random_string -> property_name.
    * Notion uses random strings in schema to prevent probable repeated
    * property names defined by user.
@@ -54,41 +40,71 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     })
   })
 
+  let about = rawTable.data
+    .find(row => {
+      return row.properties[schemaMap['type']][0][0] === 'about'
+    })
+
+  /**
+   * The site metadata
+   * @typedef {Object} NotablogMetadata
+   * @property {string} icon
+   * @property {string} title
+   * @property {string} aboutPageLink
+   */
+  /**
+   * @type {NotablogMetadata}
+   */
+  let global = {
+    icon: '',
+    title: rawTable.name,
+    aboutPageLink: about ? `${about.id}.html` : ''
+  }
+
   /**
    * Each `post` contains metadata needed to fetch and render a page in the
    * fetch pipeline.
    */
-  let posts = rawTable.data.map(row => {
-    return {
-      pageID: row.id,
-      title: row.properties[schemaMap['title']],
-      /**
-       * Structure of tags looks like this:
-       * { '<random_string>': [ [ 'css,web' ] ] }
-       */
-      tags: row.properties[schemaMap['tags']][0][0].split(',').map(tag => {
-        return {
-          value: tag,
-          color: tagColorMap[tag]
-        }
-      }),
-      icon: row.format
-        ? row.format['page_icon']
+  let posts = rawTable.data
+    .filter(row => {
+      return row.properties != null
+    })
+    .map(row => {
+      return {
+        pageID: row.id,
+        title: row.properties[schemaMap['title']],
+        /**
+         * Structure of tags looks like this:
+         * { '<random_string>': [ [ 'css,web' ] ] }
+         */
+        tags: row.properties[schemaMap['tags']]
+          ? row.properties[schemaMap['tags']][0][0].split(',').map(tag => {
+            return {
+              value: tag,
+              color: tagColorMap[tag]
+            }
+          })
+          : [],
+        icon: row.format
           ? row.format['page_icon']
-          : ''
-        : '',
-      /** Description is StyledString[]. */
-      description: row.properties[schemaMap['description']],
-      createdTime: row['created_time'],
-      lastEditedTime: row['last_edited_time']
-    }
-  })
+            ? row.format['page_icon']
+            : ''
+          : '',
+        /** Description is StyledString[]. */
+        description: row.properties[schemaMap['description']],
+        createdTime: row['created_time'],
+        lastEditedTime: row['last_edited_time'],
+        /** Hide a page from index if it's not a post. */
+        hideFromIndex: row.properties[schemaMap['type']][0][0] !== 'post'
+      }
+    })
 
   /**
    * Reverse the posts array so that the most recent post is at the top.
    */
   return {
-    global, posts: posts.reverse()
+    global,
+    posts: posts.sort((post1, post2) => post1.createdTime > post2.createdTime)
   }
 
 }
