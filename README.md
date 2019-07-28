@@ -2,6 +2,12 @@
 
 Generate a minimal blog from Notion.so.
 
+Some images. 🙂
+
+| Mobile | Desktop |
+| :--: | :--: |
+|   ![](assets/v0.1.2_mobile.png)   |   ![](assets/v0.1.2_desktop.png)   |
+
 ### :construction: This is under construction, there may be breaking changes every day! :construction:
 
 ## Getting Started
