@@ -26,8 +26,8 @@ Some images. 🙂
 
 > Below folder paths are relative to the `notablog-starter` you have cloned.
 
-* To edit CSS styles, look for files in `public/css`. (**Notice** : This folder may be moved in the future.)
-* To edit layouts, look for files in `layout`. These are [Squirrelly](https://squirrelly.js.org/) templates.
+* To edit CSS styles, look for files in `themes/pure/source/css`.
+* To edit layouts, look for files in `themes/pure/layout`. These are [Squirrelly](https://squirrelly.js.org/) templates.
   
   * Variables a user can use in `index.html` template :
   

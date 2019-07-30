@@ -24,10 +24,11 @@
     "eslint": "^6.1.0"
   },
   "dependencies": {
+    "@dnpr/fsutil": "^0.1.3",
     "@dnpr/task-manager": "^0.1.1",
-    "notionapi-agent": "^0.5.1",
     "nast-util-from-notionapi": "^0.4.0",
     "nast-util-to-html": "^0.1.0",
+    "notionapi-agent": "^0.5.1",
     "squirrelly": "^7.4.0"
   }
 }

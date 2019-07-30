@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const NotionAgent = require('notionapi-agent')
 const TaskManager = require('@dnpr/task-manager')
+const { copyDirSync } = require('@dnpr/fsutil')
 
 const { parseTable } = require('./src/parse-table')
 const { renderIndex } = require('./src/render-index')
@@ -13,11 +14,18 @@ const renderDescription = require('./src/plugins/render-description')
 const workDir = process.cwd()
 const config = JSON.parse(fs.readFileSync('config.json', { encoding: 'utf-8' }))
 const url = config.url
+const theme = config.theme
 const apiAgent = new NotionAgent({ suppressWarning: true })
 
-const cacheDir = path.join(workDir, 'post_cache')
+const cacheDir = path.join(workDir, 'source/notion_cache')
 if (!fs.existsSync(cacheDir)) {
   fs.mkdirSync(cacheDir, { recursive: true })
+}
+
+const themeDir = path.join(workDir, `themes/${theme}`)
+const outDir = path.join(workDir, 'public')
+if (!fs.existsSync(outDir)) {
+  fs.mkdirSync(outDir, { recursive: true })
 }
 
 const taskManagerOpts = {
@@ -39,12 +47,17 @@ async function main() {
 
     let startTime = Date.now()
 
+    /** Copy assets. */
+    log('Copy assets.')
+    let assetDir = path.join(themeDir, 'source')
+    copyDirSync(assetDir, outDir)
+
     /** Fetch BlogTable. */
     log('Fetch BlogTable.')
     let blogTable = await parseTable(url, apiAgent)
 
     /** Generate index-rendering task. */
-    let indexTemplatePath = path.join(workDir, 'layout/index.html')
+    let indexTemplatePath = path.join(themeDir, 'layout/index.html')
     let indexTemplate = fs.readFileSync(indexTemplatePath, { encoding: 'utf-8' })
 
     let renderIndexTask = {
@@ -67,7 +80,7 @@ async function main() {
     renderIndex(renderIndexTask)
 
     /** Generate blogpost-rendering tasks. */
-    let postTemplatePath = path.join(workDir, 'layout/post.html')
+    let postTemplatePath = path.join(themeDir, 'layout/post.html')
     let postTemplate = fs.readFileSync(postTemplatePath, { encoding: 'utf-8' })
 
     let postTotalCount = blogTable.posts.length

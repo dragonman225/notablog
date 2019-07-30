@@ -1,4 +1,5 @@
 dependencies:
+  '@dnpr/fsutil': 0.1.3
   '@dnpr/task-manager': 0.1.1
   nast-util-from-notionapi: 0.4.0
   nast-util-to-html: 0.1.0
@@ -22,6 +23,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-7dV4eu9gBxoM0dAnj/BCFDW9LFU0zvTrkq0ugM7pnHEgguOEeOz1so2ZghEdzviYzQEED0r4EAgpsBChKy1TRQ==
+  /@dnpr/fsutil/0.1.3:
+    dev: false
+    resolution:
+      integrity: sha512-xIK5oi4nyprpPDbHKFpc87hsFiuAqFEvFI6NwkNjxoCiDDVfWUEPYhVlmNnWmtS39vMhfVkC1RaHetK3pNOq8Q==
   /@dnpr/make-request/0.1.0:
     dev: false
     resolution:
@@ -894,6 +899,7 @@ packages:
     resolution:
       integrity: sha512-/lg70HAjtkUgWPVZhZcm+T4hkL8Zbtp1nFNOn3lRrxnlv50SRBv7cR7RqR+GMsd3hUXy9hWBo4CHTbFTcOYwig==
 specifiers:
+  '@dnpr/fsutil': ^0.1.3
   '@dnpr/task-manager': ^0.1.1
   eslint: ^6.1.0
   nast-util-from-notionapi: ^0.4.0
