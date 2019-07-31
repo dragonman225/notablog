@@ -3,7 +3,9 @@
   "version": "0.2.0",
   "description": "Generate a minimal blog from Notion.so.",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "build:graph": "npx depcruise --exclude '^node_modules' --output-type dot --prefix 'https://github.com/dragonman225/notablog/tree/master/' index.js | dot -T svg > assets/deps_graph.svg"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/dragonman225/notablog.git"
@@ -21,6 +23,7 @@
   },
   "homepage": "https://github.com/dragonman225/notablog",
   "devDependencies": {
+    "dependency-cruiser": "^5.0.0",
     "eslint": "^6.1.0"
   },
   "dependencies": {

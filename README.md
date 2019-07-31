@@ -2,7 +2,7 @@
 
 Generate a minimal blog from Notion.so.
 
-Some images. 🙂
+Here are some images of my blog. 🙂 [Visit site](https://dragonman225.github.io/)
 
 | Mobile | Desktop |
 | :--: | :--: |
@@ -12,15 +12,23 @@ Some images. 🙂
 
 ## Getting Started
 
-1. Duplicate my [BlogTable template](https://www.notion.so/937c97eb6efb47f5864dc7fa66bbe88a?v=7076048baf9842238b74342f6b491c5b) on Notion.
+1. Duplicate my [table template](https://www.notion.so/937c97eb6efb47f5864dc7fa66bbe88a?v=7076048baf9842238b74342f6b491c5b) on Notion.
+
 2. Make the table you've duplicated **public**.
-3. Clone the [`notablog-starter`](https://github.com/dragonman225/notablog-starter) repository and install packages.
+
+3. Clone the [`notablog-starter`](https://github.com/dragonman225/notablog-starter) repository and install it.
    ```bash
    git clone https://github.com/dragonman225/notablog-starter.git
    cd notablog-starter && npm install
    ```
+   
 4. Open `config.json`. Change `url` field to the URL of the table you've duplicated.
-5. Issue command `npm run generate`. Generated static assets are in `public` folder. You can move that folder to your hosting location.
+
+5. Issue command `npm run generate`.
+
+6. Generated blog is the `public` folder. You can open `public/index.html` in a browser to preview.  
+
+7. If you want to host the blog on the internet, either can you build your own server or use static hosting services like [Github Pages](https://pages.github.com/), [Netlify](https://www.netlify.com/), etc.
 
 ## Customize the Blog
 
@@ -112,3 +120,7 @@ Some images. 🙂
     | `siteMetadata.title` | `string` |            Title of the blog.             |
     |        `post`        |  `Post`  |         See above `Post` object.          |
     |      `content`       | `string` | HTML string of the page, including title. |
+
+## Project Structure
+
+![](assets/deps_graph.svg)

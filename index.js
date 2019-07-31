@@ -17,17 +17,6 @@ const url = config.url
 const theme = config.theme
 const apiAgent = new NotionAgent({ suppressWarning: true })
 
-const cacheDir = path.join(workDir, 'source/notion_cache')
-if (!fs.existsSync(cacheDir)) {
-  fs.mkdirSync(cacheDir, { recursive: true })
-}
-
-const themeDir = path.join(workDir, `themes/${theme}`)
-const outDir = path.join(workDir, 'public')
-if (!fs.existsSync(outDir)) {
-  fs.mkdirSync(outDir, { recursive: true })
-}
-
 const taskManagerOpts = {
   delay: 0,
   delayJitterMax: 0,
@@ -46,6 +35,22 @@ async function main() {
   try {
 
     let startTime = Date.now()
+
+    /** Init dir paths. */
+    const cacheDir = path.join(workDir, 'source/notion_cache')
+    if (!fs.existsSync(cacheDir)) {
+      fs.mkdirSync(cacheDir, { recursive: true })
+    }
+
+    const themeDir = path.join(workDir, `themes/${theme}`)
+    if (!fs.existsSync(themeDir)) {
+      throw new Error(`No theme "${theme}" in themes/ folder.`)
+    }
+
+    const outDir = path.join(workDir, 'public')
+    if (!fs.existsSync(outDir)) {
+      fs.mkdirSync(outDir, { recursive: true })
+    }
 
     /** Copy assets. */
     log('Copy assets.')
@@ -66,7 +71,7 @@ async function main() {
       },
       index: {
         // Clone one so the plugins can not change original data.
-        posts: blogTable.posts.map(post => { return {...post} }),
+        posts: blogTable.posts.map(post => { return { ...post } }),
         template: indexTemplate
       },
       operations: {
@@ -88,7 +93,7 @@ async function main() {
     let renderPostTasks = blogTable.posts.map(post => {
       let cacheFileName = post.pageID.replace(/\/|\\/g, '') + '.json'
       let cacheFilePath = path.join(cacheDir, cacheFileName)
-      
+
       let postUpdated
       if (fs.existsSync(cacheFilePath)) {
         let lastCacheTime = fs.statSync(cacheFilePath).mtimeMs
