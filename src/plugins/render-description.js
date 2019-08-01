@@ -23,10 +23,20 @@ function renderDescription() {
 
   if (pageType === 'index') {
     context.index.posts.forEach(post => {
-      post.description = toHTMLInternal.renderTitle(post.description)
+      post.descriptionHTML = renderToHTML(post.description)
+      post.descriptionPlainText = renderToPlainText(post.description)
     })
   } else if (pageType === 'post') {
-    context.post.description = toHTMLInternal.renderTitle(context.post.description)
+    context.post.descriptionHTML = renderToHTML(context.post.description)
+    context.post.descriptionPlainText = renderToPlainText(context.post.description)
   }
 
+}
+
+function renderToHTML(desc) {
+  return toHTMLInternal.renderTitle(desc)
+}
+
+function renderToPlainText(desc) {
+  return desc.map(str => str[0]).join('')
 }

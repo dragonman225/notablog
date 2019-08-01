@@ -27,14 +27,14 @@ function renderIndex(task) {
           options: plugin.options
         })
       else
-        log(`Plugin ${plugin.name} is not a function, skipped.`)
+        log(`Plugin ${plugin.name} is in wrong format, skipped.`)
     })
   }
 
   const workDir = process.cwd()
   const outDir = path.join(workDir, 'public')
   const indexPath = path.join(outDir, 'index.html')
-
+  
   Sqrl.autoEscaping(false)
   const html = Sqrl.Render(index.template, {
     siteMetadata,

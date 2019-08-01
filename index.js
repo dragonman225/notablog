@@ -12,7 +12,8 @@ const transformDate = require('./src/plugins/timestamp-to-date')
 const renderDescription = require('./src/plugins/render-description')
 
 const workDir = process.cwd()
-const config = JSON.parse(fs.readFileSync('config.json', { encoding: 'utf-8' }))
+const configPath = path.join(workDir, 'config.json')
+const config = JSON.parse(fs.readFileSync(configPath, { encoding: 'utf-8' }))
 const url = config.url
 const theme = config.theme
 const apiAgent = new NotionAgent({ suppressWarning: true })
@@ -70,9 +71,11 @@ async function main() {
         ...blogTable.global
       },
       index: {
-        // Clone one so the plugins can not change original data.
+        title: blogTable.global.title,
+        /** Clone one so the plugin changes are local. */
         posts: blogTable.posts.map(post => { return { ...post } }),
-        template: indexTemplate
+        template: indexTemplate,
+        output: 'index.html'
       },
       operations: {
         enablePlugin: true

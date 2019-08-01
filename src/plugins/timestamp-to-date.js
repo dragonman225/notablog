@@ -21,10 +21,10 @@ function transformDate() {
 
   if (pageType === 'index') {
     context.index.posts.forEach(post => {
-      post.createdTime = doTransformDate(post.createdTime)
+      post.createdTimeHumanReadable = doTransformDate(post.createdTime)
     })
   } else if (pageType === 'post') {
-    context.post.createdTime = doTransformDate(context.post.createdTime)
+    context.post.createdTimeHumanReadable = doTransformDate(context.post.createdTime)
   }
 
 }

@@ -30,6 +30,9 @@ module.exports = {
  * @property {boolean} hideFromIndex
  * @property {string} cachePath
  * @property {string} template
+ * @property {string} descriptionHTML - Plugin: `render-description`
+ * @property {string} descriptionPlainText - Plugin: `render-description`
+ * @property {string} createdTime - Plugin: `timestamp-to-date`
  */
 
 /**
@@ -83,7 +86,7 @@ async function renderPost(task) {
       let cache = await fsPromises.readFile(cachePath, { encoding: 'utf-8' })
       let _nast = parseJSON(cache)
       if (_nast != null) nast = _nast
-      else throw new Error(`Cache of ${pageID} is corrupted.`)
+      else throw new Error(`Cache of ${pageID} is corrupted. Delete source/notion_cache to rebuild.`)
     }
 
     /** Run `beforeRender` plugins. */
@@ -99,7 +102,7 @@ async function renderPost(task) {
             options: plugin.options
           })
         else
-          log(`Plugin ${plugin.name} is not a function, skipped.`)
+          log(`Plugin ${plugin.name} is in wrong format, skipped.`)
       })
     }
 

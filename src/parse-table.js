@@ -16,7 +16,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
   let rawTable = (await downloadPageAsTree(pageID, notionAgent))['raw_value']
 
   /**
-   * Create map for random_string -> property_name.
+   * Create map for property_name -> random_string.
    * Notion uses random strings in schema to prevent probable repeated
    * property names defined by user.
    */
@@ -62,8 +62,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
   }
 
   /**
-   * Each `post` contains metadata needed to fetch and render a page in the
-   * fetch pipeline.
+   * Each `post` contains metadata of the post.
    */
   let posts = rawTable.data
     .filter(row => {
@@ -74,7 +73,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
         pageID: row.id,
         title: row.properties[schemaMap['title']],
         /**
-         * Structure of tags looks like this:
+         * Raw tags looks like this:
          * { '<random_string>': [ [ 'css,web' ] ] }
          */
         tags: row.properties[schemaMap['tags']]
@@ -90,8 +89,10 @@ async function parseTable(notionDatabaseURL, notionAgent) {
             ? row.format['page_icon']
             : ''
           : '',
-        /** Description is StyledString[]. */
-        description: row.properties[schemaMap['description']],
+        /** Raw description is StyledString[]. */
+        description: row.properties[schemaMap['description']]
+          ? row.properties[schemaMap['description']]
+          : [],
         createdTime: row['created_time'],
         lastEditedTime: row['last_edited_time'],
         /** Hide a page from index if it's not a post. */
@@ -100,7 +101,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     })
 
   /**
-   * Reverse the posts array so that the most recent post is at the top.
+   * Sort the posts so that the most recent post is at the top.
    */
   return {
     global,
