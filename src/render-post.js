@@ -2,8 +2,8 @@ const fs = require('fs')
 const fsPromises = fs.promises
 const path = require('path')
 const NotionAgent = require('notionapi-agent')
-const downloadPageAsTree = require('nast-util-from-notionapi')
-const { toHTML } = require('nast-util-to-html')
+const { getPageTreeById } = require('../../notajs/packages/nast-util-from-notionapi')
+const { renderToHTML } = require('../../notajs/packages/nast-util-to-html')
 const Sqrl = require('squirrelly')
 
 const { log, parseJSON } = require('./utils')
@@ -20,7 +20,7 @@ module.exports = {
 
 /**
  * @typedef {Object} Post
- * @property {string} pageID
+ * @property {string} id
  * @property {string} title
  * @property {Tag[]} tags
  * @property {string} icon
@@ -33,6 +33,7 @@ module.exports = {
  * @property {string} descriptionHTML - Plugin: `render-description`
  * @property {string} descriptionPlainText - Plugin: `render-description`
  * @property {string} createdTime - Plugin: `timestamp-to-date`
+ * @property {string} customUrl - Plugin: `custom-url`
  */
 
 /**
@@ -67,7 +68,7 @@ async function renderPost(task) {
     const operations = task.operations
     const plugins = task.plugins
 
-    const pageID = post.pageID
+    const pageID = post.id
     const cachePath = post.cachePath
     const template = post.template
 
@@ -76,7 +77,7 @@ async function renderPost(task) {
     /** Fetch page. */
     if (operations.doFetchPage) {
       log(`Fetch page ${pageID}.`)
-      nast = await downloadPageAsTree(pageID, new NotionAgent({ suppressWarning: true }))
+      nast = await getPageTreeById(pageID, new NotionAgent({ suppressWarning: true }))
       fs.writeFile(cachePath, JSON.stringify(nast), (err) => {
         if (err) console.error(err)
         else log(`Cache of ${pageID} is saved.`)
@@ -108,10 +109,10 @@ async function renderPost(task) {
 
     /** Render with template. */
     log(`Render page ${pageID}.`)
-    contentHTML = toHTML(nast, { contentOnly: true })
+    contentHTML = renderToHTML(nast, { contentOnly: true })
     const workDir = process.cwd()
     const outDir = path.join(workDir, 'public')
-    const postPath = path.join(outDir, `${pageID}.html`)
+    const postPath = path.join(outDir, post.customUrl)
 
     Sqrl.autoEscaping(false)
     const html = Sqrl.Render(template, {

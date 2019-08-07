@@ -1,4 +1,4 @@
-const downloadPageAsTree = require('nast-util-from-notionapi')
+const { getPageTreeById } = require('../../notajs/packages/nast-util-from-notionapi')
 
 const { getPageIDFromNotionDatabaseURL } = require('./notion-utils')
 
@@ -13,7 +13,7 @@ module.exports = {
  */
 async function parseTable(notionDatabaseURL, notionAgent) {
   let pageID = getPageIDFromNotionDatabaseURL(notionDatabaseURL)
-  let rawTable = (await downloadPageAsTree(pageID, notionAgent))['raw_value']
+  let pageCollection = (await getPageTreeById(pageID, notionAgent))
 
   /**
    * Create map for property_name -> random_string.
@@ -21,7 +21,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
    * property names defined by user.
    */
   let schemaMap = {}
-  for (let [key, value] of Object.entries(rawTable.schema)) {
+  for (let [key, value] of Object.entries(pageCollection.schema)) {
     Object.defineProperty(schemaMap, value.name, {
       value: key,
       writable: true
@@ -33,45 +33,72 @@ async function parseTable(notionDatabaseURL, notionAgent) {
    */
   let tagColorMap = {}
   let classPrefix = 'tag-'
-  rawTable.schema[schemaMap['tags']].options.forEach(tag => {
+  pageCollection.schema[schemaMap['tags']].options.forEach(tag => {
     Object.defineProperty(tagColorMap, tag.value, {
       value: `${classPrefix}${tag.color}`,
       writable: true
     })
   })
 
-  let about = rawTable.data
-    .find(row => {
-      return row.properties[schemaMap['type']][0][0] === 'about'
+  /** Remove empty rows in collection */
+  let pagesValid = pageCollection.blocks
+    .filter(page => {
+      return page.properties != null
     })
+
+  /** Get custom url pages */
+  let pagesWithCustomUrl = pagesValid
+    .filter(page => {
+      let urlProp = page.properties[schemaMap['url']]
+      if (urlProp != null) return urlProp[0][0].length > 0
+      else return false
+    })
+  let idUrlMap = {}
+  pagesWithCustomUrl.forEach(page => {
+    idUrlMap[page.id] = page.properties[schemaMap['url']][0][0].replace(/\/|\\/g, '')
+  })
+
+  /** Get hidden pages */
+  let pagesHidden = pagesValid
+    .filter(page => {
+      let hiddenProp = page.properties[schemaMap['hidden']]
+      if (hiddenProp != null) return hiddenProp[0][0] === 'Yes'
+      else return false
+    })
+  let idHiddenMap = {}
+  pagesHidden.forEach(page => {
+    idHiddenMap[page.id] = true
+  })
+  console.dir(pagesValid, {depth:100})
 
   /**
    * The site metadata
    * @typedef {Object} NotablogMetadata
    * @property {string} icon
+   * @property {string} cover
    * @property {string} title
-   * @property {string} aboutPageLink
+   * @property {{[key: string]: string}} idUrlMap - key: id, value: url
+   * @property {{[key: string]: boolean}} idHiddenMap - key: id, value: hidden
    */
   /**
    * @type {NotablogMetadata}
    */
   let global = {
-    icon: '',
-    title: rawTable.name,
-    aboutPageLink: about ? `${about.id}.html` : ''
+    icon: pageCollection.icon,
+    cover: pageCollection.cover,
+    title: pageCollection.name,
+    idUrlMap,
+    idHiddenMap
   }
 
   /**
-   * Each `post` contains metadata of the post.
+   * Convert page structure
    */
-  let posts = rawTable.data
-    .filter(row => {
-      return row.properties != null
-    })
+  let pagesConverted = pagesValid
     .map(row => {
       return {
-        pageID: row.id,
-        title: row.properties[schemaMap['title']],
+        id: row.id,
+        title: row.title,
         /**
          * Raw tags looks like this:
          * { '<random_string>': [ [ 'css,web' ] ] }
@@ -84,28 +111,27 @@ async function parseTable(notionDatabaseURL, notionAgent) {
             }
           })
           : [],
-        icon: row.format
-          ? row.format['page_icon']
-            ? row.format['page_icon']
-            : ''
-          : '',
+        icon: row.icon,
+        cover: row.cover,
         /** Raw description is StyledString[]. */
         description: row.properties[schemaMap['description']]
           ? row.properties[schemaMap['description']]
           : [],
-        createdTime: row['created_time'],
-        lastEditedTime: row['last_edited_time'],
-        /** Hide a page from index if it's not a post. */
-        hideFromIndex: row.properties[schemaMap['type']][0][0] !== 'post'
+        createdTime: row.createdTime,
+        lastEditedTime: row.lastEditedTime
       }
     })
 
   /**
-   * Sort the posts so that the most recent post is at the top.
+   * Sort the pagesConverted so that the most recent post is at the top.
    */
   return {
     global,
-    posts: posts.sort((post1, post2) => post1.createdTime > post2.createdTime)
+    posts: pagesConverted.sort((post1, post2) => {
+      if (post1.createdTime > post2.createdTime) return -1
+      else if (post1.createdTime < post2.createdTime) return 1
+      else return 0
+    })
   }
 
 }

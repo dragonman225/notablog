@@ -10,6 +10,7 @@ const { renderPost } = require('./src/render-post')
 const { log } = require('./src/utils')
 const transformDate = require('./src/plugins/timestamp-to-date')
 const renderDescription = require('./src/plugins/render-description')
+const customUrl = require('./src/plugins/custom-url')
 
 const workDir = process.cwd()
 const configPath = path.join(workDir, 'config.json')
@@ -27,7 +28,8 @@ const taskManagerOpts = {
 
 const plugins = [
   transformDate,
-  renderDescription
+  renderDescription,
+  customUrl
 ]
 
 main()
@@ -71,9 +73,10 @@ async function main() {
         ...blogTable.global
       },
       index: {
-        title: blogTable.global.title,
-        /** Clone one so the plugin changes are local. */
-        posts: blogTable.posts.map(post => { return { ...post } }),
+        /** Only non-hidden posts should appear in index. */
+        posts: blogTable.posts.filter(post => {
+          return !blogTable.global.idHiddenMap[post.id]
+        }),
         template: indexTemplate,
         output: 'index.html'
       },
@@ -94,7 +97,7 @@ async function main() {
     let postTotalCount = blogTable.posts.length
     let postUpdatedCount = postTotalCount
     let renderPostTasks = blogTable.posts.map(post => {
-      let cacheFileName = post.pageID.replace(/\/|\\/g, '') + '.json'
+      let cacheFileName = post.id.replace(/\/|\\/g, '') + '.json'
       let cacheFilePath = path.join(cacheDir, cacheFileName)
 
       let postUpdated
