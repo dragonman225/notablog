@@ -1,4 +1,4 @@
-const { getPageTreeById } = require('../../notajs/packages/nast-util-from-notionapi')
+const { getOnePageAsTree } = require('../../notajs/packages/nast-util-from-notionapi')
 
 const { getPageIDFromNotionDatabaseURL } = require('./notion-utils')
 
@@ -13,7 +13,7 @@ module.exports = {
  */
 async function parseTable(notionDatabaseURL, notionAgent) {
   let pageID = getPageIDFromNotionDatabaseURL(notionDatabaseURL)
-  let pageCollection = (await getPageTreeById(pageID, notionAgent))
+  let pageCollection = (await getOnePageAsTree(pageID, notionAgent))
 
   /**
    * Create map for property_name -> random_string.
@@ -69,7 +69,6 @@ async function parseTable(notionDatabaseURL, notionAgent) {
   pagesHidden.forEach(page => {
     idHiddenMap[page.id] = true
   })
-  console.dir(pagesValid, {depth:100})
 
   /**
    * The site metadata
@@ -87,6 +86,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     icon: pageCollection.icon,
     cover: pageCollection.cover,
     title: pageCollection.name,
+    description: pageCollection.description,
     idUrlMap,
     idHiddenMap
   }

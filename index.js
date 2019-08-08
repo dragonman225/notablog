@@ -8,9 +8,12 @@ const { parseTable } = require('./src/parse-table')
 const { renderIndex } = require('./src/render-index')
 const { renderPost } = require('./src/render-post')
 const { log } = require('./src/utils')
+
+/** Internal Plugins */
 const transformDate = require('./src/plugins/timestamp-to-date')
 const renderDescription = require('./src/plugins/render-description')
 const customUrl = require('./src/plugins/custom-url')
+const renderIcon = require('./src/plugins/render-icon')
 
 const workDir = process.cwd()
 const configPath = path.join(workDir, 'config.json')
@@ -29,7 +32,8 @@ const taskManagerOpts = {
 const plugins = [
   transformDate,
   renderDescription,
-  customUrl
+  customUrl,
+  renderIcon
 ]
 
 main()
