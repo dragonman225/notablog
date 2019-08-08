@@ -2,7 +2,7 @@ const fs = require('fs')
 const fsPromises = fs.promises
 const path = require('path')
 const NotionAgent = require('notionapi-agent')
-const { getPageTreeById } = require('../../notajs/packages/nast-util-from-notionapi')
+const { getOnePageAsTree } = require('../../notajs/packages/nast-util-from-notionapi')
 const { renderToHTML } = require('../../notajs/packages/nast-util-to-html')
 const Sqrl = require('squirrelly')
 
@@ -77,7 +77,7 @@ async function renderPost(task) {
     /** Fetch page. */
     if (operations.doFetchPage) {
       log(`Fetch page ${pageID}.`)
-      nast = await getPageTreeById(pageID, new NotionAgent({ suppressWarning: true }))
+      nast = await getOnePageAsTree(pageID, new NotionAgent({ suppressWarning: true }))
       fs.writeFile(cachePath, JSON.stringify(nast), (err) => {
         if (err) console.error(err)
         else log(`Cache of ${pageID} is saved.`)

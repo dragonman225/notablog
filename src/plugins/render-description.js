@@ -22,6 +22,11 @@ function renderDescription() {
   let context = this.context
 
   if (pageType === 'index') {
+    /** Index description */
+    let siteDesc = context.siteMetadata.description
+    context.siteMetadata.descriptionHTML = renderToHTML(siteDesc)
+    context.siteMetadata.descriptionPlainText = renderToPlainText(siteDesc)
+    /** Post description */
     context.index.posts.forEach(post => {
       post.descriptionHTML = renderToHTML(post.description)
       post.descriptionPlainText = renderToPlainText(post.description)
