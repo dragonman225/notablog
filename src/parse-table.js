@@ -28,6 +28,19 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     })
   }
 
+  /** 
+   * Check if table has all required columns.
+   * 
+   * - `title` is required by Notion.
+   * - `date` is get from `created_time` which every block must have.
+   */
+  let requiredProps = ['tags', 'hidden', 'url', 'description']
+  for (let prop of requiredProps) {
+    if (typeof pageCollection.schema[schemaMap[prop]] === 'undefined'){
+      throw new Error(`Required column "${prop}" is missing in table.`)
+    }
+  }
+
   /**
    * Create map for tag -> color.
    */
