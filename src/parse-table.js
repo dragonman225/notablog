@@ -1,7 +1,18 @@
 const { getOnePageAsTree } = require('../../notajs/packages/nast-util-from-notionapi')
+const { toHTMLInternal } = require('nast-util-to-html')
 
 const { getPageIDFromNotionDatabaseURL } = require('./notion-utils')
 const { log } = require('./utils')
+
+const COLUMN_NAMES = {
+  tags: 'tags',
+  publish: 'publish',
+  inMenu: 'inMenu',
+  inList: 'inList',
+  url: 'url',
+  description: 'description',
+  date: 'date'
+}
 
 module.exports = {
   parseTable
@@ -105,23 +116,29 @@ async function parseTable(notionDatabaseURL, notionAgent) {
         id: row.id,
         title: row.title,
         /**
+         * Select Option
+         * 
          * Raw tags looks like this:
-         * { '<random_string>': [ [ 'css,web' ] ] }
+         * { '<option_id>': [ [ 'css,web' ] ] }
+         * 
+         * @typedef SelectOption
+         * @property {string} value 
+         * @property {string} color
          */
-        tags: row.properties[schemaMap['tags']]
-          ? row.properties[schemaMap['tags']][0][0].split(',').map(tag => {
-            return {
-              value: tag,
-              color: tagColorMap[tag]
-            }
-          })
-          : [],
+        /**
+         * @type {SelectOption}
+         */
+        tags: getMultiSelect(row, schemaMap['tags']).map(tag => {
+          return {
+            value: tag,
+            color: tagColorMap[tag]
+          }
+        }),
         icon: row.icon,
         cover: row.cover,
-        /** Raw description is StyledString[]. */
-        description: row.properties[schemaMap['description']]
-          ? row.properties[schemaMap['description']]
-          : [],
+        description: getTextRaw(row, schemaMap['description']),
+        descriptionPlain: getTextPlain(row, schemaMap['description']),
+        descriptionHTML: getTextHTML(row, schemaMap['description']),
         createdTime: row.createdTime,
         lastEditedTime: row.lastEditedTime,
         url: idUrlMap[row.id] ? `${idUrlMap[row.id]}.html` : `${row.id}.html`,
@@ -148,6 +165,8 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     cover: pageCollection.cover,
     title: pageCollection.name,
     description: pageCollection.description,
+    descriptionPlain: renderToPlainText(pageCollection.description),
+    descriptionHTML: renderToHTML(pageCollection.description),
     /**
      * Sort the pages so that the most recent post is at the top.
      */
@@ -162,12 +181,75 @@ async function parseTable(notionDatabaseURL, notionAgent) {
 }
 
 /**
- * Get value of a property of checkbox type
+ * Utility functions to get useful values from properties of Nast.Page
+ */
+
+/**
+ * Get value of a checkbox-typed property
  * @param {Nast.Page} page
  * @param {string} propId
+ * @returns {boolean}
  */
 function getCheckbox(page, propId) {
   let prop = page.properties[propId]
   if (prop) return prop[0][0] === 'Yes'
   else return false
+}
+
+/**
+ * Get raw value of a text-typed property
+ * @param {Nast.Page} page
+ * @param {string} propId
+ * @returns {Notion.StyledString[]}
+ */
+function getTextRaw(page, propId) {
+  let prop = page.properties[propId]
+  if (prop) return prop
+  else return []
+}
+
+/**
+ * Get plain string from a text-typed property
+ * @param {Nast.Page} page
+ * @param {string} propId
+ * @returns {string}
+ */
+function getTextPlain(page, propId) {
+  let prop = page.properties[propId]
+  if (prop) return renderToPlainText(prop)
+  else return ''
+}
+
+function renderToPlainText(styledStringArr) {
+  if (styledStringArr) return styledStringArr.map(str => str[0]).join('')
+  else return ''
+}
+
+/**
+ * Get HTML string from a text-typed property
+ * @param {Nast.Page} page
+ * @param {string} propId
+ * @returns {string}
+ */
+function getTextHTML(page, propId) {
+  let prop = page.properties[propId]
+  if (prop) return renderToHTML(prop)
+  else return ''
+}
+
+function renderToHTML(styledStringArr) {
+  if (styledStringArr) return toHTMLInternal.renderTitle(styledStringArr)
+  else return ''
+}
+
+/**
+ * Get option array of a multi-select-typed property
+ * @param {Nast.Page} page
+ * @param {string} propId
+ * @returns {string[]}
+ */
+function getMultiSelect(page, propId) {
+  let prop = page.properties[propId]
+  if (prop) return prop[0][0].split(',')
+  else return []
 }

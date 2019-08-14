@@ -11,7 +11,6 @@ const { log } = require('./src/utils')
 
 /** Internal Plugins */
 const transformDate = require('./src/plugins/timestamp-to-date')
-const renderDescription = require('./src/plugins/render-description')
 const renderIcon = require('./src/plugins/render-icon')
 
 const workDir = process.cwd()
@@ -30,7 +29,6 @@ const taskManagerOpts = {
 
 const plugins = [
   transformDate,
-  renderDescription,
   renderIcon
 ]
 
