@@ -23,9 +23,9 @@ function renderDescription() {
 
   if (pageType === 'index') {
     /** Index description */
-    let siteDesc = context.siteMetadata.description
-    context.siteMetadata.descriptionHTML = renderToHTML(siteDesc)
-    context.siteMetadata.descriptionPlainText = renderToPlainText(siteDesc)
+    let siteDesc = context.siteMeta.description
+    context.siteMeta.descriptionHTML = renderToHTML(siteDesc)
+    context.siteMeta.descriptionPlainText = renderToPlainText(siteDesc)
     /** Post description */
     context.index.posts.forEach(post => {
       post.descriptionHTML = renderToHTML(post.description)

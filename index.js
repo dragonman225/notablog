@@ -12,7 +12,6 @@ const { log } = require('./src/utils')
 /** Internal Plugins */
 const transformDate = require('./src/plugins/timestamp-to-date')
 const renderDescription = require('./src/plugins/render-description')
-const customUrl = require('./src/plugins/custom-url')
 const renderIcon = require('./src/plugins/render-icon')
 
 const workDir = process.cwd()
@@ -32,7 +31,6 @@ const taskManagerOpts = {
 const plugins = [
   transformDate,
   renderDescription,
-  customUrl,
   renderIcon
 ]
 
@@ -64,22 +62,20 @@ async function main() {
     let assetDir = path.join(themeDir, 'source')
     copyDirSync(assetDir, outDir)
 
-    /** Fetch BlogTable. */
-    log('Fetch BlogTable.')
-    let blogTable = await parseTable(url, apiAgent)
+    /** Fetch Site Metadata. */
+    log('Fetch Site Metadata.')
+    let siteMeta = await parseTable(url, apiAgent)
 
     /** Generate index-rendering task. */
     let indexTemplatePath = path.join(themeDir, 'layout/index.html')
     let indexTemplate = fs.readFileSync(indexTemplatePath, { encoding: 'utf-8' })
 
     let renderIndexTask = {
-      siteMetadata: {
-        ...blogTable.global
-      },
+      siteMeta,
       index: {
-        /** Only non-hidden posts should appear in index. */
-        posts: blogTable.posts.filter(post => {
-          return !blogTable.global.idHiddenMap[post.id]
+        /** Only published pages should appear in index */
+        posts: siteMeta.pages.filter(page => {
+          return page.publish
         }),
         template: indexTemplate,
         output: 'index.html'
@@ -98,9 +94,9 @@ async function main() {
     let postTemplatePath = path.join(themeDir, 'layout/post.html')
     let postTemplate = fs.readFileSync(postTemplatePath, { encoding: 'utf-8' })
 
-    let postTotalCount = blogTable.posts.length
+    let postTotalCount = siteMeta.pages.length
     let postUpdatedCount = postTotalCount
-    let renderPostTasks = blogTable.posts.map(post => {
+    let renderPostTasks = siteMeta.pages.map(post => {
       let cacheFileName = post.id.replace(/\/|\\/g, '') + '.json'
       let cacheFilePath = path.join(cacheDir, cacheFileName)
 
@@ -114,9 +110,7 @@ async function main() {
       }
 
       return {
-        siteMetadata: {
-          ...blogTable.global
-        },
+        siteMeta,
         post: {
           ...post,
           cachePath: cacheFilePath,
