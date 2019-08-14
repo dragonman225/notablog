@@ -1,6 +1,7 @@
 const { getOnePageAsTree } = require('../../notajs/packages/nast-util-from-notionapi')
 
 const { getPageIDFromNotionDatabaseURL } = require('./notion-utils')
+const { log } = require('./utils')
 
 module.exports = {
   parseTable
@@ -16,16 +17,19 @@ async function parseTable(notionDatabaseURL, notionAgent) {
   let pageCollection = (await getOnePageAsTree(pageID, notionAgent))
 
   /**
-   * Create map for property_name -> random_string.
+   * Create map for property_name -> property_id.
    * Notion uses random strings in schema to prevent probable repeated
    * property names defined by user.
    */
   let schemaMap = {}
   for (let [key, value] of Object.entries(pageCollection.schema)) {
-    Object.defineProperty(schemaMap, value.name, {
-      value: key,
-      writable: true
-    })
+    let propertyId = key
+    let propertyString = value.name
+    if (schemaMap[propertyString]) {
+      log(`Duplicate column name "${propertyString}", column with id "${propertyId}" is used`)
+    } else {
+      schemaMap[propertyString] = key
+    }
   }
 
   /** 
@@ -34,80 +38,68 @@ async function parseTable(notionDatabaseURL, notionAgent) {
    * - `title` is required by Notion.
    * - `date` is get from `created_time` which every block must have.
    */
-  let requiredProps = ['tags', 'hidden', 'url', 'description']
+  let requiredProps =
+    ['publish', 'tags', 'url', 'description', 'inMenu', 'inList']
   for (let prop of requiredProps) {
-    if (typeof pageCollection.schema[schemaMap[prop]] === 'undefined'){
+    if (typeof pageCollection.schema[schemaMap[prop]] === 'undefined') {
       throw new Error(`Required column "${prop}" is missing in table.`)
     }
   }
 
   /**
-   * Create map for tag -> color.
+   * Create map for tag -> color
    */
   let tagColorMap = {}
   let classPrefix = 'tag-'
   pageCollection.schema[schemaMap['tags']].options.forEach(tag => {
-    Object.defineProperty(tagColorMap, tag.value, {
-      value: `${classPrefix}${tag.color}`,
-      writable: true
-    })
+    tagColorMap[tag.value] = `${classPrefix}${tag.color}`
   })
 
-  /** Remove empty rows in collection */
-  let pagesValid = pageCollection.blocks
+  /** Remove empty rows */
+  let pagesValidAndPublished = pageCollection.blocks
     .filter(page => {
       return page.properties != null
     })
 
   /** Get custom url pages */
-  let pagesWithCustomUrl = pagesValid
+  let pagesWithCustomUrl = pagesValidAndPublished
     .filter(page => {
+      /** "url" property must exist with length > 0 */
       let urlProp = page.properties[schemaMap['url']]
       if (urlProp != null) return urlProp[0][0].length > 0
       else return false
     })
+
+  /** Create map for pageId -> url */
   let idUrlMap = {}
   pagesWithCustomUrl.forEach(page => {
-    idUrlMap[page.id] = page.properties[schemaMap['url']][0][0].replace(/\/|\\/g, '')
+    /** Remove "/" and "\" since they can't be in filename */
+    idUrlMap[page.id] =
+      page.properties[schemaMap['url']][0][0].replace(/\/|\\/g, '')
   })
-
-  /** Get hidden pages */
-  let pagesHidden = pagesValid
-    .filter(page => {
-      let hiddenProp = page.properties[schemaMap['hidden']]
-      if (hiddenProp != null) return hiddenProp[0][0] === 'Yes'
-      else return false
-    })
-  let idHiddenMap = {}
-  pagesHidden.forEach(page => {
-    idHiddenMap[page.id] = true
-  })
-
-  /**
-   * The site metadata
-   * @typedef {Object} NotablogMetadata
-   * @property {string} icon
-   * @property {string} cover
-   * @property {string} title
-   * @property {{[key: string]: string}} idUrlMap - key: id, value: url
-   * @property {{[key: string]: boolean}} idHiddenMap - key: id, value: hidden
-   */
-  /**
-   * @type {NotablogMetadata}
-   */
-  let global = {
-    icon: pageCollection.icon,
-    cover: pageCollection.cover,
-    title: pageCollection.name,
-    description: pageCollection.description,
-    idUrlMap,
-    idHiddenMap
-  }
 
   /**
    * Convert page structure
    */
-  let pagesConverted = pagesValid
+  /**
+   * @typedef {Object} Page
+   * @property {string} id
+   * @property {string} title
+   * @property {Tag[]} tags
+   * @property {string} icon
+   * @property {string} cover
+   * @property {StyledString[]} description
+   * @property {number} createdTime
+   * @property {number} lastEditedTime
+   * @property {string} url
+   * @property {boolean} inList
+   * @property {boolean} inMenu
+   * @property {boolean} publish
+   */
+  /**
+   * @type {Page[]}
+   */
+  let pagesConverted = pagesValidAndPublished
     .map(row => {
       return {
         id: row.id,
@@ -131,20 +123,51 @@ async function parseTable(notionDatabaseURL, notionAgent) {
           ? row.properties[schemaMap['description']]
           : [],
         createdTime: row.createdTime,
-        lastEditedTime: row.lastEditedTime
+        lastEditedTime: row.lastEditedTime,
+        url: idUrlMap[row.id] ? `${idUrlMap[row.id]}.html` : `${row.id}.html`,
+        inList: getCheckbox(row, schemaMap['inList']),
+        inMenu: getCheckbox(row, schemaMap['inMenu']),
+        publish: getCheckbox(row, schemaMap['publish'])
       }
     })
 
   /**
-   * Sort the pagesConverted so that the most recent post is at the top.
+   * The site metadata
+   * @typedef {Object} NotablogMetadata
+   * @property {string} icon
+   * @property {string} cover
+   * @property {string} title
+   * @property {Notion.StyledString[]} description
+   * @property {Page[]} pages
    */
-  return {
-    global,
-    posts: pagesConverted.sort((post1, post2) => {
+  /**
+   * @type {NotablogMetadata}
+   */
+  let siteMeta = {
+    icon: pageCollection.icon,
+    cover: pageCollection.cover,
+    title: pageCollection.name,
+    description: pageCollection.description,
+    /**
+     * Sort the pages so that the most recent post is at the top.
+     */
+    pages: pagesConverted.sort((post1, post2) => {
       if (post1.createdTime > post2.createdTime) return -1
       else if (post1.createdTime < post2.createdTime) return 1
       else return 0
     })
   }
 
+  return siteMeta
+}
+
+/**
+ * Get value of a property of checkbox type
+ * @param {Nast.Page} page
+ * @param {string} propId
+ */
+function getCheckbox(page, propId) {
+  let prop = page.properties[propId]
+  if (prop) return prop[0][0] === 'Yes'
+  else return false
 }

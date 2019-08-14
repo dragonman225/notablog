@@ -9,7 +9,7 @@ module.exports = {
 }
 
 function renderIndex(task) {
-  const siteMetadata = task.siteMetadata
+  const siteMeta = task.siteMeta
   const index = task.index
   const operations = task.operations
   const plugins = task.plugins
@@ -22,7 +22,7 @@ function renderIndex(task) {
         plugin.func.call({
           pageType: 'index',
           context: {
-            siteMetadata, index
+            siteMeta, index
           },
           options: plugin.options
         })
@@ -37,7 +37,7 @@ function renderIndex(task) {
   
   Sqrl.autoEscaping(false)
   const html = Sqrl.Render(index.template, {
-    siteMetadata,
+    siteMeta,
     index
   })
   fs.writeFileSync(indexPath, html, { encoding: 'utf-8' })

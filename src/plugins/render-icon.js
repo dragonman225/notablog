@@ -20,12 +20,18 @@ function renderIcon() {
   let context = this.context
 
   if (pageType === 'index') {
-    context.siteMetadata.iconHTML = renderIconToHTML(context.siteMetadata.icon)
+    context.siteMeta.iconHTML = renderIconToHTML(context.siteMeta.icon)
+    context.siteMeta.pages.forEach(post => {
+      post.iconHTML = renderIconToHTML(post.icon)
+    })
     context.index.posts.forEach(post => {
       post.iconHTML = renderIconToHTML(post.icon)
     })
   } else if (pageType === 'post') {
-    context.siteMetadata.iconHTML = renderIconToHTML(context.siteMetadata.icon)
+    context.siteMeta.iconHTML = renderIconToHTML(context.siteMeta.icon)
+    context.siteMeta.pages.forEach(post => {
+      post.iconHTML = renderIconToHTML(post.icon)
+    })
     context.post.iconHTML = renderIconToHTML(context.post.icon)
   }
 
@@ -34,8 +40,8 @@ function renderIcon() {
 function renderIconToHTML(icon) {
   let re = /^http/
   if (re.test(icon)) {
-    return `<img class="inline-img-icon" src="${icon}">`
+    return `<span><img class="inline-img-icon" src="${icon}"></span>`
   } else {
-    return icon
+    return `<span>${icon}</span>`
   }
 }

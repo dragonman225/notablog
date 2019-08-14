@@ -24,16 +24,20 @@ module.exports = {
  * @property {string} title
  * @property {Tag[]} tags
  * @property {string} icon
+ * @property {string} cover
  * @property {StyledString[]} description
  * @property {number} createdTime
  * @property {number} lastEditedTime
- * @property {boolean} hideFromIndex
+ * @property {string} url
+ * @property {boolean} inList
+ * @property {boolean} inMenu
+ * @property {boolean} publish
  * @property {string} cachePath
  * @property {string} template
  * @property {string} descriptionHTML - Plugin: `render-description`
  * @property {string} descriptionPlainText - Plugin: `render-description`
  * @property {string} createdTime - Plugin: `timestamp-to-date`
- * @property {string} customUrl - Plugin: `custom-url`
+ * @property {string} iconHTML - Plugin: `render-icon`
  */
 
 /**
@@ -51,7 +55,7 @@ module.exports = {
 
 /**
  * @typedef {Object} RenderPostTask
- * @property {NotablogMetadata} siteMetadata
+ * @property {NotablogMetadata} siteMeta
  * @property {Post} post
  * @property {PostOperation} operations
  * @property {NotablogPlugin[]} plugins
@@ -63,7 +67,7 @@ module.exports = {
  */
 async function renderPost(task) {
   if (task != null) {
-    const siteMetadata = task.siteMetadata
+    const siteMeta = task.siteMeta
     const post = task.post
     const operations = task.operations
     const plugins = task.plugins
@@ -98,7 +102,7 @@ async function renderPost(task) {
           plugin.func.call({
             pageType: 'post',
             context: {
-              siteMetadata, post
+              siteMeta, post
             },
             options: plugin.options
           })
@@ -112,11 +116,11 @@ async function renderPost(task) {
     contentHTML = renderToHTML(nast, { contentOnly: true })
     const workDir = process.cwd()
     const outDir = path.join(workDir, 'public')
-    const postPath = path.join(outDir, post.customUrl)
+    const postPath = path.join(outDir, post.url)
 
     Sqrl.autoEscaping(false)
     const html = Sqrl.Render(template, {
-      siteMetadata,
+      siteMeta,
       post,
       content: contentHTML
     })
