@@ -63,18 +63,20 @@ module.exports = {
 
 /**
  * Render a post.
- * @param {RenderPostTask} task 
+ * @param {RenderPostTask} task
+ * // TODO: May be attach a CacheProvider instance in task to handle cache 
+ * lookup and update operations. Index doesn't go through this pipeline.
  */
 async function renderPost(task) {
   if (task != null) {
     const siteMeta = task.siteMeta
+    const templateProvider = task.templateProvider
     const post = task.post
     const operations = task.operations
     const plugins = task.plugins
 
     const pageID = post.id
     const cachePath = post.cachePath
-    const template = post.template
 
     let nast, contentHTML
 
@@ -119,7 +121,7 @@ async function renderPost(task) {
     const postPath = path.join(outDir, post.url)
 
     Sqrl.autoEscaping(false)
-    const html = Sqrl.Render(template, {
+    const html = Sqrl.Render(templateProvider.get(post.template), {
       siteMeta,
       post,
       content: contentHTML

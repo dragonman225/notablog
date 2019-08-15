@@ -4,13 +4,13 @@ const NotionAgent = require('notionapi-agent')
 const TaskManager = require('@dnpr/task-manager')
 const { copyDirSync } = require('@dnpr/fsutil')
 
+const TemplateProvider = require('./src/template-provider')
 const { parseTable } = require('./src/parse-table')
 const { renderIndex } = require('./src/render-index')
 const { renderPost } = require('./src/render-post')
 const { log } = require('./src/utils')
 
 /** Internal Plugins */
-const transformDate = require('./src/plugins/timestamp-to-date')
 const renderIcon = require('./src/plugins/render-icon')
 
 const workDir = process.cwd()
@@ -28,7 +28,6 @@ const taskManagerOpts = {
 }
 
 const plugins = [
-  transformDate,
   renderIcon
 ]
 
@@ -47,7 +46,7 @@ async function main() {
 
     const themeDir = path.join(workDir, `themes/${theme}`)
     if (!fs.existsSync(themeDir)) {
-      throw new Error(`No theme "${theme}" in themes/ folder.`)
+      throw new Error(`Cannot find "${theme}" in themes/ folder.`)
     }
 
     const outDir = path.join(workDir, 'public')
@@ -64,20 +63,12 @@ async function main() {
     log('Fetch Site Metadata.')
     let siteMeta = await parseTable(url, apiAgent)
 
-    /** Generate index-rendering task. */
-    let indexTemplatePath = path.join(themeDir, 'layout/index.html')
-    let indexTemplate = fs.readFileSync(indexTemplatePath, { encoding: 'utf-8' })
+    /** Create TemplateProvider instance */
+    let templateProvider = new TemplateProvider(themeDir)
 
     let renderIndexTask = {
       siteMeta,
-      index: {
-        /** Only published pages should appear in index */
-        posts: siteMeta.pages.filter(page => {
-          return page.publish
-        }),
-        template: indexTemplate,
-        output: 'index.html'
-      },
+      templateProvider,
       operations: {
         enablePlugin: true
       },
@@ -89,9 +80,6 @@ async function main() {
     renderIndex(renderIndexTask)
 
     /** Generate blogpost-rendering tasks. */
-    let postTemplatePath = path.join(themeDir, 'layout/post.html')
-    let postTemplate = fs.readFileSync(postTemplatePath, { encoding: 'utf-8' })
-
     let postTotalCount = siteMeta.pages.length
     let postUpdatedCount = postTotalCount
     let renderPostTasks = siteMeta.pages.map(post => {
@@ -109,10 +97,10 @@ async function main() {
 
       return {
         siteMeta,
+        templateProvider,
         post: {
           ...post,
-          cachePath: cacheFilePath,
-          template: postTemplate
+          cachePath: cacheFilePath
         },
         operations: {
           doFetchPage: postUpdated,

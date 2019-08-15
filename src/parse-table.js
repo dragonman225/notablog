@@ -4,15 +4,16 @@ const { toHTMLInternal } = require('nast-util-to-html')
 const { getPageIDFromNotionDatabaseURL } = require('./notion-utils')
 const { log } = require('./utils')
 
-const COLUMN_NAMES = {
-  tags: 'tags',
-  publish: 'publish',
-  inMenu: 'inMenu',
-  inList: 'inList',
-  url: 'url',
-  description: 'description',
-  date: 'date'
-}
+// const COLUMN_NAMES = {
+//   tags: 'tags',
+//   publish: 'publish',
+//   inMenu: 'inMenu',
+//   inList: 'inList',
+//   template: 'template',
+//   url: 'url',
+//   description: 'description',
+//   date: 'date'
+// }
 
 module.exports = {
   parseTable
@@ -72,40 +73,28 @@ async function parseTable(notionDatabaseURL, notionAgent) {
       return page.properties != null
     })
 
-  /** Get custom url pages */
-  let pagesWithCustomUrl = pagesValidAndPublished
-    .filter(page => {
-      /** "url" property must exist with length > 0 */
-      let urlProp = page.properties[schemaMap['url']]
-      if (urlProp != null) return urlProp[0][0].length > 0
-      else return false
-    })
-
-  /** Create map for pageId -> url */
-  let idUrlMap = {}
-  pagesWithCustomUrl.forEach(page => {
-    /** Remove "/" and "\" since they can't be in filename */
-    idUrlMap[page.id] =
-      page.properties[schemaMap['url']][0][0].replace(/\/|\\/g, '')
-  })
-
   /**
    * Convert page structure
    */
   /**
    * @typedef {Object} Page
    * @property {string} id
-   * @property {string} title
-   * @property {Tag[]} tags
    * @property {string} icon
    * @property {string} cover
-   * @property {StyledString[]} description
+   * @property {string} title
+   * @property {Tag[]} tags
+   * @property {boolean} publish
+   * @property {boolean} inMenu
+   * @property {boolean} inList
+   * @property {string} template
+   * @property {string} url
+   * @property {Notion.StyledString[]} description
+   * @property {string} descriptionPlain
+   * @property {string} descriptionHTML
+   * @property {string} date
+   * @property {string} dateString
    * @property {number} createdTime
    * @property {number} lastEditedTime
-   * @property {string} url
-   * @property {boolean} inList
-   * @property {boolean} inMenu
-   * @property {boolean} publish
    */
   /**
    * @type {Page[]}
@@ -114,6 +103,8 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     .map(row => {
       return {
         id: row.id,
+        icon: row.icon,
+        cover: row.cover,
         title: row.title,
         /**
          * Select Option
@@ -134,17 +125,18 @@ async function parseTable(notionDatabaseURL, notionAgent) {
             color: tagColorMap[tag]
           }
         }),
-        icon: row.icon,
-        cover: row.cover,
+        publish: getCheckbox(row, schemaMap['publish']),
+        inMenu: getCheckbox(row, schemaMap['inMenu']),
+        inList: getCheckbox(row, schemaMap['inList']),
+        template: getSingleSelect(row, schemaMap['template']),
+        url: getRealUrl(row, schemaMap['url']),
         description: getTextRaw(row, schemaMap['description']),
         descriptionPlain: getTextPlain(row, schemaMap['description']),
         descriptionHTML: getTextHTML(row, schemaMap['description']),
+        date: getDateRaw(row, schemaMap['date']),
+        dateString: getDateString(row, schemaMap['date']),
         createdTime: row.createdTime,
-        lastEditedTime: row.lastEditedTime,
-        url: idUrlMap[row.id] ? `${idUrlMap[row.id]}.html` : `${row.id}.html`,
-        inList: getCheckbox(row, schemaMap['inList']),
-        inMenu: getCheckbox(row, schemaMap['inMenu']),
-        publish: getCheckbox(row, schemaMap['publish'])
+        lastEditedTime: row.lastEditedTime
       }
     })
 
@@ -170,9 +162,9 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     /**
      * Sort the pages so that the most recent post is at the top.
      */
-    pages: pagesConverted.sort((post1, post2) => {
-      if (post1.createdTime > post2.createdTime) return -1
-      else if (post1.createdTime < post2.createdTime) return 1
+    pages: pagesConverted.sort((later, former) => {
+      if (later.date > former.date) return -1
+      else if (later.date < former.date) return 1
       else return 0
     })
   }
@@ -252,4 +244,67 @@ function getMultiSelect(page, propId) {
   let prop = page.properties[propId]
   if (prop) return prop[0][0].split(',')
   else return []
+}
+
+/**
+ * Get option of a single-select-typed property
+ * @param {Nast.Page} page
+ * @param {string} propId
+ * @returns {string}
+ */
+function getSingleSelect(page, propId) {
+  let options = getMultiSelect(page, propId)
+  if (options.length > 0) return options[0]
+  else return ''
+}
+
+/**
+ * Get raw string of a date-typed property
+ * @param {Nast.Page} page
+ * @param {string} propId
+ * @returns {string | undefined} YYYY-MM-DD
+ */
+function getDateRaw(page, propId) {
+  let prop = page.properties[propId]
+  if (prop) {
+    let dateString = prop[0][1][0][1].start_date
+    return dateString
+  } else return undefined
+}
+
+/**
+ * Get formatted string from a date-typed property
+ * @param {Nast.Page} page
+ * @param {string} propId
+ * @returns {string | undefined} WWW, MMM DD, YYY
+ */
+function getDateString(page, propId) {
+  let dateRaw = getDateRaw(page, propId)
+  if (dateRaw) {
+    let options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }
+    let dateString = (new Date(dateRaw)).toLocaleDateString('en-US', options)
+    return dateString
+  } else return undefined
+}
+
+/**
+ * Infer real URL that will be used as filename.
+ * @param {Nast.Page} page
+ * @param {string} propId
+ * @returns {string}
+ */
+function getRealUrl(page, propId) {
+  let wantUrl = getTextPlain(page, propId)
+  let safeUrl = getSafeUrl(wantUrl)
+  let realUrl = (safeUrl.length > 0) ? `${safeUrl}.html` : `${page.id}.html`
+  return realUrl
+}
+
+/**
+ * Remove "/" and "\" since they can't be in filename
+ * @param {string} url
+ * @returns {string}
+ */
+function getSafeUrl(url) {
+  return url.replace(/\/|\\/g, '')
 }
