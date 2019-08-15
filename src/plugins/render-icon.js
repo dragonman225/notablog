@@ -24,9 +24,6 @@ function renderIcon() {
     context.siteMeta.pages.forEach(post => {
       post.iconHTML = renderIconToHTML(post.icon)
     })
-    context.index.posts.forEach(post => {
-      post.iconHTML = renderIconToHTML(post.icon)
-    })
   } else if (pageType === 'post') {
     context.siteMeta.iconHTML = renderIconToHTML(context.siteMeta.icon)
     context.siteMeta.pages.forEach(post => {
