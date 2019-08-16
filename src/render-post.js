@@ -2,8 +2,8 @@ const fs = require('fs')
 const fsPromises = fs.promises
 const path = require('path')
 const NotionAgent = require('notionapi-agent')
-const { getOnePageAsTree } = require('../../notajs/packages/nast-util-from-notionapi')
-const { renderToHTML } = require('../../notajs/packages/nast-util-to-html')
+const { getOnePageAsTree } = require('nast-util-from-notionapi')
+const { renderToHTML } = require('nast-util-to-html')
 const Sqrl = require('squirrelly')
 
 const { log, parseJSON } = require('./utils')

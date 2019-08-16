@@ -1,5 +1,5 @@
-const { getOnePageAsTree } = require('../../notajs/packages/nast-util-from-notionapi')
-const { toHTMLInternal } = require('nast-util-to-html')
+const { getOnePageAsTree } = require('nast-util-from-notionapi')
+const { renderToHTML } = require('nast-util-to-html')
 
 const { getPageIDFromNotionDatabaseURL } = require('./notion-utils')
 const { log } = require('./utils')
@@ -156,8 +156,8 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     cover: pageCollection.cover,
     title: pageCollection.name,
     description: pageCollection.description,
-    descriptionPlain: renderToPlainText(pageCollection.description),
-    descriptionHTML: renderToHTML(pageCollection.description),
+    descriptionPlain: renderStyledStringToTXT(pageCollection.description),
+    descriptionHTML: renderStyledStringToHTML(pageCollection.description),
     /**
      * Sort the pages so that the most recent post is at the top.
      */
@@ -207,11 +207,11 @@ function getTextRaw(page, propId) {
  */
 function getTextPlain(page, propId) {
   let prop = page.properties[propId]
-  if (prop) return renderToPlainText(prop)
+  if (prop) return renderStyledStringToTXT(prop)
   else return ''
 }
 
-function renderToPlainText(styledStringArr) {
+function renderStyledStringToTXT(styledStringArr) {
   if (styledStringArr) return styledStringArr.map(str => str[0]).join('')
   else return ''
 }
@@ -224,12 +224,12 @@ function renderToPlainText(styledStringArr) {
  */
 function getTextHTML(page, propId) {
   let prop = page.properties[propId]
-  if (prop) return renderToHTML(prop)
+  if (prop) return renderStyledStringToHTML(prop)
   else return ''
 }
 
-function renderToHTML(styledStringArr) {
-  if (styledStringArr) return toHTMLInternal.renderTitle(styledStringArr)
+function renderStyledStringToHTML(styledStringArr) {
+  if (styledStringArr) return renderToHTML(styledStringArr)
   else return ''
 }
 

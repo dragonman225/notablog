@@ -1,18 +1,22 @@
 # notablog
 
-Generate a minimal blog from Notion.so.
+Generate a minimalistic blog from a Notion.so table.
 
-Here are some images of my blog. 🙂 [Visit site](https://dragonman225.github.io/)
+Here are some images of my blog, built with [notablog-theme-pure](https://github.com/dragonman225/notablog-theme-pure)(the default theme). 🙂 [Visit site](https://dragonman225.github.io/)
 
 | Mobile | Desktop |
 | :--: | :--: |
-|   ![](assets/v0.1.2_mobile.png)   |   ![](assets/v0.1.2_desktop.png)   |
+|   ![](assets/v0.3.0_mobile.png)   |   ![](assets/v0.3.0_desktop.png)   |
+
+| Management Interface on Notion.so |
+| :----------------------------: |
+| ![](assets/v0.3.0_manage.png) |
 
 ### :construction: This is under construction, there may be breaking changes every day! :construction:
 
 ## Getting Started
 
-1. Duplicate my [table template](https://www.notion.so/937c97eb6efb47f5864dc7fa66bbe88a?v=7076048baf9842238b74342f6b491c5b) on Notion.
+1. Duplicate my [table template v0.3.0](https://www.notion.so/b6fcf809ca5047b89f423948dce013a0?v=03ddc4d6130a47f8b68e74c9d0061de2) on Notion.
 
 2. Make the table you've duplicated **public**.
 
@@ -30,7 +34,11 @@ Here are some images of my blog. 🙂 [Visit site](https://dragonman225.github.i
 
 7. If you want to host the blog on the internet, either can you build your own server or use static hosting services like [Github Pages](https://pages.github.com/), [Netlify](https://www.netlify.com/), etc.
 
-## Customize the Blog
+##Customize the Blog (for >= v0.3.0)
+
+TBD
+
+## Customize the Blog (for <= v0.2.1)
 
 > Below folder paths are relative to the `notablog-starter` you have cloned.
 
