@@ -34,7 +34,7 @@ Here are some images of my blog, built with [notablog-theme-pure](https://github
 
 7. If you want to host the blog on the internet, either can you build your own server or use static hosting services like [Github Pages](https://pages.github.com/), [Netlify](https://www.netlify.com/), etc.
 
-##Customize the Blog (for >= v0.3.0)
+## Customize the Blog (for >= v0.3.0)
 
 TBD
 
