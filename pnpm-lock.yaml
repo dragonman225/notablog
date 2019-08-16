@@ -1,8 +1,8 @@
 dependencies:
   '@dnpr/fsutil': 0.1.3
   '@dnpr/task-manager': 0.1.1
-  nast-util-from-notionapi: 0.4.0
-  nast-util-to-html: 0.1.0
+  nast-util-from-notionapi: 0.5.0
+  nast-util-to-html: 0.2.0
   notionapi-agent: 0.5.1
   squirrelly: 7.4.0
 devDependencies:
@@ -214,7 +214,6 @@ packages:
     resolution:
       integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==
   /commander/2.20.0:
-    dev: true
     resolution:
       integrity: sha512-7j2y+40w61zy6YC2iRNpUe/NwhNyoXrYpHMrSunaMG64nRnaf96zO/KMQR4OyN/UnE5KLyEBnKHd4aG3rskjpQ==
   /concat-map/0.0.1:
@@ -694,6 +693,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-aKS4WQjPenRxiQsC93MNfjx+nbF4PAdYzmd/1JIj8HYzqfbu86beTuNgXDzPknWk0n0uARlyewZo4s++ES36Ow==
+  /katex/0.10.2:
+    dependencies:
+      commander: 2.20.0
+    dev: false
+    hasBin: true
+    resolution:
+      integrity: sha512-cQOmyIRoMloCoSIOZ1+gEwsksdJZ1EW4SWm3QzxSza/QsnZr6D4U1V9S4q+B/OLm2OQ8TCBecQ8MaIfnScI7cw==
   /levn/0.3.0:
     dependencies:
       prelude-ls: 1.1.2
@@ -757,16 +763,17 @@ packages:
     dev: true
     resolution:
       integrity: sha1-MHXOk7whuPq0PhvE2n6BFe0ee6s=
-  /nast-util-from-notionapi/0.4.0:
+  /nast-util-from-notionapi/0.5.0:
     dev: false
     resolution:
-      integrity: sha512-isHFRxIvazaBKgs9SiBolSglI/pciDTwBymlwfHrWhYLyV48JICCESFGCm4YU2tThPTC6RUc25BXiVN7pORIxA==
-  /nast-util-to-html/0.1.0:
+      integrity: sha512-tF1ZGNb3u5Hdj5OeHGZyfNA5I8VKxv2F9vmg69IlXodO0S1LrX9dVO+ZO9lSn92glZDIVHj3M50DeUns0LQvoA==
+  /nast-util-to-html/0.2.0:
     dependencies:
+      katex: 0.10.2
       prismjs: 1.17.1
     dev: false
     resolution:
-      integrity: sha512-0PPUe1SrqCzbbGQUFNDrizHEOkch+0daJiZIzNUvy34z6ebZXkg1Hqwal4EPUu3En0c2v8me87rDShnxs9x6Uw==
+      integrity: sha512-zhjuA40HcmfeYicB+Wp1w8AcSYe3dbzsILvCs+NGqFZXD/dV7YFzz8/EDYsCr5TZbkNFaGydhymhrIrmWdUKGw==
   /natural-compare/1.4.0:
     dev: true
     resolution:
@@ -1245,7 +1252,7 @@ specifiers:
   '@dnpr/task-manager': ^0.1.1
   dependency-cruiser: ^5.0.0
   eslint: ^6.1.0
-  nast-util-from-notionapi: ^0.4.0
-  nast-util-to-html: ^0.1.0
+  nast-util-from-notionapi: ^0.5.0
+  nast-util-to-html: ^0.2.0
   notionapi-agent: ^0.5.1
   squirrelly: ^7.4.0
