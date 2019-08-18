@@ -14,7 +14,9 @@ class TemplateProvider {
   }
 
   /**
-   * Get template as string with its name
+   * Get template as a string with its name.
+   * 
+   * The name of a template is its filename without extension.
    * @param {string} templateName 
    */
   get(templateName) {
@@ -28,6 +30,12 @@ class TemplateProvider {
     }
   }
 
+  /**
+   * Load a template as a string into cache and return it.
+   * 
+   * If loading failed, return an error message string.
+   * @param {string} templateName 
+   */
   _load(templateName) {
     if (DEBUG_EN) console.log(`Load template ${templateName}`)
     let templatePath = path.join(this.templateDir, `${templateName}.html`)
