@@ -287,6 +287,8 @@ function getDateString(page, propId) {
 }
 
 /**
+ * TODO: Use encodeURLComponent to completely eliminate XSS.
+ * 
  * Determine the string that will be used as the filename of the generated 
  * HTML and as the URL to link in other pages.
  * 
