@@ -4,7 +4,7 @@
   "description": "Generate a minimalistic blog from a Notion.so table.",
   "main": "src/index",
   "scripts": {
-    "report:deps_graph": "npx depcruise --exclude '^node_modules' --output-type dot --prefix 'https://github.com/dragonman225/notablog/tree/master/' index.js | dot -T svg > assets/deps_graph.svg",
+    "report:deps_graph": "npx depcruise --exclude '^node_modules' --output-type dot --prefix 'https://github.com/dragonman225/notablog/tree/master/' src/index.js | dot -T svg > assets/deps_graph.svg",
     "upgrade": "pnpm i squirrelly@latest notionapi-agent@latest nast-util-to-html@latest nast-util-from-notionapi@latest @dnpr/task-manager@latest @dnpr/fsutil@latest eslint@latest dependency-cruiser@latest --save-exact"
   },
   "repository": {
