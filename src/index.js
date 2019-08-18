@@ -4,14 +4,11 @@ const NotionAgent = require('notionapi-agent')
 const TaskManager = require('@dnpr/task-manager')
 const { copyDirSync } = require('@dnpr/fsutil')
 
-const TemplateProvider = require('./src/template-provider')
-const { parseTable } = require('./src/parse-table')
-const { renderIndex } = require('./src/render-index')
-const { renderPost } = require('./src/render-post')
-const { log } = require('./src/utils')
-
-/** Internal Plugins */
-const renderIcon = require('./src/plugins/render-icon')
+const TemplateProvider = require('./template-provider')
+const { parseTable } = require('./parse-table')
+const { renderIndex } = require('./render-index')
+const { renderPost } = require('./render-post')
+const { log } = require('./utils')
 
 const workDir = process.cwd()
 const configPath = path.join(workDir, 'config.json')
@@ -27,8 +24,10 @@ const taskManagerOpts = {
   debug: false
 }
 
+/**
+ * For internal use. Deprecated.
+ */
 const plugins = [
-  renderIcon
 ]
 
 main()
@@ -46,7 +45,7 @@ async function main() {
 
     const themeDir = path.join(workDir, `themes/${theme}`)
     if (!fs.existsSync(themeDir)) {
-      throw new Error(`Cannot find "${theme}" in themes/ folder.`)
+      throw new Error(`Cannot find "${theme}" in themes/ folder`)
     }
 
     const outDir = path.join(workDir, 'public')
@@ -55,12 +54,12 @@ async function main() {
     }
 
     /** Copy assets. */
-    log('Copy assets.')
+    log('Copy assets')
     let assetDir = path.join(themeDir, 'source')
     copyDirSync(assetDir, outDir)
 
     /** Fetch Site Metadata. */
-    log('Fetch Site Metadata.')
+    log('Fetch Site Metadata')
     let siteMeta = await parseTable(url, apiAgent)
 
     /** Create TemplateProvider instance */
@@ -76,7 +75,7 @@ async function main() {
     }
 
     /** Render index. */
-    log('Render index.')
+    log('Render index')
     renderIndex(renderIndexTask)
 
     /** Generate blogpost-rendering tasks. */
@@ -109,10 +108,10 @@ async function main() {
         plugins
       }
     })
-    log(`${postUpdatedCount} of ${postTotalCount} posts have been updated.`)
+    log(`${postUpdatedCount} of ${postTotalCount} posts have been updated`)
 
     /** Fetch & render posts. */
-    log('Fetch and render posts.')
+    log('Fetch and render posts')
     const tm = new TaskManager(renderPostTasks, renderPost, taskManagerOpts)
     tm.start()
     await tm.finish()

@@ -82,22 +82,22 @@ async function renderPost(task) {
 
     /** Fetch page. */
     if (operations.doFetchPage) {
-      log(`Fetch page ${pageID}.`)
+      log(`Fetch page ${pageID}`)
       nast = await getOnePageAsTree(pageID, new NotionAgent({ suppressWarning: true }))
       fs.writeFile(cachePath, JSON.stringify(nast), (err) => {
         if (err) console.error(err)
-        else log(`Cache of ${pageID} is saved.`)
+        else log(`Cache of ${pageID} is saved`)
       })
     } else {
-      log(`Read page cache ${pageID}.`)
+      log(`Read page cache ${pageID}`)
       let cache = await fsPromises.readFile(cachePath, { encoding: 'utf-8' })
       let _nast = parseJSON(cache)
       if (_nast != null) nast = _nast
-      else throw new Error(`Cache of ${pageID} is corrupted. Delete source/notion_cache to rebuild.`)
+      else throw new Error(`Cache of ${pageID} is corrupted, delete source/notion_cache to rebuild`)
     }
 
     /** Run `beforeRender` plugins. */
-    log(`Run beforeRender plugins on ${pageID}.`)
+    log(`Run beforeRender plugins on ${pageID}`)
     if (operations.enablePlugin) {
       plugins.forEach(plugin => {
         if (typeof plugin.func === 'function')
@@ -109,12 +109,12 @@ async function renderPost(task) {
             options: plugin.options
           })
         else
-          log(`Plugin ${plugin.name} is in wrong format, skipped.`)
+          log(`Plugin ${plugin.name} is in wrong format, skipped`)
       })
     }
 
     /** Render with template. */
-    log(`Render page ${pageID}.`)
+    log(`Render page ${pageID}`)
     contentHTML = renderToHTML(nast, { contentOnly: true })
     const workDir = process.cwd()
     const outDir = path.join(workDir, 'public')
@@ -123,8 +123,10 @@ async function renderPost(task) {
     Sqrl.autoEscaping(false)
     const html = Sqrl.Render(templateProvider.get(post.template), {
       siteMeta,
-      post,
-      content: contentHTML
+      post: {
+        ...post,
+        contentHTML
+      }
     })
     await fsPromises.writeFile(postPath, html, { encoding: 'utf-8' })
   }
