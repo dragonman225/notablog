@@ -13,34 +13,6 @@ module.exports = {
 }
 
 /**
- * @typedef {Object} NotablogMetadata
- * @property {string} icon
- * @property {string} title
- */
-
-/**
- * @typedef {Object} Post
- * @property {string} id
- * @property {string} title
- * @property {Tag[]} tags
- * @property {string} icon
- * @property {string} cover
- * @property {StyledString[]} description
- * @property {number} createdTime
- * @property {number} lastEditedTime
- * @property {string} url
- * @property {boolean} inList
- * @property {boolean} inMenu
- * @property {boolean} publish
- * @property {string} cachePath
- * @property {string} template
- * @property {string} descriptionHTML - Plugin: `render-description`
- * @property {string} descriptionPlainText - Plugin: `render-description`
- * @property {string} createdTime - Plugin: `timestamp-to-date`
- * @property {string} iconHTML - Plugin: `render-icon`
- */
-
-/**
  * @typedef {Object} PostOperation
  * @property {boolean} doFetchPage
  * @property {boolean} enablePlugin
@@ -55,8 +27,8 @@ module.exports = {
 
 /**
  * @typedef {Object} RenderPostTask
- * @property {NotablogMetadata} siteMeta
- * @property {Post} post
+ * @property {SiteMetadata} siteMeta
+ * @property {Object} post - ...PageMetadata + cachePath
  * @property {PostOperation} operations
  * @property {NotablogPlugin[]} plugins
  */
