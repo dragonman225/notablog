@@ -73,15 +73,20 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     })
 
   /**
-   * Convert page structure
+   * Select Option
+   * @typedef {Object} SelectOption
+   * @property {string} value 
+   * @property {string} color
    */
   /**
-   * @typedef {Object} Page
+   * Metadata of a page
+   * @typedef {Object} PageMetadata
    * @property {string} id
    * @property {string} icon
+   * @property {string} iconHTML
    * @property {string} cover
    * @property {string} title
-   * @property {Tag[]} tags
+   * @property {SelectOption[]} tags
    * @property {boolean} publish
    * @property {boolean} inMenu
    * @property {boolean} inList
@@ -96,28 +101,16 @@ async function parseTable(notionDatabaseURL, notionAgent) {
    * @property {number} lastEditedTime
    */
   /**
-   * @type {Page[]}
+   * @type {PageMetadata[]}
    */
   let pagesConverted = pagesValidAndPublished
     .map(row => {
       return {
         id: row.id,
         icon: row.icon,
+        iconHTML: renderIconToHTML(row.icon),
         cover: row.cover,
         title: row.title,
-        /**
-         * Select Option
-         * 
-         * Raw tags looks like this:
-         * { '<option_id>': [ [ 'css,web' ] ] }
-         * 
-         * @typedef SelectOption
-         * @property {string} value 
-         * @property {string} color
-         */
-        /**
-         * @type {SelectOption}
-         */
         tags: getMultiSelect(row, schemaMap['tags']).map(tag => {
           return {
             value: tag,
@@ -141,18 +134,22 @@ async function parseTable(notionDatabaseURL, notionAgent) {
 
   /**
    * The site metadata
-   * @typedef {Object} NotablogMetadata
+   * @typedef {Object} SiteMetadata
    * @property {string} icon
+   * @property {string} iconHTML
    * @property {string} cover
    * @property {string} title
    * @property {Notion.StyledString[]} description
-   * @property {Page[]} pages
+   * @property {string} descriptionPlain
+   * @property {string} descriptionHTML
+   * @property {PageMetadata[]} pages
    */
   /**
-   * @type {NotablogMetadata}
+   * @type {SiteMetadata}
    */
   let siteMeta = {
     icon: pageCollection.icon,
+    iconHTML: renderIconToHTML(pageCollection.icon),
     cover: pageCollection.cover,
     title: pageCollection.name,
     description: pageCollection.description,
@@ -235,6 +232,9 @@ function renderStyledStringToHTML(styledStringArr) {
 
 /**
  * Get option array of a multi-select-typed property
+ * 
+ * Raw options look like this:
+ * { '<propId>': [ [ 'css,web' ] ] }
  * @param {Nast.Page} page
  * @param {string} propId
  * @returns {string[]}
@@ -287,7 +287,12 @@ function getDateString(page, propId) {
 }
 
 /**
- * Infer real URL that will be used as filename.
+ * Determine the string that will be used as the filename of the generated 
+ * HTML and as the URL to link in other pages.
+ * 
+ * First, `/` and `\` are removed since they can't exist in file path.
+ * Second, if the escaped url is a empty string or user doesn't specify an
+ * url, use page id as the url.
  * @param {Nast.Page} page
  * @param {string} propId
  * @returns {string}
@@ -306,4 +311,17 @@ function getRealUrl(page, propId) {
  */
 function getSafeUrl(url) {
   return url.replace(/\/|\\/g, '')
+}
+
+/**
+ * If the icon is an url, wrap it with `<img>`.
+ * @param {string} icon 
+ */
+function renderIconToHTML(icon) {
+  let re = /^http/
+  if (re.test(icon)) {
+    return `<span><img class="inline-img-icon" src="${icon}"></span>`
+  } else {
+    return `<span>${icon}</span>`
+  }
 }
