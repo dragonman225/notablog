@@ -16,12 +16,16 @@ Here are some images of [my blog](https://dragonman225.github.io/), built with [
 
 ### :construction: This is under construction, there may be breaking changes often ! :construction:
 
+
+
 ## Table of Contents
 
 * [Getting Started](#Getting-Started)
 * [Blog Management Interface](#Blog-Management-Interface)
 * [API Reference](#API-Reference)
 * [Notes](#Notes)
+
+
 
 ## Getting Started
 
@@ -47,6 +51,8 @@ Here are some images of [my blog](https://dragonman225.github.io/), built with [
 
 * [Github Pages](https://pages.github.com/), [Netlify](https://www.netlify.com/), [surge.sh](https://surge.sh) are some choices for static hosting service. [nginx](https://www.nginx.com/), [lighttpd](https://www.lighttpd.net/), [Apache httpd](https://httpd.apache.org/) are some choices for self-hosted server.
 
+
+
 ## Blog Management Interface
 
 * `title` - The page title.
@@ -69,11 +75,15 @@ Here are some images of [my blog](https://dragonman225.github.io/), built with [
 
 * `date` - User customizable, convenient for importing posts from other platforms and adjusting the order of posts.
 
+
+
 ## API Reference
 
-`notablog` itself is designed to be installed as a dependency, and invoked from a NPM script. This way we can separate application code and user assets so that it's less confusing for a user. To make things even more simple, the [`notablog-starter`](https://github.com/dragonman225/notablog-starter) is prepared, so a user doesn't have to setup the folders and files manually. The concept is inspired by a popular project [hexo](https://github.com/hexojs/hexo).
+### Introduction
 
-Therefore, the following documentation is in the context of `notablog-starter`.
+`notablog` itself is designed to be installed as a dependency, and invoked from NPM script. This way we can separate application code and user assets so that it's less confusing for a user. To make things even more simple, we have prepared [`notablog-starter`](https://github.com/dragonman225/notablog-starter), so a user doesn't have to setup folder structure manually. The concept is inspired by a popular project [hexo](https://github.com/hexojs/hexo).
+
+With the design, a user only sees `notablog-starter` when using, therefore the following documentation will be in the context of `notablog-starter`.
 
 ### Simplified Folder Structure
 
@@ -94,17 +104,83 @@ notablog-starter
   |  url  | string |     The URL of a Notion table compatible with Notablog.      |
   | theme | string | The theme to use. It should be one of the folder names in `themes/`. |
 
-- `public/` - Contains the generated blog.
+- `public/` - Contains generated static assets of the blog.
 
-- `source/notion_cache/` - Store data of Notion pages in JSON. This speeds up blog generation since only pages with changes are downloaded again from Notion, other pages are rendered from these cached data.
+- `source/notion_cache/` - Cached JSON files of Notion pages. They are used when a user runs `npm run generate`, if a page contains no changes, the generator reads data from these cached files.
 
 - `themes/` - Store themes.
 
 ### Theme
 
-A theme is a collection of layout templates, CSS files, fonts, and other assets that defines the style and look of a blog.
+A theme contains layout templates, CSS files, fonts, and other assets that shapes the style and look of a blog.
 
-A theme is required to have at least one index layout and one post layout to function correctly.
+#### Folder Structure
+
+```
+<name>
+├── layout
+└── source
+```
+
+* `<name>` - Theme folder name, also the name to be used in `notablog-starter/config.json`.
+* `layout/` - Contains page templates. It is required to have at least one index layout (`index.html`) and one post layout (`post.html`). You can have more templates, and a user can use those bonus templates by specifying the template's filename in `template` field on Notion.
+* `source/` - Other assets. Anything in this folder will be copied to `notablog-starter/public/` when running `npm run generate`.
+
+#### Template Language
+
+* Currently, we use [Squirrelly.js](https://squirrelly.js.org/) as template engine.
+
+* `index.html` gets the following structure of data :
+
+  ```
+  {
+    siteMeta {
+    	icon // Emoji or URL
+    	iconHTML // Rendered HTML
+    	cover // URL
+    	title // String
+    	description // Raw array, do not use
+    	descriptionPlain // Rendered plain text, no style
+    	descriptionHTML // Rendered HTML, with style
+    	pages { // An array of page
+    	  id // Notion's page id
+    	  icon // Emoji or URL
+    	  iconHTML // Rendered HTML
+    	  cover // URL
+    	  title // String
+    	  tags // An array, [{ color: string, value: string }]
+    	  publish // Boolean, `true` if publish is checked.
+    	  inMenu // Boolean, `true` if inMenu is checked.
+    	  inList // Boolean, `true` if inList is checked.
+    	  template // Template name
+    	  url // URL of the page relative to site root
+    	  description // Raw array, do not use
+    	  descriptionPlain // Rendered plain text, no style
+    	  descriptionHTML // Rendered HTML, with style
+    	  date // Raw string, e.g. 2019-08-09
+    	  dateString // Formatted, e.g. Fri, Aug 9, 2019
+    	  createdTime // Unix timestamp
+    	  lastEditedTime // Unix timestamp
+    	}
+    }
+  }
+  ```
+
+* `post.html` gets the following structure of data :
+
+  ```
+  {
+    siteMeta // The same as "siteMeta" in index.html
+    post {
+      ...post // All properties of a page in "siteMeta.pages"
+      contentHTML // HTML of content
+    }
+  }
+  ```
+
+> It is highly recommended to take a look at [notablog-theme-pure](https://github.com/dragonman225/notablog-theme-pure).
+
+
 
 ## Notes
 
@@ -113,3 +189,7 @@ A theme is required to have at least one index layout and one post layout to fun
 Generated by `dependency-cruiser` NPM package.
 
 ![](assets/deps_graph.svg)
+
+### EJS
+
+There is an experimental version at `ejs` branch that uses [EJS](https://ejs.co/) as template engine. Main advantage of EJS is its `include` feature, which enable us to make repetitive parts of template into components that can be reused.
