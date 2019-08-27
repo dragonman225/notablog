@@ -134,35 +134,35 @@ A theme contains layout templates, CSS files, fonts, and other assets that shape
 
   ```
   {
-    siteMeta {
-    	icon // Emoji or URL
-    	iconHTML // Rendered HTML
-    	cover // URL
-    	title // String
-    	description // Raw array, do not use
-    	descriptionPlain // Rendered plain text, no style
-    	descriptionHTML // Rendered HTML, with style
-    	pages { // An array of page
-    	  id // Notion's page id
-    	  icon // Emoji or URL
-    	  iconHTML // Rendered HTML
-    	  cover // URL
-    	  title // String
-    	  tags // An array, [{ color: string, value: string }]
-    	  publish // Boolean, `true` if publish is checked.
-    	  inMenu // Boolean, `true` if inMenu is checked.
-    	  inList // Boolean, `true` if inList is checked.
-    	  template // Template name
-    	  url // URL of the page relative to site root
-    	  description // Raw array, do not use
-    	  descriptionPlain // Rendered plain text, no style
-    	  descriptionHTML // Rendered HTML, with style
-    	  date // Raw string, e.g. 2019-08-09
-    	  dateString // Formatted, e.g. Fri, Aug 9, 2019
-    	  createdTime // Unix timestamp
-    	  lastEditedTime // Unix timestamp
-    	}
-    }
+		siteMeta {
+			icon // Emoji or URL
+			iconHTML // Rendered HTML
+			cover // URL
+			title // String
+			description // Raw array, do not use
+			descriptionPlain // Rendered plain text, no style
+			descriptionHTML // Rendered HTML, with style
+			pages { // An array of page
+				id // Notion's page id
+				icon // Emoji or URL
+				iconHTML // Rendered HTML
+				cover // URL
+				title // String
+				tags // An array, [{ color: string, value: string }]
+				publish // Boolean, `true` if publish is checked.
+				inMenu // Boolean, `true` if inMenu is checked.
+				inList // Boolean, `true` if inList is checked.
+				template // Template name
+				url // URL of the page relative to site root
+				description // Raw array, do not use
+				descriptionPlain // Rendered plain text, no style
+				descriptionHTML // Rendered HTML, with style
+				date // Raw string, e.g. 2019-08-09
+				dateString // Formatted, e.g. Fri, Aug 9, 2019
+				createdTime // Unix timestamp
+				lastEditedTime // Unix timestamp
+			}
+		}
   }
   ```
 
@@ -170,11 +170,11 @@ A theme contains layout templates, CSS files, fonts, and other assets that shape
 
   ```
   {
-    siteMeta // The same as "siteMeta" in index.html
-    post {
-      ...post // All properties of a page in "siteMeta.pages"
-      contentHTML // HTML of content
-    }
+		siteMeta // The same as "siteMeta" in index.html
+		post {
+			...post // All properties of a page in "siteMeta.pages"
+			contentHTML // HTML of content
+		}
   }
   ```
 
