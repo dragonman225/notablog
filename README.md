@@ -4,7 +4,7 @@
 
 Generate a minimalistic blog from a Notion.so table.
 
-Here are some images of [my blog](https://dragonman225.github.io/), built with [notablog-theme-pure](https://github.com/dragonman225/notablog-theme-pure)(the default theme). 🙂
+Here are some images of [my blog](https://dragonman225.github.io/), using [notablog-theme-pure](https://github.com/dragonman225/notablog-theme-pure)(the default theme). 🙂
 
 | Mobile | Desktop |
 | :--: | :--: |
@@ -20,10 +20,17 @@ Here are some images of [my blog](https://dragonman225.github.io/), built with [
 
 ## Table of Contents
 
+* [Announcement](#Announcement)
 * [Getting Started](#Getting-Started)
 * [Blog Management Interface](#Blog-Management-Interface)
 * [API Reference](#API-Reference)
 * [Notes](#Notes)
+
+
+
+## Announcement
+
+> BREAKING CHANGES of `v0.3.0` : If you upgrade from `v0.2.1` or lower, please edit you blog management table to match the new [Blog Management Interface](#Blog-Management-Interface), or duplicate the new [Notion table template](https://www.notion.so/b6fcf809ca5047b89f423948dce013a0?v=03ddc4d6130a47f8b68e74c9d0061de2) and copy-paste your post content.
 
 
 
@@ -55,25 +62,22 @@ Here are some images of [my blog](https://dragonman225.github.io/), built with [
 
 ## Blog Management Interface
 
-* `title` - The page title.
+This is the documentation of [Notion table template](https://www.notion.so/b6fcf809ca5047b89f423948dce013a0?v=03ddc4d6130a47f8b68e74c9d0061de2)
 
-* `tags` - Topics related to the page. It's a multi-select option.
+|  Column Name  | Property Type  |                         Description                          |
+| :-----------: | :------------: | :----------------------------------------------------------: |
+|    `title`    |    `Title`     |                       The page title.                        |
+|    `tags`     | `Multi-Select` |                 Topics related to the page.                  |
+|   `publish`   |   `Checkbox`   |           Determine if a page should be rendered.            |
+|   `inMenu`    |   `Checkbox`   |    Determine if a page should appear in the topbar menu.     |
+|   `inList`    |   `Checkbox`   |   Determine if a page should appear in the list of posts.    |
+|  `template`   |    `Select`    | Specify which template to use for the page. Available template names depend on which theme you use. |
+|     `url`     |     `Text`     | A string to be used as the filename and the URL of the generated page. It should not contain `/` and `\`. If it's empty, the `id` of the page is used. |
+| `description` |     `Text`     |         Short intro of the page. Styles are working.         |
+|    `date`     |     `Date`     | User customizable date, convenient for importing posts from other platforms or adjusting the order of posts. |
 
-* `publish` - Determine if a page should be rendered.
+* **Trick** : Check `publish` but leave `inMenu` and `inList` unchecked to create a *hidden* page which people can access only if knowing its URL.
 
-*  `inMenu` - Determine if a page should appear in the topbar menu.
-
-* `inList` - Determine if a page should appear in the list of posts.
-
-  **Trick** : Check `publish` but leave `inMenu` and `inList` unchecked to create a *hidden* page which people can access only if knowing its URL.
-
-* `template` - Specify which template to use for the page. Available template names depend on which theme you use.
-
-* `url` - A string to be used as the filename and the URL of the generated page. It should not contain `/` and `\`. It can be empty, in this case, the `id` of the page is used for filename and URL.
-
-* `description` - Short intro of the page. Styles are working.
-
-* `date` - User customizable, convenient for importing posts from other platforms and adjusting the order of posts.
 
 
 
@@ -81,7 +85,7 @@ Here are some images of [my blog](https://dragonman225.github.io/), built with [
 
 ### Introduction
 
-`notablog` itself is designed to be installed as a dependency, and invoked from NPM script. This way we can separate application code and user assets so that it's less confusing for a user. To make things even more simple, we have prepared [`notablog-starter`](https://github.com/dragonman225/notablog-starter), so a user doesn't have to setup folder structure manually. The concept is inspired by a popular project [hexo](https://github.com/hexojs/hexo).
+`notablog` itself is designed to be installed as a dependency, and invoked from NPM script. This way we can separate application code and user assets so that it's less confusing for a user. To make things even more simple, I have prepared [`notablog-starter`](https://github.com/dragonman225/notablog-starter), so a user doesn't have to setup folder structure manually. The concept is inspired by a popular project [hexo](https://github.com/hexojs/hexo).
 
 With the design, a user only sees `notablog-starter` when using, therefore the following documentation will be in the context of `notablog-starter`.
 
@@ -128,9 +132,9 @@ A theme contains layout templates, CSS files, fonts, and other assets that shape
 
 #### Template Language
 
-* Currently, we use [Squirrelly.js](https://squirrelly.js.org/) as template engine.
+* Currently, I use [Squirrelly.js](https://squirrelly.js.org/) as template engine.
 
-* `index.html` gets the following structure of data :
+* Template `index.html` gets the following structure of data :
 
   ```
   {
@@ -166,19 +170,19 @@ A theme contains layout templates, CSS files, fonts, and other assets that shape
   }
   ```
 
-* `post.html` gets the following structure of data :
+* Template `post.html` or others gets the following structure of data :
 
   ```
   {
 		siteMeta // The same as "siteMeta" in index.html
 		post {
 			...post // All properties of a page in "siteMeta.pages"
-			contentHTML // HTML of content
+			contentHTML // HTML of post body
 		}
   }
   ```
 
-> It is highly recommended to take a look at [notablog-theme-pure](https://github.com/dragonman225/notablog-theme-pure).
+> It is highly recommended to take a look at [notablog-theme-pure](https://github.com/dragonman225/notablog-theme-pure) if you want to make your own !
 
 
 
@@ -192,4 +196,4 @@ Generated by `dependency-cruiser` NPM package.
 
 ### EJS
 
-There is an experimental version at `ejs` branch that uses [EJS](https://ejs.co/) as template engine. Main advantage of EJS is its `include` feature, which enable us to make repetitive parts of template into components that can be reused.
+There is an experimental version at `ejs` branch that uses [EJS](https://ejs.co/) as template engine. Main advantage of EJS is its `include` feature, which enable us to make repetitive parts of template into components that can be reused. I also made an EJS version of `notablog-theme-pure` [here](https://github.com/dragonman225/notablog-theme-pure-ejs).
