@@ -44,8 +44,11 @@ class TemplateProvider {
         fs.readFileSync(templatePath, { encoding: 'utf-8' })
       return this.templateMap[templateName]
     } catch (err) {
-      console.log(err)
-      return `Cannot find ${templateName}.html in ${this.templateDir}`
+      if (DEBUG_EN) console.log(err)
+      if (templateName.length)
+        return `Cannot find ${templateName}.html in ${this.templateDir}`
+      else
+        return 'Template name has length 0, please check "template" field of your table on Notion'
     }
   }
 }

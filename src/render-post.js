@@ -86,20 +86,24 @@ async function renderPost(task) {
     }
 
     /** Render with template. */
-    log(`Render page ${pageID}`)
-    contentHTML = renderToHTML(nast, { contentOnly: true })
-    const workDir = process.cwd()
-    const outDir = path.join(workDir, 'public')
-    const postPath = path.join(outDir, post.url)
+    if (post.publish) {
+      log(`Render page ${pageID}`)
+      contentHTML = renderToHTML(nast, { contentOnly: true })
+      const workDir = process.cwd()
+      const outDir = path.join(workDir, 'public')
+      const postPath = path.join(outDir, post.url)
 
-    Sqrl.autoEscaping(false)
-    const html = Sqrl.Render(templateProvider.get(post.template), {
-      siteMeta,
-      post: {
-        ...post,
-        contentHTML
-      }
-    })
-    await fsPromises.writeFile(postPath, html, { encoding: 'utf-8' })
+      Sqrl.autoEscaping(false)
+      const html = Sqrl.Render(templateProvider.get(post.template), {
+        siteMeta,
+        post: {
+          ...post,
+          contentHTML
+        }
+      })
+      await fsPromises.writeFile(postPath, html, { encoding: 'utf-8' })
+    } else {
+      log(`Skip rendering of unpublished page ${pageID}`)
+    }
   }
 }
