@@ -38,7 +38,7 @@ Here are some images of [my blog](https://dragonman225.github.io/), using [notab
 
 1. Clone the [`notablog-starter`](https://github.com/dragonman225/notablog-starter) repository and install dependencies.
    ```bash
-   git clone https://github.com/dragonman225/notablog-starter.git
+   git clone --recursive https://github.com/dragonman225/notablog-starter.git
    cd notablog-starter && npm install
    ```
 
