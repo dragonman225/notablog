@@ -81,44 +81,47 @@ async function main() {
     /** Generate blogpost-rendering tasks. */
     let postTotalCount = siteMeta.pages.length
     let postUpdatedCount = postTotalCount
-    let renderPostTasks = siteMeta.pages.map(post => {
-      let cacheFileName = post.id.replace(/\/|\\/g, '') + '.json'
-      let cacheFilePath = path.join(cacheDir, cacheFileName)
+    let postPublishedCount = siteMeta.pages.filter(page => page.publish).length
+    let renderPostTasks = siteMeta.pages
+      .map(post => {
+        let cacheFileName = post.id.replace(/\/|\\/g, '') + '.json'
+        let cacheFilePath = path.join(cacheDir, cacheFileName)
 
-      let postUpdated
-      if (fs.existsSync(cacheFilePath)) {
-        let lastCacheTime = fs.statSync(cacheFilePath).mtimeMs
-        postUpdated = post.lastEditedTime > lastCacheTime
-        if (!postUpdated) postUpdatedCount -= 1
-      } else {
-        postUpdated = true
-      }
+        let postUpdated
+        if (fs.existsSync(cacheFilePath)) {
+          let lastCacheTime = fs.statSync(cacheFilePath).mtimeMs
+          postUpdated = post.lastEditedTime > lastCacheTime
+          if (!postUpdated) postUpdatedCount -= 1
+        } else {
+          postUpdated = true
+        }
 
-      return {
-        siteMeta,
-        templateProvider,
-        post: {
-          ...post,
-          cachePath: cacheFilePath
-        },
-        operations: {
-          doFetchPage: postUpdated,
-          enablePlugin: true
-        },
-        plugins
-      }
-    })
-    log(`${postUpdatedCount} of ${postTotalCount} posts have been updated`)
+        return {
+          siteMeta,
+          templateProvider,
+          post: {
+            ...post,
+            cachePath: cacheFilePath
+          },
+          operations: {
+            doFetchPage: postUpdated,
+            enablePlugin: true
+          },
+          plugins
+        }
+      })
+    log(`${postUpdatedCount} of ${postTotalCount} posts have been updated
+           ${postPublishedCount} of ${postTotalCount} posts are published`)
 
     /** Fetch & render posts. */
-    log('Fetch and render posts')
+    log('Fetch and render published posts')
     const tm = new TaskManager(renderPostTasks, renderPost, taskManagerOpts)
     tm.start()
     await tm.finish()
 
     let endTime = Date.now()
     let timeElapsed = (endTime - startTime) / 1000
-    log(`Build complete in ${timeElapsed}s`)
+    log(`Build complete in ${timeElapsed}s. Open public/index.html to preview`)
 
   } catch (error) {
     console.error(error)
