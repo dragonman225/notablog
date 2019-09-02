@@ -30,7 +30,7 @@ Here are some images of [my blog](https://dragonman225.github.io/), using [notab
 
 ## Announcement
 
-> BREAKING CHANGES of `v0.3.0` : If you upgrade from `v0.2.1` or lower, please edit you blog management table to match the new [Blog Management Interface](#Blog-Management-Interface), or duplicate the new [Notion table template](https://www.notion.so/b6fcf809ca5047b89f423948dce013a0?v=03ddc4d6130a47f8b68e74c9d0061de2) and copy-paste your post content.
+> BREAKING CHANGES of `v0.3.0` : If you want to upgrade from `v0.2.1` or lower, please delete old `notablog-starter` and go through [Getting Started](#Getting-Started) again since `notablog-starter` has a lot of changes.
 
 
 
