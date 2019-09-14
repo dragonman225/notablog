@@ -12,22 +12,26 @@ const dashIDLen = '0eeee000-cccc-bbbb-aaaa-123450000000'.length
 const noDashIDLen = '0eeee000ccccbbbbaaaa123450000000'.length
 
 function getPageIDFromNotionDatabaseURL(str) {
-  const re = /https:\/\/www.notion.so\/([\da-f]+)\?v=([\da-f]+)/
-  const found = str.match(re)
-  if (found != null && found[1] != null) {
-    let dashID = toDashID(found[1])
-    return dashID
+  let splitArr = str.split('/')
+  splitArr = splitArr.pop().split('-')
+  splitArr = splitArr.pop().split('?')
+
+  let pageID = splitArr[0]
+  if (pageID && pageID.length === noDashIDLen) {
+    return toDashID(pageID)
   } else {
-    throw new Error(`Cannot get pageID from ${str}.`)
+    throw new Error(`Cannot get pageID from ${str}`)
   }
 }
 
 function getBookmarkLinkFromNotionPageURL(str) {
-  let re = /https:\/\/www.notion.so\/.+#([\da-f]+)/
-  let found = str.match(re)
-  if (found != null && found[1] != null) {
-    let dashID = toDashID(found[1])
-    return `#${dashID}`
+  let splitArr = str.split('/')
+  splitArr = splitArr.pop().split('-')
+  splitArr = splitArr.pop().split('#')
+
+  let blockID = splitArr[1]
+  if (blockID && blockID.length === noDashIDLen) {
+    return `#${toDashID(blockID)}`
   } else {
     return str
   }
@@ -38,10 +42,10 @@ function getPageIDFromNotionPageURL(str) {
   splitArr = splitArr.pop().split('-')
 
   let pageID = splitArr.pop()
-  if (pageID.length === noDashIDLen) {
+  if (pageID && pageID.length === noDashIDLen) {
     return toDashID(pageID)
   } else {
-    return str
+    throw new Error(`Cannot get pageID from ${str}`)
   }
 }
 
