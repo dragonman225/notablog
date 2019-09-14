@@ -25,10 +25,9 @@ const taskManagerOpts = {
 }
 
 /**
- * For internal use. Deprecated.
+ * Originally for internal use. Planned to deprecate.
  */
-const plugins = [
-]
+const plugins = []
 
 main()
 
@@ -53,8 +52,8 @@ async function main() {
       fs.mkdirSync(outDir, { recursive: true })
     }
 
-    /** Copy assets. */
-    log('Copy assets')
+    /** Copy theme assets. */
+    log('Copy theme assets')
     let assetDir = path.join(themeDir, 'source')
     copyDirSync(assetDir, outDir)
 

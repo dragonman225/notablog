@@ -36,6 +36,8 @@ Here are some images of [my blog](https://dragonman225.github.io/), using [notab
 
 ## Getting Started
 
+> Make sure you have Node.js v12.0.0 or higher. Check with command `node -v`.
+
 1. Clone the [`notablog-starter`](https://github.com/dragonman225/notablog-starter) repository and install dependencies.
    ```bash
    git clone --recursive https://github.com/dragonman225/notablog-starter.git
