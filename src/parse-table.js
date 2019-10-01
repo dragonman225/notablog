@@ -67,7 +67,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
   })
 
   /** Remove empty rows */
-  let pagesValidAndPublished = pageCollection.blocks
+  let pagesValid = pageCollection.blocks
     .filter(page => {
       return page.properties != null
     })
@@ -103,7 +103,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
   /**
    * @type {PageMetadata[]}
    */
-  let pagesConverted = pagesValidAndPublished
+  let pagesConverted = pagesValid
     .map(row => {
       return {
         id: row.id,
@@ -159,8 +159,12 @@ async function parseTable(notionDatabaseURL, notionAgent) {
      * Sort the pages so that the most recent post is at the top.
      */
     pages: pagesConverted.sort((later, former) => {
-      if (later.date > former.date) return -1
-      else if (later.date < former.date) return 1
+      const laterTimestamp = later.date
+        ? (new Date(later.date)).getTime() : 0
+      const formerTimestamp = former.date
+        ? (new Date(former.date)).getTime() : 0
+      if (laterTimestamp > formerTimestamp) return -1
+      else if (laterTimestamp < formerTimestamp) return 1
       else return 0
     })
   }
