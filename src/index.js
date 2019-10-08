@@ -54,7 +54,7 @@ async function main() {
 
     /** Copy theme assets. */
     log('Copy theme assets')
-    let assetDir = path.join(themeDir, 'source')
+    let assetDir = path.join(themeDir, 'assets')
     copyDirSync(assetDir, outDir)
 
     /** Fetch Site Metadata. */

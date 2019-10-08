@@ -40,7 +40,7 @@ Here are some images of [my blog](https://dragonman225.github.io/), using [notab
 
 1. Clone the [`notablog-starter`](https://github.com/dragonman225/notablog-starter) repository and install dependencies.
    ```bash
-   git clone --recursive https://github.com/dragonman225/notablog-starter.git
+   git clone https://github.com/dragonman225/notablog-starter.git
    cd notablog-starter && npm install
    ```
 
@@ -125,12 +125,12 @@ A theme contains layout templates, CSS files, fonts, and other assets that shape
 ```
 <name>
 ├── layout
-└── source
+└── assets
 ```
 
 * `<name>` - Theme folder name, also the name to be used in `notablog-starter/config.json`.
 * `layout/` - Contains page templates. It is required to have at least one index layout (`index.html`) and one post layout (`post.html`). You can have more templates, and a user can use those bonus templates by specifying the template's filename in `template` field on Notion.
-* `source/` - Other assets. Anything in this folder will be copied to `notablog-starter/public/` when running `npm run generate`.
+* `assets/` - Other assets. Anything in this folder will be copied to `notablog-starter/public/` when running `npm run generate`.
 
 #### Template Language
 
