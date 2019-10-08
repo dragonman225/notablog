@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const NotionAgent = require('notionapi-agent')
+const { NotionAgent } = require('notionapi-agent')
 const TaskManager = require('@dnpr/task-manager')
 const { copyDirSync } = require('@dnpr/fsutil')
 
@@ -15,7 +15,7 @@ const configPath = path.join(workDir, 'config.json')
 const config = JSON.parse(fs.readFileSync(configPath, { encoding: 'utf-8' }))
 const url = config.url
 const theme = config.theme
-const apiAgent = new NotionAgent({ suppressWarning: true })
+const apiAgent = new NotionAgent({ suppressWarning: true, verbose: false })
 
 const taskManagerOpts = {
   delay: 0,
