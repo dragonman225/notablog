@@ -328,6 +328,6 @@ function renderIconToHTML(icon) {
   if (re.test(icon)) {
     return `<span><img class="inline-img-icon" src="${icon}"></span>`
   } else {
-    return `<span>${icon}</span>`
+    return icon ? `<span>${icon}</span>` : ''
   }
 }
