@@ -109,7 +109,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
         id: row.id,
         icon: row.icon,
         iconHTML: renderIconToHTML(row.icon),
-        cover: fixCoverUrl(row.cover),
+        cover: row.cover,
         title: row.title,
         tags: getMultiSelect(row, schemaMap['tags']).map(tag => {
           return {
@@ -150,7 +150,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
   let siteMeta = {
     icon: pageCollection.icon,
     iconHTML: renderIconToHTML(pageCollection.icon),
-    cover: fixCoverUrl(pageCollection.cover),
+    cover: pageCollection.cover,
     title: pageCollection.name,
     description: pageCollection.description,
     descriptionPlain: renderStyledStringToTXT(pageCollection.description),
@@ -329,20 +329,5 @@ function renderIconToHTML(icon) {
     return `<span><img class="inline-img-icon" src="${icon}"></span>`
   } else {
     return icon ? `<span>${icon}</span>` : ''
-  }
-}
-
-/**
- * Add prefix for built-in covers
- * @param {string} url 
- */
-function fixCoverUrl(url) {
-  if (url) {
-    const re = /^http/
-    if (re.test(url)) {
-      return url
-    } else {
-      return `https://notion.so${url}`
-    }
   }
 }
