@@ -4,7 +4,7 @@
 
 Generate a minimalistic blog from a Notion.so table.
 
-Here are some images of [my blog](https://dragonman225.github.io/), using [notablog-theme-pure](https://github.com/dragonman225/notablog-theme-pure)(the default theme). 🙂
+Here are some images of [my blog](https://dragonman225.js.org/), using [`notablog-starter`'s default theme](https://github.com/dragonman225/notablog-starter/tree/master/themes/pure). 🙂
 
 | Mobile | Desktop |
 | :--: | :--: |
