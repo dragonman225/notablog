@@ -32,7 +32,7 @@
     "@dnpr/task-manager": "0.1.1",
     "nast-util-from-notionapi": "0.5.3",
     "nast-util-to-html": "0.2.2",
-    "notionapi-agent": "0.6.1",
+    "notionapi-agent": "0.6.3",
     "squirrelly": "7.7.0"
   }
 }
