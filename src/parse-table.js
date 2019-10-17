@@ -100,6 +100,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
    * @property {number} createdTime
    * @property {number} lastEditedTime
    */
+
   /**
    * @type {PageMetadata[]}
    */
@@ -143,6 +144,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
    * @property {string} descriptionPlain
    * @property {string} descriptionHTML
    * @property {PageMetadata[]} pages
+   * @property {Map<string, PageMetadata[]>} tagMap
    */
   /**
    * @type {SiteMetadata}
@@ -166,8 +168,22 @@ async function parseTable(notionDatabaseURL, notionAgent) {
       if (laterTimestamp > formerTimestamp) return -1
       else if (laterTimestamp < formerTimestamp) return 1
       else return 0
-    })
+    }),
+    tagMap: new Map()
   }
+
+  /**
+   * Create tagMap
+   */
+  siteMeta.pages.forEach(page => {
+    page.tags.forEach(tag => {
+      if (!siteMeta.tagMap.has(tag.value)) {
+        siteMeta.tagMap.set(tag.value, [page])
+      } else {
+        siteMeta.tagMap.get(tag.value).push(page)
+      }
+    })
+  })
 
   return siteMeta
 }
