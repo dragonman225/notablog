@@ -1,6 +1,6 @@
 {
   "name": "notablog",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Generate a minimalistic blog from a Notion.so table.",
   "main": "src/index",
   "scripts": {
