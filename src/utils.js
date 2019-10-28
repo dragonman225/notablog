@@ -1,13 +1,12 @@
-module.exports = { log, parseJSON }
+const { Logger } = require('@dnpr/logger')
 
 /**
  * Wrapper of console.log().
  */
-function log() {
-  let args = Array.from(arguments)
-  args.unshift('(notablog)')
-  console.log.apply(null, args)
-}
+const log = new Logger('notablog', {
+  logLevel: typeof process.env.DEBUG_EN !== 'undefined' ? 'debug' : 'info',
+  useColor: typeof process.env.NO_COLOR !== 'undefined' ? false : true
+})
 
 /**
  * Failsafe JSON.parse() wrapper.
@@ -21,3 +20,5 @@ function parseJSON(str) {
     return void 0
   }
 }
+
+module.exports = { log, parseJSON }

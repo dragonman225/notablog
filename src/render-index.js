@@ -15,7 +15,7 @@ function renderIndex(task) {
   const plugins = task.plugins
 
   /** Run `beforeRender` plugins. */
-  log('Run beforeRender plugins on index')
+  log.info('Run beforeRender plugins on index')
   if (operations.enablePlugin) {
     plugins.forEach(plugin => {
       if (typeof plugin.func === 'function')
@@ -27,7 +27,7 @@ function renderIndex(task) {
           options: plugin.options
         })
       else
-        log(`Plugin ${plugin.name} is in wrong format, skipped`)
+        log.warn(`Plugin ${plugin.name} is in wrong format, skipped`)
     })
   }
 

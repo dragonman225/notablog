@@ -54,14 +54,14 @@ async function renderPost(task) {
 
     /** Fetch page. */
     if (operations.doFetchPage) {
-      log(`Fetch page ${pageID}`)
+      log.info(`Fetch page ${pageID}`)
       nast = await getOnePageAsTree(pageID, new NotionAgent({ suppressWarning: true, verbose: false }))
       fs.writeFile(cachePath, JSON.stringify(nast), (err) => {
         if (err) console.error(err)
-        else log(`Cache of ${pageID} is saved`)
+        else log.info(`Cache of ${pageID} is saved`)
       })
     } else {
-      log(`Read page cache ${pageID}`)
+      log.info(`Read page cache ${pageID}`)
       let cache = await fsPromises.readFile(cachePath, { encoding: 'utf-8' })
       let _nast = parseJSON(cache)
       if (_nast != null) nast = _nast
@@ -69,7 +69,7 @@ async function renderPost(task) {
     }
 
     /** Run `beforeRender` plugins. */
-    log(`Run beforeRender plugins on ${pageID}`)
+    log.info(`Run beforeRender plugins on ${pageID}`)
     if (operations.enablePlugin) {
       plugins.forEach(plugin => {
         if (typeof plugin.func === 'function')
@@ -81,13 +81,13 @@ async function renderPost(task) {
             options: plugin.options
           })
         else
-          log(`Plugin ${plugin.name} is in wrong format, skipped`)
+          log.warn(`Plugin ${plugin.name} is in wrong format, skipped`)
       })
     }
 
     /** Render with template. */
     if (post.publish) {
-      log(`Render page ${pageID}`)
+      log.info(`Render page ${pageID}`)
       contentHTML = renderToHTML(nast, { contentOnly: true })
       const workDir = process.cwd()
       const outDir = path.join(workDir, 'public')
@@ -103,7 +103,7 @@ async function renderPost(task) {
       })
       await fsPromises.writeFile(postPath, html, { encoding: 'utf-8' })
     } else {
-      log(`Skip rendering of unpublished page ${pageID}`)
+      log.info(`Skip rendering of unpublished page ${pageID}`)
     }
   }
 }
