@@ -37,14 +37,14 @@ function renderIndex(task) {
 
   Sqrl.autoEscaping(false)
 
-  log('Rendering home page')
+  log.info('Rendering home page')
   const html = Sqrl.Render(templateProvider.get('index'), {
     siteMeta
   })
   fs.writeFileSync(indexPath, html, { encoding: 'utf-8' })
 
   siteMeta.tagMap.forEach((pageMetas, tagVal) => {
-    log(`Rendering tag: ${tagVal}`)
+    log.info(`Rendering tag: ${tagVal}`)
     const html = Sqrl.Render(templateProvider.get('tag'), {
       siteMeta,
       tag: {
