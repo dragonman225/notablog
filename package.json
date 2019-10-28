@@ -1,6 +1,6 @@
 {
   "name": "notablog",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "description": "Generate a minimalistic blog from a Notion.so table.",
   "main": "src/index",
   "scripts": {
@@ -33,7 +33,7 @@
     "@dnpr/logger": "^0.2.0",
     "@dnpr/task-manager": "0.1.1",
     "nast-util-from-notionapi": "0.5.3",
-    "nast-util-to-html": "0.2.5",
+    "nast-util-to-html": "0.2.7",
     "notionapi-agent": "0.6.3",
     "squirrelly": "7.7.0"
   }
