@@ -38,7 +38,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     let propertyId = key
     let propertyString = value.name
     if (schemaMap[propertyString]) {
-      log(`Duplicate column name "${propertyString}", column with id "${propertyId}" is used`)
+      log.warn(`Duplicate column name "${propertyString}", column with id "${propertyId}" is used`)
     } else {
       schemaMap[propertyString] = key
     }

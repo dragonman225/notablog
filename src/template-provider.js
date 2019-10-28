@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const DEBUG_EN = false
+const { log } = require('./utils')
 
 class TemplateProvider {
 
@@ -20,7 +20,7 @@ class TemplateProvider {
    * @param {string} templateName 
    */
   get(templateName) {
-    if (DEBUG_EN) console.log(`Get template ${templateName}`)
+    log.debug(`Get template "${templateName}"`)
     if (typeof templateName === 'string') {
       let template = this.templateMap[templateName]
       if (template) return template
@@ -37,16 +37,16 @@ class TemplateProvider {
    * @param {string} templateName 
    */
   _load(templateName) {
-    if (DEBUG_EN) console.log(`Load template ${templateName}`)
+    log.debug(`Load template "${templateName}"`)
     let templatePath = path.join(this.templateDir, `${templateName}.html`)
     try {
       this.templateMap[templateName] =
         fs.readFileSync(templatePath, { encoding: 'utf-8' })
       return this.templateMap[templateName]
     } catch (err) {
-      if (DEBUG_EN) console.log(err)
+      log.debug(err)
       if (templateName.length)
-        return `Cannot find ${templateName}.html in ${this.templateDir}`
+        return `Cannot find "${templateName}.html" in ${this.templateDir}`
       else
         return 'Template name has length 0, please check "template" field of your table on Notion'
     }

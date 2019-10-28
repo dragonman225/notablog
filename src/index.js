@@ -58,12 +58,12 @@ async function main() {
     }
 
     /** Copy theme assets. */
-    log('Copy theme assets')
+    log.info('Copy theme assets')
     let assetDir = path.join(themeDir, 'assets')
     copyDirSync(assetDir, outDir)
 
     /** Fetch Site Metadata. */
-    log('Fetch Site Metadata')
+    log.info('Fetch Site Metadata')
     let siteMeta = await parseTable(url, apiAgent)
 
     /** Create TemplateProvider instance */
@@ -79,7 +79,7 @@ async function main() {
     }
 
     /** Render index. */
-    log('Render index')
+    log.info('Render index')
     renderIndex(renderIndexTask)
 
     /** Generate blogpost-rendering tasks. */
@@ -114,18 +114,18 @@ async function main() {
           plugins
         }
       })
-    log(`${postUpdatedCount} of ${postTotalCount} posts have been updated
-           ${postPublishedCount} of ${postTotalCount} posts are published`)
+    log.info(`${postUpdatedCount} of ${postTotalCount} posts have been updated`)
+    log.info(`${postPublishedCount} of ${postTotalCount} posts are published`)
 
     /** Fetch & render posts. */
-    log('Fetch and render published posts')
+    log.info('Fetch and render published posts')
     const tm = new TaskManager(renderPostTasks, renderPost, taskManagerOpts)
     tm.start()
     await tm.finish()
 
     let endTime = Date.now()
     let timeElapsed = (endTime - startTime) / 1000
-    log(`Build complete in ${timeElapsed}s. Open public/index.html to preview`)
+    log.info(`Build complete in ${timeElapsed}s. Open public/index.html to preview`)
 
   } catch (error) {
     console.error(error)
