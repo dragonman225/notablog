@@ -6,13 +6,13 @@ Generate a minimalistic blog from a Notion.so table.
 
 Here are some images of [my blog](https://dragonman225.js.org/), using [`notablog-starter`'s default theme](https://github.com/dragonman225/notablog-starter/tree/master/themes/pure). 🙂
 
-| Mobile | Desktop |
-| :--: | :--: |
-|   ![](assets/v0.3.0_mobile.png)   |   ![](assets/v0.3.0_desktop.png)   |
+|            Mobile             |            Desktop             |
+| :---------------------------: | :----------------------------: |
+| ![](assets/v0.3.0_mobile.png) | ![](assets/v0.3.0_desktop.png) |
 
 | Management Interface on Notion.so |
-| :----------------------------: |
-| ![](assets/v0.3.0_manage.png) |
+| :-------------------------------: |
+|   ![](assets/v0.3.0_manage.png)   |
 
 ### :construction: This is under construction, there may be breaking changes often ! :construction:
 
@@ -30,7 +30,9 @@ Here are some images of [my blog](https://dragonman225.js.org/), using [`notablo
 
 ## Announcement
 
-> BREAKING CHANGES of `v0.3.0` : If you want to upgrade from `v0.2.1` or lower, please delete old `notablog-starter` and go through [Getting Started](#Getting-Started) again since `notablog-starter` has a lot of changes.
+### [2019.09.02]
+
+BREAKING CHANGES of `v0.3.0` : If you want to upgrade from `v0.2.1` or lower, please delete old `notablog-starter` and go through [Getting Started](#Getting-Started) again since `notablog-starter` has a lot of changes.
 
 
 
