@@ -52,6 +52,11 @@ async function main() {
       fs.mkdirSync(outDir, { recursive: true })
     }
 
+    const tagDir = path.join(workDir, 'public/tag')
+    if (!fs.existsSync(tagDir)) {
+      fs.mkdirSync(tagDir, { recursive: true })
+    }
+
     /** Copy theme assets. */
     log.info('Copy theme assets')
     let assetDir = path.join(themeDir, 'assets')
