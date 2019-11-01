@@ -6,8 +6,10 @@ const { spawn } = require('child_process')
 
 const manifest = require('../package.json')
 
-const devDeps = Object.keys(manifest.devDependencies)
-const deps = Object.keys(manifest.dependencies)
+const devDeps = Object.keys(manifest.devDependencies
+  ? manifest.devDependencies : [])
+const deps = Object.keys(manifest.dependencies
+  ? manifest.dependencies : [])
 
 const devDepsLatest = devDeps.map(d => `${d}@latest`)
 const depsLatest = deps.map(d => `${d}@latest`)
