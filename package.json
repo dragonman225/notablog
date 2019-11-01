@@ -6,7 +6,7 @@
   "scripts": {
     "release": "npm run report:deps_graph && npm publish",
     "report:deps_graph": "npx depcruise --exclude '^node_modules' --output-type dot --prefix 'https://github.com/dragonman225/notablog/tree/master/' src/index.js | dot -T svg > assets/deps_graph.svg",
-    "upgrade": "pnpm i squirrelly@latest notionapi-agent@latest nast-util-to-html@latest nast-util-from-notionapi@latest @dnpr/task-manager@latest @dnpr/logger@latest @dnpr/fsutil@latest eslint@latest dependency-cruiser@latest --save-exact"
+    "upgrade": "node tools/upgrade-deps.js"
   },
   "repository": {
     "type": "git",
@@ -25,16 +25,16 @@
   },
   "homepage": "https://github.com/dragonman225/notablog",
   "devDependencies": {
-    "dependency-cruiser": "5.2.0",
-    "eslint": "6.5.1"
+    "dependency-cruiser": "5.2.2",
+    "eslint": "6.6.0"
   },
   "dependencies": {
     "@dnpr/fsutil": "0.1.3",
-    "@dnpr/logger": "^0.2.0",
-    "@dnpr/task-manager": "0.1.1",
+    "@dnpr/logger": "0.2.0",
+    "@dnpr/task-manager": "0.1.2",
     "nast-util-from-notionapi": "0.5.3",
     "nast-util-to-html": "0.2.7",
-    "notionapi-agent": "0.6.3",
+    "notionapi-agent": "0.7.2",
     "squirrelly": "7.7.0"
   }
 }
