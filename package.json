@@ -32,7 +32,7 @@
     "@dnpr/fsutil": "0.1.3",
     "@dnpr/logger": "0.2.0",
     "@dnpr/task-manager": "0.1.2",
-    "nast-util-from-notionapi": "0.5.3",
+    "nast-util-from-notionapi": "0.7.0",
     "nast-util-to-html": "0.2.7",
     "notionapi-agent": "0.7.2",
     "squirrelly": "7.7.0"
