@@ -1,19 +1,8 @@
 const { getOnePageAsTree } = require('nast-util-from-notionapi')
-const { renderToHTML } = require('nast-util-to-html')
+const { renderToHTML } = require('nast-util-to-react')
 
 const { getPageIDFromNotionDatabaseURL } = require('./notion-utils')
 const { log } = require('./utils')
-
-// const COLUMN_NAMES = {
-//   tags: 'tags',
-//   publish: 'publish',
-//   inMenu: 'inMenu',
-//   inList: 'inList',
-//   template: 'template',
-//   url: 'url',
-//   description: 'description',
-//   date: 'date'
-// }
 
 module.exports = {
   parseTable
@@ -38,7 +27,8 @@ async function parseTable(notionDatabaseURL, notionAgent) {
     let propertyId = key
     let propertyString = value.name
     if (schemaMap[propertyString]) {
-      log.warn(`Duplicate column name "${propertyString}", column with id "${propertyId}" is used`)
+      log.warn(`Duplicate column name "${propertyString}", \
+column with id "${propertyId}" is used`)
     } else {
       schemaMap[propertyString] = key
     }
@@ -61,16 +51,14 @@ async function parseTable(notionDatabaseURL, notionAgent) {
    * Create map for tag -> color
    */
   let tagColorMap = {}
-  let classPrefix = 'tag-'
+  let classPrefix = ''
   pageCollection.schema[schemaMap['tags']].options.forEach(tag => {
     tagColorMap[tag.value] = `${classPrefix}${tag.color}`
   })
 
   /** Remove empty rows */
-  let pagesValid = pageCollection.blocks
-    .filter(page => {
-      return page.properties != null
-    })
+  let pagesValid = pageCollection.children
+    .filter(page => page.properties)
 
   /**
    * Select Option
@@ -107,7 +95,7 @@ async function parseTable(notionDatabaseURL, notionAgent) {
   let pagesConverted = pagesValid
     .map(row => {
       return {
-        id: row.id,
+        uri: row.uri,
         icon: row.icon,
         iconHTML: renderIconToHTML(row.icon),
         cover: row.cover,
@@ -322,7 +310,8 @@ function getDateString(page, propId) {
 function getRealUrl(page, propId) {
   let wantUrl = getTextPlain(page, propId)
   let safeUrl = getSafeUrl(wantUrl)
-  let realUrl = (safeUrl.length > 0) ? `${safeUrl}.html` : `${page.id}.html`
+  let realUrl = (safeUrl.length > 0) ?
+    `${safeUrl}.html` : `${page.uri.split('/').pop().split('?')[0]}.html`
   return realUrl
 }
 

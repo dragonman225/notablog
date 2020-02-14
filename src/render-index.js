@@ -47,10 +47,8 @@ function renderIndex(task) {
     log.info(`Rendering tag: ${tagVal}`)
     const html = Sqrl.Render(templateProvider.get('tag'), {
       siteMeta,
-      tag: {
-        value: tagVal,
-        pageMetas
-      }
+      tagName: tagVal,
+      pages: pageMetas
     })
     fs.writeFileSync(`${outDir}/tag/${tagVal}.html`, html, { encoding: 'utf-8' })
   })
