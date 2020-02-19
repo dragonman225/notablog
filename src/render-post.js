@@ -1,12 +1,13 @@
 const fs = require('fs')
 const fsPromises = fs.promises
 const path = require('path')
-const { NotionAgent } = require('notionapi-agent')
+const { createAgent } = require('notionapi-agent')
 const { getOnePageAsTree } = require('nast-util-from-notionapi')
-const { renderToHTML } = require('nast-util-to-html')
+const { renderToHTML } = require('nast-util-to-react')
 const Sqrl = require('squirrelly')
 
 const { log, parseJSON } = require('./utils')
+const { toDashID } = require('./notion-utils')
 
 module.exports = {
   renderPost
@@ -47,7 +48,7 @@ async function renderPost(task) {
     const operations = task.operations
     const plugins = task.plugins
 
-    const pageID = post.id
+    const pageID = toDashID(post.uri.split('/').pop().split('?')[0])
     const cachePath = post.cachePath
 
     let nast, contentHTML
@@ -55,7 +56,7 @@ async function renderPost(task) {
     /** Fetch page. */
     if (operations.doFetchPage) {
       log.info(`Fetch page ${pageID}`)
-      nast = await getOnePageAsTree(pageID, new NotionAgent({ suppressWarning: true, verbose: false }))
+      nast = await getOnePageAsTree(pageID, createAgent())
       fs.writeFile(cachePath, JSON.stringify(nast), (err) => {
         if (err) console.error(err)
         else log.info(`Cache of ${pageID} is saved`)

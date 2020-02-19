@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { NotionAgent } = require('notionapi-agent')
+const { createAgent } = require('notionapi-agent')
 const TaskManager = require('@dnpr/task-manager')
 const { copyDirSync } = require('@dnpr/fsutil')
 
@@ -15,7 +15,7 @@ const configPath = path.join(workDir, 'config.json')
 const config = JSON.parse(fs.readFileSync(configPath, { encoding: 'utf-8' }))
 const url = config.url
 const theme = config.theme
-const apiAgent = new NotionAgent({ suppressWarning: true, verbose: false })
+const apiAgent = createAgent()
 
 const taskManagerOpts = {
   delay: 0,
@@ -88,7 +88,8 @@ async function main() {
     let postPublishedCount = siteMeta.pages.filter(page => page.publish).length
     let renderPostTasks = siteMeta.pages
       .map(post => {
-        let cacheFileName = post.id.replace(/\/|\\/g, '') + '.json'
+        console.log(post)
+        let cacheFileName = post.uri.split('/').pop().split('?')[0] + '.json'
         let cacheFilePath = path.join(cacheDir, cacheFileName)
 
         let postUpdated
