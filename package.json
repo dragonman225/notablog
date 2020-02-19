@@ -7,12 +7,8 @@
   "main": "src/index",
   "scripts": {
     "report:deps_graph": "npx depcruise --exclude '^node_modules' --output-type dot --prefix 'https://github.com/dragonman225/notablog/tree/master/' src/index.js | dot -T svg > assets/deps_graph.svg",
-<<<<<<< HEAD
-    "upgrade": "node tools/upgrade-deps.js"
-=======
     "release": "npm run report:deps_graph && npm publish",
     "release:beta": "npm run report:deps_graph && npm publish --tag beta"
->>>>>>> hot-new-backend-stack
   },
   "dependencies": {
     "@dnpr/fsutil": "0.1.3",
@@ -37,26 +33,11 @@
     "blog"
   ],
   "homepage": "https://github.com/dragonman225/notablog",
-<<<<<<< HEAD
-  "devDependencies": {
-    "dependency-cruiser": "5.2.2",
-    "eslint": "6.6.0"
-  },
-  "dependencies": {
-    "@dnpr/fsutil": "0.1.3",
-    "@dnpr/logger": "0.2.0",
-    "@dnpr/task-manager": "0.1.2",
-    "nast-util-from-notionapi": "0.7.0",
-    "nast-util-to-html": "0.2.7",
-    "notionapi-agent": "0.7.2",
-    "squirrelly": "7.7.0"
-=======
   "repository": {
     "type": "git",
     "url": "https://github.com/dragonman225/notablog.git"
   },
   "bugs": {
     "url": "https://github.com/dragonman225/notablog/issues"
->>>>>>> hot-new-backend-stack
   }
 }
