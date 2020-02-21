@@ -20,7 +20,6 @@ Here are some images of [my blog](https://dragonman225.js.org/), using [`notablo
 
 ## Table of Contents
 
-* [Announcement](#Announcement)
 * [Getting Started](#Getting-Started)
 * [Blog Management Interface](#Blog-Management-Interface)
 * [API Reference](#API-Reference)
@@ -28,39 +27,45 @@ Here are some images of [my blog](https://dragonman225.js.org/), using [`notablo
 
 
 
-## Announcement
-
-### [2019.09.02]
-
-BREAKING CHANGES of `v0.3.0` : If you want to upgrade from `v0.2.1` or lower, please delete old `notablog-starter` and go through [Getting Started](#Getting-Started) again since `notablog-starter` has a lot of changes.
-
-
-
 ## Getting Started
 
 > Make sure you have Node.js v12.0.0 or higher. Check with command `node -v`.
 
-1. Clone the [`notablog-starter`](https://github.com/dragonman225/notablog-starter) repository and install dependencies.
+1. Install Notablog.
    ```bash
-   git clone https://github.com/dragonman225/notablog-starter.git
-   cd notablog-starter && npm install
+   npm i -g notablog
    ```
 
-2. While it's installing, go to this [Notion table template](https://www.notion.so/b6fcf809ca5047b89f423948dce013a0?v=03ddc4d6130a47f8b68e74c9d0061de2) and duplicate it.
+2. Clone the [`notablog-starter`](https://github.com/dragonman225/notablog-starter) repository.
+   ```bash
+   git clone https://github.com/dragonman225/notablog-starter.git
+   ```
 
-3. Make the table you've duplicated **public** and **copy its URL** (for the next step).
+3. Duplicate this [Notion table template](https://www.notion.so/b6fcf809ca5047b89f423948dce013a0?v=03ddc4d6130a47f8b68e74c9d0061de2).
 
-4. Go back to `notablog-starter`, open `config.json`. Replace the value of `url` with the URL of the table you've duplicated (the one you copied in previous step).
+4. Make the table you've duplicated **public** and **copy its URL** for the next step.
 
-5. If `npm install` finishes, issue command `npm run generate`.
+5. Go into `notablog-starter/` directory, open `config.json`. Replace the value of `url` with the URL of the table you've duplicated.
 
-6. Go to `public` folder, open `index.html` in a browser to preview your blog.
+6. Inside `notablog-starter/` directory, issue command `notablog .`. Notablog will start generating your site.
 
-* Now, your blog is ready. You can edit something on Notion, then `npm run generate` again to update the generated blog.
+7. After it finishes, go to `public/` directory, open `index.html` with a browser to preview your site.
 
-* Next, you can upload the `public` folder to any **static hosting** service or your **own server** to share your blog globally.
+### Your site is ready now!
 
-* [Github Pages](https://pages.github.com/), [Netlify](https://www.netlify.com/), [surge.sh](https://surge.sh) are some choices for static hosting service. [nginx](https://www.nginx.com/), [lighttpd](https://www.lighttpd.net/), [Apache httpd](https://httpd.apache.org/) are some choices for self-hosted server.
+* You can copy files in  `public/` directory to your server or upload them to any static hosting service to share your content with the world.
+
+* Whenever you want to update your site, go into `notablog-starter/` directory and issue command `notablog .`, or issue the command from outside `notablog-starter/` with the pattern `notablog <path_to_the_notablog-starter>`.
+
+* Some options for static hosting services:
+  * [Github Pages](https://pages.github.com/)
+  * [Netlify](https://www.netlify.com/)
+  * [surge.sh](https://surge.sh)
+
+* Some options for self-hosting:
+  * [nginx](https://www.nginx.com/)
+  * [lighttpd](https://www.lighttpd.net/)
+  * [Apache httpd](https://httpd.apache.org/)
 
 
 
@@ -73,19 +78,19 @@ This is the documentation of [Notion table template](https://www.notion.so/b6fcf
 |    `title`    |    `Title`     |                       The page title.                        |
 |    `tags`     | `Multi-Select` |                 Topics related to the page.                  |
 |   `publish`   |   `Checkbox`   |           Determine if a page should be rendered.            |
-|   `inMenu`    |   `Checkbox`   |    Determine if a page should appear in the topbar menu.     |
-|   `inList`    |   `Checkbox`   |   Determine if a page should appear in the list of posts.    |
-|  `template`   |    `Select`    | Specify which template to use for the page. Available template names depend on which theme you use. |
+|   `inMenu`    |   `Checkbox`   |   Determine if a page should appear in the navigation bar.   |
+|   `inList`    |   `Checkbox`   |    Determine if a page should appear in the article list.    |
+|  `template`   |    `Select`    | Specify which template to use for the page. Available template names depend on the theme you use. |
 |     `url`     |     `Text`     | A string to be used as the filename and the URL of the generated page. It should not contain `/` and `\`. If it's empty, the `id` of the page is used. |
 | `description` |     `Text`     |         Short intro of the page. Styles are working.         |
 |    `date`     |     `Date`     | User customizable date, convenient for importing posts from other platforms or adjusting the order of posts. |
 
-* **Trick** : Check `publish` but leave `inMenu` and `inList` unchecked to create a *hidden* page which people can access only if knowing its URL.
+* **Hack**: Check `publish` but leave `inMenu` and `inList` unchecked to make a page seem like *hidden* because people can only view it when they know its URL.
 
 
 
 
-## API Reference
+## API Reference (Outdated)
 
 ### Introduction
 
