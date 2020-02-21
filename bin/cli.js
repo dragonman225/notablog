@@ -6,7 +6,7 @@ const { generate } = require('..')
 
 function printHelp() {
   console.log(`\
-Usage: notablog <path_to_a_notablog_starter>
+Usage: notablog <path_to_a_notablog-starter>
 
 Options:
   -v, --verbose  Print more messages for debugging.
