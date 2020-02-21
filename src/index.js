@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const { createAgent } = require('notionapi-agent')
-const TaskManager = require('@dnpr/task-manager')
+const { TaskManager2 } = require('@dnpr/task-manager')
 const { copyDirSync } = require('@dnpr/fsutil')
 
 const TemplateProvider = require('./template-provider')
@@ -10,125 +10,171 @@ const { renderIndex } = require('./render-index')
 const { renderPost } = require('./render-post')
 const { log } = require('./utils')
 
-const workDir = process.cwd()
-const configPath = path.join(workDir, 'config.json')
-const config = JSON.parse(fs.readFileSync(configPath, { encoding: 'utf-8' }))
-const url = config.url
-const theme = config.theme
-const apiAgent = createAgent()
+/**
+ * @typedef {Object} NotablogConfig
+ * @property {string} url - URL of a Notion table.
+ * @property {string} theme - Name of a theme.
+ */
 
-const taskManagerOpts = {
-  delay: 0,
-  delayJitterMax: 0,
-  parallelNum: 3,
-  debug: false
+/**
+ * Read and parse the JSON config file.
+ * @param {string} workDir - A valid Notablog starter directory.
+ * @returns {NotablogConfig}
+ */
+function getConfig(workDir) {
+  const cPath = path.join(workDir, 'config.json')
+  const cFile = fs.readFileSync(cPath, { encoding: 'utf-8' })
+  try {
+    const config = JSON.parse(cFile)
+    return config
+  } catch (error) {
+    console.error(error)
+    throw new Error(`Fail to parse config at ${cPath}`)
+  }
 }
 
 /**
- * Originally for internal use. Planned to deprecate.
+ * Check if a page is newer than its cached version.
+ * @param {string} uri 
+ * @param {number} lastEditedTime 
+ * @param {string} cacheDir 
  */
-const plugins = []
-
-main()
-
-async function main() {
-  try {
-
-    let startTime = Date.now()
-
-    /** Init dir paths. */
-    const cacheDir = path.join(workDir, 'source/notion_cache')
-    if (!fs.existsSync(cacheDir)) {
-      fs.mkdirSync(cacheDir, { recursive: true })
-    }
-
-    const themeDir = path.join(workDir, `themes/${theme}`)
-    if (!fs.existsSync(themeDir)) {
-      throw new Error(`Cannot find "${theme}" in themes/ folder`)
-    }
-
-    const outDir = path.join(workDir, 'public')
-    if (!fs.existsSync(outDir)) {
-      fs.mkdirSync(outDir, { recursive: true })
-    }
-
-    const tagDir = path.join(workDir, 'public/tag')
-    if (!fs.existsSync(tagDir)) {
-      fs.mkdirSync(tagDir, { recursive: true })
-    }
-
-    /** Copy theme assets. */
-    log.info('Copy theme assets')
-    let assetDir = path.join(themeDir, 'assets')
-    copyDirSync(assetDir, outDir)
-
-    /** Fetch Site Metadata. */
-    log.info('Fetch Site Metadata')
-    let siteMeta = await parseTable(url, apiAgent)
-
-    /** Create TemplateProvider instance */
-    let templateProvider = new TemplateProvider(themeDir)
-
-    let renderIndexTask = {
-      siteMeta,
-      templateProvider,
-      operations: {
-        enablePlugin: true
-      },
-      plugins
-    }
-
-    /** Render index. */
-    log.info('Render index')
-    renderIndex(renderIndexTask)
-
-    /** Generate blogpost-rendering tasks. */
-    let postTotalCount = siteMeta.pages.length
-    let postUpdatedCount = postTotalCount
-    let postPublishedCount = siteMeta.pages.filter(page => page.publish).length
-    let renderPostTasks = siteMeta.pages
-      .map(post => {
-        console.log(post)
-        let cacheFileName = post.uri.split('/').pop().split('?')[0] + '.json'
-        let cacheFilePath = path.join(cacheDir, cacheFileName)
-
-        let postUpdated
-        if (fs.existsSync(cacheFilePath)) {
-          let lastCacheTime = fs.statSync(cacheFilePath).mtimeMs
-          postUpdated = post.lastEditedTime > lastCacheTime
-          if (!postUpdated) postUpdatedCount -= 1
-        } else {
-          postUpdated = true
-        }
-
-        return {
-          siteMeta,
-          templateProvider,
-          post: {
-            ...post,
-            cachePath: cacheFilePath
-          },
-          operations: {
-            doFetchPage: postUpdated,
-            enablePlugin: true
-          },
-          plugins
-        }
-      })
-    log.info(`${postUpdatedCount} of ${postTotalCount} posts have been updated`)
-    log.info(`${postPublishedCount} of ${postTotalCount} posts are published`)
-
-    /** Fetch & render posts. */
-    log.info('Fetch and render published posts')
-    const tm = new TaskManager(renderPostTasks, renderPost, taskManagerOpts)
-    tm.start()
-    await tm.finish()
-
-    let endTime = Date.now()
-    let timeElapsed = (endTime - startTime) / 1000
-    log.info(`Build complete in ${timeElapsed}s. Open public/index.html to preview`)
-
-  } catch (error) {
-    console.error(error)
+function isPageUpdated(pageId, lastEditedTime, cacheDir) {
+  const cacheFileName = pageId + '.json'
+  const cacheFilePath = path.join(cacheDir, cacheFileName)
+  if (fs.existsSync(cacheFilePath)) {
+    const lastCacheTime = fs.statSync(cacheFilePath).mtimeMs
+    return lastEditedTime > lastCacheTime
+  } else {
+    return true
   }
 }
+
+/**
+ * @typedef {Object} GenerateOptions
+ * @property {string} workDir - A valid Notablog starter directory.
+ * @property {number} concurrency - Concurrency for Notion page 
+ * downloading and rendering.
+ * @property {boolean} verbose - Whether to print more messages for 
+ * debugging.
+ */
+
+/**
+ * Generate a blog.
+ * @param {GenerateOptions} opts 
+ */
+async function generate(opts = {}) {
+
+  const workDir = opts.workDir
+  const concurrency = opts.concurrency
+  const verbose = opts.verbose
+  const notion = createAgent({ debug: verbose })
+  const config = getConfig(workDir)
+
+  /** Init dir paths. */
+  const cacheDir = path.join(workDir, 'source/notion_cache')
+  if (!fs.existsSync(cacheDir)) {
+    fs.mkdirSync(cacheDir, { recursive: true })
+  }
+
+  const themeDir = path.join(workDir, `themes/${config.theme}`)
+  if (!fs.existsSync(themeDir)) {
+    throw new Error(`Cannot find "${config.theme}" in themes/ folder`)
+  }
+
+  const outDir = path.join(workDir, 'public')
+  if (!fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true })
+  }
+
+  const tagDir = path.join(workDir, 'public/tag')
+  if (!fs.existsSync(tagDir)) {
+    fs.mkdirSync(tagDir, { recursive: true })
+  }
+
+  const dirs = {
+    workDir, cacheDir, themeDir, outDir, tagDir
+  }
+
+  /** Create TemplateProvider instance. */
+  const templateProvider = new TemplateProvider(themeDir)
+
+  /** Copy theme assets. */
+  log.info('Copy theme assets')
+  const assetDir = path.join(themeDir, 'assets')
+  copyDirSync(assetDir, outDir)
+
+  /** Fetch site metadata. */
+  log.info('Fetch Site Metadata')
+  const siteMeta = await parseTable(config.url, notion)
+
+  /** Render site entry. */
+  log.info('Render site entry')
+  renderIndex({
+    data: {
+      siteMeta
+    },
+    tools: {
+      templateProvider
+    },
+    config: {
+      ...dirs
+    }
+  })
+
+  /** Render pages. */
+  log.info('Fetch and render pages')
+  const { pagesUpdated, pagesNotUpdated } = siteMeta.pages
+    .reduce((data, page) => {
+      if (isPageUpdated(page.id, page.lastEditedTime, cacheDir)) {
+        data.pagesUpdated.push(page)
+      } else {
+        data.pagesNotUpdated.push(page)
+      }
+      return data
+    }, {
+      pagesUpdated: [], pagesNotUpdated: []
+    })
+
+  const pageTotalCount = siteMeta.pages.length
+  const pageUpdatedCount = pagesUpdated.length
+  const pagePublishedCount = siteMeta.pages
+    .filter(page => page.publish).length
+  log.info(`${pageUpdatedCount} of ${pageTotalCount} posts have been updated`)
+  log.info(`${pagePublishedCount} of ${pageTotalCount} posts are published`)
+
+  const tm2 = new TaskManager2({ concurrency })
+  const tasks = []
+  pagesUpdated.forEach(page => {
+    tasks.push(tm2.queue(renderPost, [{
+      data: {
+        siteMeta, page
+      },
+      tools: {
+        templateProvider, notion
+      },
+      config: {
+        ...dirs,
+        doFetchPage: true
+      }
+    }]))
+  })
+  pagesNotUpdated.forEach(page => {
+    tasks.push(tm2.queue(renderPost, [{
+      data: {
+        siteMeta, page
+      },
+      tools: {
+        templateProvider, notion
+      },
+      config: {
+        ...dirs,
+        doFetchPage: false
+      }
+    }]))
+  })
+  await Promise.all(tasks)
+  return 0
+}
+
+module.exports = { generate }

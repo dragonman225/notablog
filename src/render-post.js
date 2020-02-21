@@ -1,7 +1,6 @@
 const fs = require('fs')
 const fsPromises = fs.promises
 const path = require('path')
-const { createAgent } = require('notionapi-agent')
 const { getOnePageAsTree } = require('nast-util-from-notionapi')
 const { renderToHTML } = require('nast-util-to-react')
 const Sqrl = require('squirrelly')
@@ -14,97 +13,60 @@ module.exports = {
 }
 
 /**
- * @typedef {Object} PostOperation
- * @property {boolean} doFetchPage
- * @property {boolean} enablePlugin
- */
-
-/**
- * @typedef {Object} NotablogPlugin
- * @property {string} name
- * @property {Function} func
- * @property {Object} options
- */
-
-/**
- * @typedef {Object} RenderPostTask
- * @property {SiteMetadata} siteMeta
- * @property {Object} post - ...PageMetadata + cachePath
- * @property {PostOperation} operations
- * @property {NotablogPlugin[]} plugins
- */
-
-/**
  * Render a post.
  * @param {RenderPostTask} task
- * // TODO: May be attach a CacheProvider instance in task to handle cache 
- * lookup and update operations. Index doesn't go through this pipeline.
  */
 async function renderPost(task) {
-  if (task != null) {
-    const siteMeta = task.siteMeta
-    const templateProvider = task.templateProvider
-    const post = task.post
-    const operations = task.operations
-    const plugins = task.plugins
 
-    const pageID = toDashID(post.uri.split('/').pop().split('?')[0])
-    const cachePath = post.cachePath
+  const siteMeta = task.data.siteMeta
+  const templateProvider = task.tools.templateProvider
+  const notion = task.tools.notion
+  const page = task.data.page
+  const config = task.config
 
-    let nast, contentHTML
+  const pageID = toDashID(page.id)
+  const cacheFileName = page.id + '.json'
+  const cacheFilePath = path.join(config.cacheDir, cacheFileName)
 
-    /** Fetch page. */
-    if (operations.doFetchPage) {
-      log.info(`Fetch page ${pageID}`)
-      nast = await getOnePageAsTree(pageID, createAgent())
-      fs.writeFile(cachePath, JSON.stringify(nast), (err) => {
-        if (err) console.error(err)
-        else log.info(`Cache of ${pageID} is saved`)
-      })
-    } else {
-      log.info(`Read page cache ${pageID}`)
-      let cache = await fsPromises.readFile(cachePath, { encoding: 'utf-8' })
-      let _nast = parseJSON(cache)
-      if (_nast != null) nast = _nast
-      else throw new Error(`Cache of ${pageID} is corrupted, delete source/notion_cache to rebuild`)
-    }
+  let nast, contentHTML
 
-    /** Run `beforeRender` plugins. */
-    log.info(`Run beforeRender plugins on ${pageID}`)
-    if (operations.enablePlugin) {
-      plugins.forEach(plugin => {
-        if (typeof plugin.func === 'function')
-          plugin.func.call({
-            pageType: 'post',
-            context: {
-              siteMeta, post
-            },
-            options: plugin.options
-          })
-        else
-          log.warn(`Plugin ${plugin.name} is in wrong format, skipped`)
-      })
-    }
-
-    /** Render with template. */
-    if (post.publish) {
-      log.info(`Render page ${pageID}`)
-      contentHTML = renderToHTML(nast, { contentOnly: true })
-      const workDir = process.cwd()
-      const outDir = path.join(workDir, 'public')
-      const postPath = path.join(outDir, post.url)
-
-      Sqrl.autoEscaping(false)
-      const html = Sqrl.Render(templateProvider.get(post.template), {
-        siteMeta,
-        post: {
-          ...post,
-          contentHTML
-        }
-      })
-      await fsPromises.writeFile(postPath, html, { encoding: 'utf-8' })
-    } else {
-      log.info(`Skip rendering of unpublished page ${pageID}`)
-    }
+  /** Fetch page. */
+  if (config.doFetchPage) {
+    log.info(`Fetch data of page "${pageID}"`)
+    nast = await getOnePageAsTree(pageID, notion)
+    fs.writeFile(cacheFilePath, JSON.stringify(nast), (err) => {
+      if (err) console.error(err)
+      else log.info(`Cache of "${pageID}" is saved`)
+    })
+  } else {
+    log.info(`Read cache of page "${pageID}"`)
+    let cache = await fsPromises.readFile(cacheFilePath, { encoding: 'utf-8' })
+    let _nast = parseJSON(cache)
+    if (_nast != null) nast = _nast
+    else throw new Error(`\
+Cache of page "${pageID}" is corrupted, delete source/notion_cache to rebuild`)
   }
+
+  /** Render with template. */
+  if (page.publish) {
+    log.info(`Render page "${pageID}"`)
+    contentHTML = renderToHTML(nast, { contentOnly: true })
+    const outDir = config.outDir
+    const postPath = path.join(outDir, page.url)
+
+    Sqrl.autoEscaping(false)
+    const html = Sqrl.Render(templateProvider.get(page.template), {
+      siteMeta,
+      post: {
+        ...page,
+        contentHTML
+      }
+    })
+    await fsPromises.writeFile(postPath, html, { encoding: 'utf-8' })
+    return 0
+  } else {
+    log.info(`Skip rendering of unpublished page "${pageID}"`)
+    return 1
+  }
+
 }

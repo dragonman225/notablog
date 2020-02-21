@@ -95,7 +95,7 @@ column with id "${propertyId}" is used`)
   let pagesConverted = pagesValid
     .map(row => {
       return {
-        uri: row.uri,
+        id: row.uri.split('/').pop().split('?')[0],
         icon: row.icon,
         iconHTML: renderIconToHTML(row.icon),
         cover: row.cover,

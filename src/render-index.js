@@ -9,47 +9,28 @@ module.exports = {
 }
 
 function renderIndex(task) {
-  const siteMeta = task.siteMeta
-  const templateProvider = task.templateProvider
-  const operations = task.operations
-  const plugins = task.plugins
+  const siteMeta = task.data.siteMeta
+  const templateProvider = task.tools.templateProvider
+  const config = task.config
 
-  /** Run `beforeRender` plugins. */
-  log.info('Run beforeRender plugins on index')
-  if (operations.enablePlugin) {
-    plugins.forEach(plugin => {
-      if (typeof plugin.func === 'function')
-        plugin.func.call({
-          pageType: 'index',
-          context: {
-            siteMeta
-          },
-          options: plugin.options
-        })
-      else
-        log.warn(`Plugin ${plugin.name} is in wrong format, skipped`)
-    })
-  }
-
-  const workDir = process.cwd()
-  const outDir = path.join(workDir, 'public')
+  const outDir = config.outDir
   const indexPath = path.join(outDir, 'index.html')
 
   Sqrl.autoEscaping(false)
 
-  log.info('Rendering home page')
+  log.info('Render home page')
   const html = Sqrl.Render(templateProvider.get('index'), {
     siteMeta
   })
   fs.writeFileSync(indexPath, html, { encoding: 'utf-8' })
 
   siteMeta.tagMap.forEach((pageMetas, tagVal) => {
-    log.info(`Rendering tag: ${tagVal}`)
+    log.info(`Render tag "${tagVal}"`)
     const html = Sqrl.Render(templateProvider.get('tag'), {
       siteMeta,
       tagName: tagVal,
       pages: pageMetas
     })
-    fs.writeFileSync(`${outDir}/tag/${tagVal}.html`, html, { encoding: 'utf-8' })
+    fs.writeFileSync(`${config.tagDir}/${tagVal}.html`, html, { encoding: 'utf-8' })
   })
 }
