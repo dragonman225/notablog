@@ -22,7 +22,7 @@ function preview(workDir) {
   if (c.previewBrowser) {
     open(c.previewBrowser, path.join(outDir(workDir), 'index.html'))
   } else {
-    throw new Error('"browser" property is not set in config.')
+    throw new Error('"previewBrowser" property is not set in your Notablog config file.')
   }
 }
 
