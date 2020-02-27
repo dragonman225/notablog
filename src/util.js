@@ -27,7 +27,7 @@ function parseJSON(str) {
  * @typedef {Object} NotablogConfig
  * @property {string} url - URL of a Notion table.
  * @property {string} theme - Name of a theme.
- * @property {string} browser - Path to a browser executable.
+ * @property {string} previewBrowser - Path to a browser executable.
  */
 
 /**

@@ -19,8 +19,8 @@ function open(bin, index) {
  */
 function preview(workDir) {
   const c = getConfig(workDir)
-  if (c.browser) {
-    open(c.browser, path.join(outDir(workDir), 'index.html'))
+  if (c.previewBrowser) {
+    open(c.previewBrowser, path.join(outDir(workDir), 'index.html'))
   } else {
     throw new Error('"browser" property is not set in config.')
   }
