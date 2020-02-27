@@ -5,7 +5,7 @@ const { getOnePageAsTree } = require('nast-util-from-notionapi')
 const { renderToHTML } = require('nast-util-to-react')
 const Sqrl = require('squirrelly')
 
-const { log, parseJSON } = require('./utils')
+const { log, parseJSON } = require('./util')
 const { toDashID } = require('./notion-utils')
 
 module.exports = {

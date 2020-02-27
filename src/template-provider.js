@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-const { log } = require('./utils')
+const { log } = require('./util')
 
 class TemplateProvider {
 

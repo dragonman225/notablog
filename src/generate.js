@@ -8,30 +8,7 @@ const TemplateProvider = require('./template-provider')
 const { parseTable } = require('./parse-table')
 const { renderIndex } = require('./render-index')
 const { renderPost } = require('./render-post')
-const { log } = require('./utils')
-
-/**
- * @typedef {Object} NotablogConfig
- * @property {string} url - URL of a Notion table.
- * @property {string} theme - Name of a theme.
- */
-
-/**
- * Read and parse the JSON config file.
- * @param {string} workDir - A valid Notablog starter directory.
- * @returns {NotablogConfig}
- */
-function getConfig(workDir) {
-  const cPath = path.join(workDir, 'config.json')
-  const cFile = fs.readFileSync(cPath, { encoding: 'utf-8' })
-  try {
-    const config = JSON.parse(cFile)
-    return config
-  } catch (error) {
-    console.error(error)
-    throw new Error(`Fail to parse config at ${cPath}`)
-  }
-}
+const { log, getConfig } = require('./util')
 
 /**
  * Check if a page is newer than its cached version.

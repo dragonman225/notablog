@@ -2,7 +2,7 @@ const { getOnePageAsTree } = require('nast-util-from-notionapi')
 const { renderToHTML } = require('nast-util-to-react')
 
 const { getPageIDFromNotionDatabaseURL } = require('./notion-utils')
-const { log } = require('./utils')
+const { log } = require('./util')
 
 module.exports = {
   parseTable
