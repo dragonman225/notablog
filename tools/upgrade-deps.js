@@ -14,11 +14,10 @@ const deps = Object.keys(manifest.dependencies
 const devDepsLatest = devDeps.map(d => `${d}@latest`)
 const depsLatest = deps.map(d => `${d}@latest`)
 
-const bin = 'pnpm'
-let args = ['i']
+const bin = 'yarn'
+let args = ['upgrade']
 args = args.concat(devDepsLatest)
 args = args.concat(depsLatest)
-args = args.concat(['--save-exact'])
 
 const upgrade = spawn(bin, args)
 
