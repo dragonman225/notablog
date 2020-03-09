@@ -42,6 +42,12 @@ Here are some images of [my blog](https://dragonman225.js.org/), using [`notablo
    ```bash
    git clone https://github.com/dragonman225/notablog-starter.git
    ```
+   
+   * Why `-b develop`?
+   
+     Notion modified their API recently, and that made newly created/duplicated tables incompatible with Notablog v0.3.11, which will throw an error `TypeError: Cannot read property 'aggregate' of undefined` (like [this](https://github.com/dragonman225/notablog-starter/issues/1) and [this](https://github.com/dragonman225/notablog/issues/4)) in step 5. `-b develop` tells git to switch to `notablog-starter`'s `develop` branch, which uses a beta version of Notablog where the bug is fixed.
+     
+     The beta version works the same as the old one, even some features are improved (e.g. support more blocks, blocks look better, ...), so it is quite capable for daily use in spite of its name.
 
 3. Duplicate this [Notion table template](https://www.notion.so/b6fcf809ca5047b89f423948dce013a0?v=03ddc4d6130a47f8b68e74c9d0061de2).
 
