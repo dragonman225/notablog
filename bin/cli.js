@@ -2,8 +2,7 @@
 
 const { parseArgs, parseFlagVal } = require('@dnpr/cli')
 const { Logger } = require('@dnpr/logger')
-const { generate } = require('../src/generate')
-const { preview } = require('../src/preview')
+const { generate, preview } = require('..')
 
 function printHelp() {
   console.log(`\
