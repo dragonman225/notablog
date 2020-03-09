@@ -1,31 +1,33 @@
 {
   "name": "notablog",
-  "version": "1.0.0-beta.1",
+  "version": "0.4.0",
   "description": "Generate a minimalistic blog from a Notion.so table.",
   "author": "dragonman225",
   "license": "MIT",
-  "main": "src/index",
+  "main": "src/index.js",
   "bin": {
     "notablog": "bin/cli.js"
   },
   "scripts": {
-    "report:deps_graph": "npx depcruise --exclude '^node_modules' --output-type dot --prefix 'https://github.com/dragonman225/notablog/tree/master/' src/index.js | dot -T svg > assets/deps_graph.svg",
-    "release": "npm run report:deps_graph && npm publish",
-    "release:beta": "npm run report:deps_graph && npm publish --tag beta"
+    "build": "npm run build:dependency-graph",
+    "build:dependency-graph": "npx depcruise --exclude '^node_modules' --output-type dot --prefix 'https://github.com/dragonman225/notablog/tree/master/' src/index.js | dot -T svg > assets/deps_graph.svg",
+    "release": "npm run build && npm publish",
+    "release:beta": "npm run build && npm publish --tag beta",
+    "upgrade": "node tools/upgrade-deps.js"
   },
   "dependencies": {
     "@dnpr/cli": "^1.0.0",
-    "@dnpr/fsutil": "0.1.3",
+    "@dnpr/fsutil": "^0.1.3",
     "@dnpr/logger": "^0.2.0",
-    "@dnpr/task-manager": "1.0.0",
-    "nast-util-from-notionapi": "1.0.0-beta.1",
-    "nast-util-to-react": "1.0.0-beta.5",
-    "notionapi-agent": "1.1.3",
-    "squirrelly": "7.7.0"
+    "@dnpr/task-manager": "^1.0.0",
+    "nast-util-from-notionapi": "^1.0.0",
+    "nast-util-to-react": "^1.0.0",
+    "notionapi-agent": "^1.2.0",
+    "squirrelly": "^7.9.2"
   },
   "devDependencies": {
-    "dependency-cruiser": "5.2.0",
-    "eslint": "6.5.1"
+    "dependency-cruiser": "^8.0.1",
+    "eslint": "^6.8.0"
   },
   "files": [
     "src/",

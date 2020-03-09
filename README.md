@@ -31,6 +31,8 @@ Here are some images of [my blog](https://dragonman225.js.org/), using [`notablo
 
 > Make sure you have Node.js v12.0.0 or higher. Check with command `node -v`.
 
+> For existing users who want to upgrade from v0.3.x, please go through all below steps (do a clean install), except that you can continue to use your Notion table.
+
 1. Install Notablog.
    ```bash
    npm i -g notablog
@@ -47,21 +49,27 @@ Here are some images of [my blog](https://dragonman225.js.org/), using [`notablo
 
 5. Go into `notablog-starter/` directory, open `config.json`. Replace the value of `url` with the URL of the table you've duplicated.
 
-6. Inside `notablog-starter/` directory, issue command `notablog .`. Notablog will start generating your site.
+6. Inside `notablog-starter/` directory, run command:
 
-7. After it finishes, go to `public/` directory, open `index.html` with a browser to preview your site.
+   ```bash
+   notablog generate .
+   ```
+
+7. After it finishes, go to `notablog-starter/public/` directory, open `index.html` with a browser to preview your site. Or, you can change `previewBrowser` field in `config.json` to the path of a browser you use and run  command:
+
+   ```bash
+   notablog preview .
+   ```
 
 ### Your site is ready now!
 
-* You can copy files in  `public/` directory to your server or upload them to any static hosting service to share your content with the world.
-
-* Whenever you want to update your site, go into `notablog-starter/` directory and issue command `notablog .`, or issue the command from outside `notablog-starter/` with the pattern `notablog <path_to_the_notablog-starter>`.
+* You can copy files in  `notablog-starter/public/` directory to your server or upload them to any static hosting service to share your content with the world.
+* Whenever you want to update your site, go into `notablog-starter/` directory and issue command `notablog generate .`, or issue the command from outside `notablog-starter/` with the pattern `notablog generate <path_to_the_notablog-starter>`.
 
 * Some options for static hosting services:
   * [Github Pages](https://pages.github.com/)
   * [Netlify](https://www.netlify.com/)
   * [surge.sh](https://surge.sh)
-
 * Some options for self-hosting:
   * [nginx](https://www.nginx.com/)
   * [lighttpd](https://www.lighttpd.net/)
