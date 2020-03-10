@@ -1,9 +1,13 @@
-const path = require('path')
-const fs = require('fs')
+import path from 'path'
+import fs from 'fs'
 
-const { log } = require('./util')
+import { log } from './util'
 
-class TemplateProvider {
+export class TemplateProvider {
+  private templateDir: string
+  private templateMap: {
+    [key: string]: string
+  }
 
   /**
    * @param {string} themeDir 
@@ -36,7 +40,7 @@ class TemplateProvider {
    * If loading failed, return an error message string.
    * @param {string} templateName 
    */
-  _load(templateName) {
+  private _load(templateName) {
     log.debug(`Load template "${templateName}"`)
     let templatePath = path.join(this.templateDir, `${templateName}.html`)
     try {
@@ -52,5 +56,3 @@ class TemplateProvider {
     }
   }
 }
-
-module.exports = TemplateProvider

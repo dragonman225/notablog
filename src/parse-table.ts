@@ -1,21 +1,14 @@
-const { getOnePageAsTree } = require('nast-util-from-notionapi')
-const { renderToHTML } = require('nast-util-to-react')
-
-const { getPageIDFromNotionDatabaseURL } = require('./notion-utils')
-const { log } = require('./util')
-
-module.exports = {
-  parseTable
-}
+import { getOnePageAsTree } from 'nast-util-from-notionapi'
+import { renderToHTML } from 'nast-util-to-react'
+import { getPageIDFromCollectionPageURL } from './notion-utils'
+import { log } from './util'
 
 /**
  * Extract interested data for blog generation from a Notion table.
- * @param {string} notionDatabaseURL 
- * @param {NotionAgent} notionAgent 
  */
-async function parseTable(notionDatabaseURL, notionAgent) {
-  let pageID = getPageIDFromNotionDatabaseURL(notionDatabaseURL)
-  let pageCollection = (await getOnePageAsTree(pageID, notionAgent))
+export async function parseTable(collectionPageURL, notionAgent) {
+  let pageID = getPageIDFromCollectionPageURL(collectionPageURL)
+  let pageCollection = (await getOnePageAsTree(pageID, notionAgent)) as NAST.CollectionPage
 
   /**
    * Create map for property_name -> property_id.
@@ -51,8 +44,8 @@ column with id "${propertyId}" is used`)
    * Create map for tag -> color
    */
   let tagColorMap = {}
-  let classPrefix = ''
-  pageCollection.schema[schemaMap['tags']].options.forEach(tag => {
+  let classPrefix = '';
+  (pageCollection.schema[schemaMap['tags']].options || []).forEach(tag => {
     tagColorMap[tag.value] = `${classPrefix}${tag.color}`
   })
 
@@ -60,42 +53,11 @@ column with id "${propertyId}" is used`)
   let pagesValid = pageCollection.children
     .filter(page => page.properties)
 
-  /**
-   * Select Option
-   * @typedef {Object} SelectOption
-   * @property {string} value 
-   * @property {string} color
-   */
-  /**
-   * Metadata of a page
-   * @typedef {Object} PageMetadata
-   * @property {string} id
-   * @property {string} icon
-   * @property {string} iconHTML
-   * @property {string} cover
-   * @property {string} title
-   * @property {SelectOption[]} tags
-   * @property {boolean} publish
-   * @property {boolean} inMenu
-   * @property {boolean} inList
-   * @property {string} template
-   * @property {string} url
-   * @property {Notion.StyledString[]} description
-   * @property {string} descriptionPlain
-   * @property {string} descriptionHTML
-   * @property {string} date
-   * @property {string} dateString
-   * @property {number} createdTime
-   * @property {number} lastEditedTime
-   */
 
-  /**
-   * @type {PageMetadata[]}
-   */
   let pagesConverted = pagesValid
     .map(row => {
       return {
-        id: row.uri.split('/').pop().split('?')[0],
+        id: (row.uri.split('/').pop() || "").split('?')[0],
         icon: row.icon,
         iconHTML: renderIconToHTML(row.icon),
         cover: row.cover,
@@ -121,22 +83,6 @@ column with id "${propertyId}" is used`)
       }
     })
 
-  /**
-   * The site metadata
-   * @typedef {Object} SiteMetadata
-   * @property {string} icon
-   * @property {string} iconHTML
-   * @property {string} cover
-   * @property {string} title
-   * @property {Notion.StyledString[]} description
-   * @property {string} descriptionPlain
-   * @property {string} descriptionHTML
-   * @property {PageMetadata[]} pages
-   * @property {Map<string, PageMetadata[]>} tagMap
-   */
-  /**
-   * @type {SiteMetadata}
-   */
   let siteMeta = {
     icon: pageCollection.icon,
     iconHTML: renderIconToHTML(pageCollection.icon),

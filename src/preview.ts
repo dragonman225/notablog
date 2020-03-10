@@ -1,6 +1,6 @@
-const path = require('path')
-const { spawn } = require('child_process')
-const { getConfig, outDir } = require('./util')
+import path from 'path'
+import { spawn } from 'child_process'
+import { getConfig, outDir } from './util'
 
 /**
  * Open `index` with `bin`.
@@ -17,7 +17,7 @@ function open(bin, index) {
  * Preview the generate blog.
  * @param {string} workDir 
  */
-function preview(workDir) {
+export function preview(workDir) {
   const c = getConfig(workDir)
   if (c.previewBrowser) {
     open(c.previewBrowser, path.join(outDir(workDir), 'index.html'))
@@ -25,5 +25,3 @@ function preview(workDir) {
     throw new Error('"previewBrowser" property is not set in your Notablog config file.')
   }
 }
-
-module.exports = { preview }

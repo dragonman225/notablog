@@ -25,7 +25,7 @@ async function cmdGenerate(opts, logger) {
 
   try {
     const startTime = Date.now()
-    await generate(opts)
+    await generate(opts.workDir, opts)
     const endTime = Date.now()
     const timeElapsed = (endTime - startTime) / 1000
     logger.info(`\

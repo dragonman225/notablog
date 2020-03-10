@@ -1,14 +1,10 @@
-const fs = require('fs')
-const path = require('path')
-const Sqrl = require('squirrelly')
+import fs from 'fs'
+import path from 'path'
+import Sqrl from 'squirrelly'
 
-const { log } = require('./util')
+import { log } from './util'
 
-module.exports = {
-  renderIndex
-}
-
-function renderIndex(task) {
+export function renderIndex(task) {
   const siteMeta = task.data.siteMeta
   const templateProvider = task.tools.templateProvider
   const config = task.config

@@ -1,22 +1,18 @@
-const fs = require('fs')
-const fsPromises = fs.promises
-const path = require('path')
-const { getOnePageAsTree } = require('nast-util-from-notionapi')
-const { renderToHTML } = require('nast-util-to-react')
-const Sqrl = require('squirrelly')
+import fs from 'fs'
+import fsPromises = fs.promises
+import path from 'path'
+import { getOnePageAsTree } from 'nast-util-from-notionapi'
+import { renderToHTML } from 'nast-util-to-react'
+import Sqrl from 'squirrelly'
 
-const { log, parseJSON } = require('./util')
-const { toDashID } = require('./notion-utils')
-
-module.exports = {
-  renderPost
-}
+import { log, parseJSON } from './util'
+import { toDashID } from './notion-utils'
 
 /**
  * Render a post.
  * @param {RenderPostTask} task
  */
-async function renderPost(task) {
+export async function renderPost(task) {
 
   const siteMeta = task.data.siteMeta
   const templateProvider = task.tools.templateProvider
@@ -50,7 +46,7 @@ Cache of page "${pageID}" is corrupted, delete source/notion_cache to rebuild`)
   /** Render with template. */
   if (page.publish) {
     log.info(`Render page "${pageID}"`)
-    contentHTML = renderToHTML(nast, { contentOnly: true })
+    contentHTML = renderToHTML(nast)
     const outDir = config.outDir
     const postPath = path.join(outDir, page.url)
 

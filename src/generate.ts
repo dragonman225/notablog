@@ -1,14 +1,18 @@
-const fs = require('fs')
-const path = require('path')
-const { createAgent } = require('notionapi-agent')
-const { TaskManager2 } = require('@dnpr/task-manager')
-const { copyDirSync } = require('@dnpr/fsutil')
+import fs from 'fs'
+import path from 'path'
+import { createAgent } from 'notionapi-agent'
+import { TaskManager2 } from '@dnpr/task-manager'
+import { copyDirSync } from '@dnpr/fsutil'
+import { TemplateProvider } from './template-provider'
+import { parseTable } from './parse-table'
+import { renderIndex } from './render-index'
+import { renderPost } from './render-post'
+import { log, getConfig } from './util'
 
-const TemplateProvider = require('./template-provider')
-const { parseTable } = require('./parse-table')
-const { renderIndex } = require('./render-index')
-const { renderPost } = require('./render-post')
-const { log, getConfig } = require('./util')
+type GenerateOptions = {
+  concurrency?: number
+  verbose?: boolean
+}
 
 /**
  * Check if a page is newer than its cached version.
@@ -38,11 +42,8 @@ function isPageUpdated(pageId, lastEditedTime, cacheDir) {
 
 /**
  * Generate a blog.
- * @param {GenerateOptions} opts 
  */
-async function generate(opts = {}) {
-
-  const workDir = opts.workDir
+export async function generate(workDir: string, opts: GenerateOptions = {}) {
   const concurrency = opts.concurrency
   const verbose = opts.verbose
   const notion = createAgent({ debug: verbose })
@@ -111,6 +112,9 @@ async function generate(opts = {}) {
       return data
     }, {
       pagesUpdated: [], pagesNotUpdated: []
+    } as {
+      pagesUpdated: typeof siteMeta.pages,
+      pagesNotUpdated: typeof siteMeta.pages
     })
 
   const pageTotalCount = siteMeta.pages.length
@@ -134,7 +138,7 @@ async function generate(opts = {}) {
         ...dirs,
         doFetchPage: true
       }
-    }]))
+    }]) as never)
   })
   pagesNotUpdated.forEach(page => {
     tasks.push(tm2.queue(renderPost, [{
@@ -148,10 +152,8 @@ async function generate(opts = {}) {
         ...dirs,
         doFetchPage: false
       }
-    }]))
+    }]) as never)
   })
   await Promise.all(tasks)
   return 0
 }
-
-module.exports = { generate }

@@ -1,11 +1,11 @@
-const fs = require('fs')
-const path = require('path')
-const { Logger } = require('@dnpr/logger')
+import fs from 'fs'
+import path from 'path'
+import { Logger } from '@dnpr/logger'
 
 /**
  * Wrapper of console.log().
  */
-const log = new Logger('notablog', {
+export const log = new Logger('notablog', {
   logLevel: typeof process.env.DEBUG_EN !== 'undefined' ? 'debug' : 'info',
   useColor: typeof process.env.NO_COLOR !== 'undefined' ? false : true
 })
@@ -15,7 +15,7 @@ const log = new Logger('notablog', {
  * @param {*} str - Payload to parse.
  * @returns {Object} Parsed object when success, undefined when fail.
  */
-function parseJSON(str) {
+export function parseJSON(str) {
   try {
     return JSON.parse(str)
   } catch (error) {
@@ -35,7 +35,7 @@ function parseJSON(str) {
  * @param {string} workDir - A valid Notablog starter directory.
  * @returns {NotablogConfig}
  */
-function getConfig(workDir) {
+export function getConfig(workDir) {
   const cPath = path.join(workDir, 'config.json')
   const cFile = fs.readFileSync(cPath, { encoding: 'utf-8' })
   try {
@@ -52,12 +52,10 @@ function getConfig(workDir) {
  * @param {string} workDir
  * @returns {string} 
  */
-function outDir(workDir) {
+export function outDir(workDir) {
   const outDir = path.join(workDir, 'public')
   if (!fs.existsSync(outDir)) {
     fs.mkdirSync(outDir, { recursive: true })
   }
   return outDir
 }
-
-module.exports = { log, parseJSON, getConfig, outDir }
