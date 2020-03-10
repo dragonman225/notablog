@@ -9,8 +9,11 @@
     "notablog": "bin/cli.js"
   },
   "scripts": {
-    "build": "npm run build:dependency-graph",
+    "build": "npm run build:module && npm run build:doc",
+    "build:module": "rm -rf dist && rollup -c && tsc --emitDeclarationOnly",
+    "build:doc": "npm run build:dependency-graph",
     "build:dependency-graph": "npx depcruise --exclude '^node_modules' --output-type dot --prefix 'https://github.com/dragonman225/notablog/tree/master/' src/index.js | dot -T svg > assets/deps_graph.svg",
+    "test": "ts-node test/index.spec.ts",
     "release": "npm run build && npm publish",
     "release:beta": "npm run build && npm publish --tag beta",
     "upgrade": "node tools/upgrade-deps.js"
@@ -26,11 +29,20 @@
     "squirrelly": "^7.9.2"
   },
   "devDependencies": {
+    "@rollup/plugin-typescript": "^4.0.0",
+    "@types/node": "^13.9.0",
+    "@typescript-eslint/eslint-plugin": "^2.23.0",
+    "@typescript-eslint/parser": "^2.23.0",
     "dependency-cruiser": "^8.0.1",
-    "eslint": "^6.8.0"
+    "eslint": "^6.8.0",
+    "nast-types": "^1.0.0",
+    "rollup": "^2.0.2",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.3",
+    "zora": "^3.1.8"
   },
   "files": [
-    "src/",
+    "dist/",
     "assets/"
   ],
   "keywords": [
