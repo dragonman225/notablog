@@ -59,3 +59,14 @@ export function outDir(workDir) {
   }
   return outDir
 }
+
+export function numToOrder(n: number) {
+  switch (n) {
+    case 1:
+      return "1st"
+    case 2:
+      return "2nd"
+    default:
+      return `${n}th`
+  }
+}
