@@ -14,5 +14,5 @@ export default {
     }
   ],
   plugins: [typescript()],
-  external: [...Object.keys(pkg.dependencies), "fs", "path", "child_process"]
+  external: [...Object.keys(pkg.dependencies), "crypto", "fs", "path", "child_process"]
 }
