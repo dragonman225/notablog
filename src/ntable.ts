@@ -1,4 +1,5 @@
 import { getPageIDFromPageURL } from './notion-utils'
+import { objAccess } from './util'
 
 type SelectOption = {
   id: string
@@ -182,18 +183,14 @@ class NDateTimeCell extends NCell {
   constructor(property: NDateTimeProperty, record: NRecord,
     rawValue: NAST.SemanticString[]) {
     super(property, record)
-    try {
-      /**
-       * rawValue
-       * [0]: SemanticString
-       * [0][1]: FormattingAll[]
-       * [0][1][0]: FormattingMentionDate
-       * [0][1][0][1]: DateTime
-       */
-      this.value = arrayAccessMayFail(rawValue)(0)(1)(0)(1)()
-    } catch (error) {
-      this.value = undefined
-    }
+    /**
+     * rawValue
+     * [0]: SemanticString
+     * [0][1]: FormattingAll[]
+     * [0][1][0]: FormattingMentionDate
+     * [0][1][0][1]: DateTime
+     */
+    this.value = objAccess(rawValue)(0)(1)(0)(1)()
   }
 }
 
@@ -298,21 +295,5 @@ function createNCell(
       return new NDateTimeCell(property, record, rawValue)
     default:
       return new NTextCell(property, record, rawValue)
-  }
-}
-
-function arrayAccessMayFail(arrayLike) {
-  return function (i) {
-    /** Call with no parameter to signal the end of the access chain. */
-    if (typeof i === 'undefined') {
-      return arrayLike
-    }
-    /** Access the array. */
-    if (Array.isArray(arrayLike)) {
-      return arrayAccessMayFail(arrayLike[i])
-    } else {
-      /** Throw when you want to access the array but no way to do. */
-      throw new Error(arrayLike)
-    }
   }
 }

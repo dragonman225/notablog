@@ -23,7 +23,7 @@ async function main() {
     console.dir(table.recordsGroupByProperty("template"), { depth: 2 })
     console.dir(table2.schema, { depth: 2 })
     table2.records.forEach(record => {
-      console.dir((record.properties.get(table2.schema[7]) || {}).value)
+      console.dir((record.properties.get(table2.schema[8]) || {}).value)
     })
     table2.peekStructure()
   } catch (error) {
