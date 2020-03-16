@@ -21,7 +21,7 @@ async function main() {
     console.dir(table.recordsGroupByProperty("title"), { depth: 2 })
     console.dir(table.recordsGroupByProperty("publish"), { depth: 2 })
     console.dir(table.recordsGroupByProperty("template"), { depth: 2 })
-    console.dir(table2.id, { depth: 2 })
+    console.dir(table2.schema, { depth: 2 })
     console.dir(table2.records[0].properties.get(table2.schema[0]), { depth: 2 })
     table2.peekStructure()
   } catch (error) {

@@ -1,59 +1,4 @@
-import { getPageIDFromPageURL } from "./notion-utils"
-
-interface IProperty {
-  id: string
-  type: string
-  records: Map<IRecord, ICell>
-}
-
-interface IRecord {
-  id: string
-  properties: Map<IProperty, ICell>
-}
-
-interface ICell {
-  property: IProperty
-  record: IRecord
-  value: any
-}
-
-interface ITable {
-  id: string
-  schema: IProperty[]
-  records: IRecord[]
-}
-
-class NTextProperty implements IProperty {
-  id: string
-  type: "text"
-  records: Map<NPageRecord, NCell>
-
-  /** Extended properties. */
-  name: string
-
-  constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
-    this.id = id
-    this.name = rawProperty.name
-    this.type = "text"
-    this.records = new Map()
-  }
-}
-
-class NCheckboxProperty implements IProperty {
-  id: string
-  type: "checkbox"
-  records: Map<NPageRecord, NCell>
-
-  /** Extended properties. */
-  name: string
-
-  constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
-    this.id = id
-    this.name = rawProperty.name
-    this.type = "checkbox"
-    this.records = new Map()
-  }
-}
+import { getPageIDFromPageURL } from './notion-utils'
 
 type SelectOption = {
   id: string
@@ -61,31 +6,91 @@ type SelectOption = {
   value: string
 }
 
-class NSelectProperty implements IProperty {
+interface Property {
   id: string
-  type: "select"
-  records: Map<NPageRecord, NCell>
+  type: string
+  records: Map<Record, Cell>
+}
 
-  /** Extended properties. */
+interface Record {
+  id: string
+  properties: Map<Property, Cell>
+}
+
+interface Cell {
+  property: Property
+  record: Record
+}
+
+interface Table {
+  id: string
+  schema: Property[]
+  records: Record[]
+}
+
+class NProperty implements Property {
+  id: string
+  type: string
+  records: Map<NRecord, NCell>
+
   name: string
-  options: SelectOption[]
 
   constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
     this.id = id
     this.name = rawProperty.name
-    this.type = "select"
+    this.type = ''
     this.records = new Map()
+  }
+}
+
+class NTextProperty extends NProperty {
+  type: 'text'
+
+  constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
+    super(id, rawProperty)
+    this.type = 'text'
+  }
+}
+
+class NCheckboxProperty extends NProperty {
+  type: 'checkbox'
+
+  constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
+    super(id, rawProperty)
+    this.type = 'checkbox'
+  }
+}
+
+class NSelectProperty extends NProperty {
+  type: 'select'
+  options: SelectOption[]
+
+  constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
+    super(id, rawProperty)
+    this.type = 'select'
     this.options = rawProperty.options || []
   }
 }
 
-type NProperty = NTextProperty | NCheckboxProperty | NSelectProperty
+class NMultiSelectProperty extends NProperty {
+  type: 'multi_select'
+  options: SelectOption[]
 
-class NPageRecord implements IRecord {
+  constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
+    super(id, rawProperty)
+    this.type = 'multi_select'
+    this.options = rawProperty.options || []
+  }
+}
+
+type NPropertyUnion =
+  NTextProperty | NCheckboxProperty | NSelectProperty |
+  NMultiSelectProperty
+
+class NRecord implements Record {
   id: string
   properties: Map<NProperty, NCell>
 
-  /** Extended properties. */
   uri: NAST.URI
   title: NAST.SemanticString[]
   icon?: NAST.Emoji | NAST.PublicUrl
@@ -106,53 +111,69 @@ class NPageRecord implements IRecord {
   }
 }
 
-class NTextCell implements ICell {
-  property: NTextProperty
-  record: NPageRecord
-  value: NAST.SemanticString[]
+class NCell implements Cell {
+  property: NProperty
+  record: NRecord
 
-  constructor(property: NTextProperty, record: NPageRecord,
-    rawValue: NAST.SemanticString[]) {
+  constructor(property: NProperty, record: NRecord) {
     this.property = property
     this.record = record
+  }
+}
+
+class NTextCell extends NCell {
+  value: NAST.SemanticString[]
+
+  constructor(property: NTextProperty, record: NRecord,
+    rawValue: NAST.SemanticString[]) {
+    super(property, record)
     this.value = rawValue
   }
 }
 
-class NCheckboxCell implements ICell {
-  property: NCheckboxProperty
-  record: NPageRecord
+class NCheckboxCell extends NCell {
   value: boolean
 
-  constructor(property: NCheckboxProperty, record: NPageRecord,
+  constructor(property: NCheckboxProperty, record: NRecord,
     rawValue: NAST.SemanticString[]) {
-    this.property = property
-    this.record = record
-    this.value = rawValue ? rawValue[0][0] === "Yes" : false
+    super(property, record)
+    this.value = rawValue ? rawValue[0][0] === 'Yes' : false
   }
 }
 
-class NSelectCell implements ICell {
-  property: NSelectProperty
-  record: NPageRecord
+class NSelectCell extends NCell {
   value: SelectOption | undefined
 
-  constructor(property: NSelectProperty, record: NPageRecord,
+  constructor(property: NSelectProperty, record: NRecord,
     rawValue: NAST.SemanticString[]) {
-    this.property = property
-    this.record = record
-
-    const optionNames = rawValue ? rawValue[0][0].split(",") : []
+    super(property, record)
+    const optionNames = rawValue ? rawValue[0][0].split(',') : []
     this.value = property.options.find(o => o.value === optionNames[0])
   }
 }
 
-type NCell = NTextCell | NCheckboxCell | NSelectCell
+class NMultiSelectCell extends NCell {
+  value: SelectOption[]
 
-export class NTable implements ITable {
+  constructor(property: NMultiSelectProperty, record: NRecord,
+    rawValue: NAST.SemanticString[]) {
+    super(property, record)
+    const optionNames = rawValue ? rawValue[0][0].split(',') : []
+    this.value = optionNames.reduce((result, optionName) => {
+      const option = property.options.find(o => o.value === optionName)
+      if (option) result.push(option)
+      return result
+    }, [] as SelectOption[])
+  }
+}
+
+type NCellUnion =
+  NTextCell | NCheckboxCell | NSelectCell | NMultiSelectCell
+
+export class NTable implements Table {
   id: string
-  schema: NProperty[]
-  records: NPageRecord[]
+  schema: NPropertyUnion[]
+  records: NRecord[]
 
   constructor(rawTable: NAST.Collection) {
     this.id = getPageIDFromPageURL(rawTable.uri)
@@ -180,7 +201,7 @@ export class NTable implements ITable {
 
     this.records = []
     rawTable.children.forEach(rawPage => {
-      const record = new NPageRecord(rawPage)
+      const record = new NRecord(rawPage)
       this.records.push(record)
       this.schema.forEach(property => {
         const rawPropertyValue = (rawPage.properties || {})[property.id]
@@ -193,20 +214,20 @@ export class NTable implements ITable {
 
   /** Print the table structure so you can see what it looks like. */
   peekStructure() {
-    let head = ""
+    let head = ''
     for (let i = 0; i < this.schema.length; i++) {
-      head += this.schema[i].constructor.name + " "
+      head += this.schema[i].constructor.name + ' '
     }
     console.log(head)
-    console.log("".padEnd(head.length, "-"))
+    console.log(''.padEnd(head.length, '-'))
     for (let i = 0; i < this.records.length; i++) {
       const record = this.records[i]
-      let row = ""
+      let row = ''
       record.properties.forEach((cell, property) => {
         row += cell.constructor.name
-          .padEnd(property.constructor.name.length) + " "
+          .padEnd(property.constructor.name.length) + ' '
       })
-      row += "-> " + record.constructor.name
+      row += '-> ' + record.constructor.name
       console.log(row)
     }
   }
@@ -217,25 +238,29 @@ function createNProperty(
   rawProperty: Notion.Collection.ColumnProperty
 ) {
   switch (rawProperty.type) {
-    case "checkbox":
+    case 'checkbox':
       return new NCheckboxProperty(propertyId, rawProperty)
-    case "select":
+    case 'select':
       return new NSelectProperty(propertyId, rawProperty)
+    case 'multi_select':
+      return new NMultiSelectProperty(propertyId, rawProperty)
     default:
       return new NTextProperty(propertyId, rawProperty)
   }
 }
 
 function createNCell(
-  property: NProperty,
-  record: NPageRecord,
+  property: NPropertyUnion,
+  record: NRecord,
   rawValue: NAST.SemanticString[]
-) {
+): NCellUnion {
   switch (property.type) {
-    case "checkbox":
+    case 'checkbox':
       return new NCheckboxCell(property, record, rawValue)
-    case "select":
+    case 'select':
       return new NSelectCell(property, record, rawValue)
+    case 'multi_select':
+      return new NMultiSelectCell(property, record, rawValue)
     default:
       return new NTextCell(property, record, rawValue)
   }
