@@ -83,13 +83,22 @@ class NMultiSelectProperty extends NProperty {
   }
 }
 
+class NDateTimeProperty extends NProperty {
+  type: 'date'
+
+  constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
+    super(id, rawProperty)
+    this.type = 'date'
+  }
+}
+
 type NPropertyUnion =
   NTextProperty | NCheckboxProperty | NSelectProperty |
-  NMultiSelectProperty
+  NMultiSelectProperty | NDateTimeProperty
 
 class NRecord implements Record {
   id: string
-  properties: Map<NProperty, NCell>
+  properties: Map<NPropertyUnion, NCellUnion>
 
   uri: NAST.URI
   title: NAST.SemanticString[]
@@ -167,8 +176,30 @@ class NMultiSelectCell extends NCell {
   }
 }
 
+class NDateTimeCell extends NCell {
+  value: NAST.DateTime | undefined
+
+  constructor(property: NDateTimeProperty, record: NRecord,
+    rawValue: NAST.SemanticString[]) {
+    super(property, record)
+    try {
+      /**
+       * rawValue
+       * [0]: SemanticString
+       * [0][1]: FormattingAll[]
+       * [0][1][0]: FormattingMentionDate
+       * [0][1][0][1]: DateTime
+       */
+      this.value = arrayAccessMayFail(rawValue)(0)(1)(0)(1)()
+    } catch (error) {
+      this.value = undefined
+    }
+  }
+}
+
 type NCellUnion =
-  NTextCell | NCheckboxCell | NSelectCell | NMultiSelectCell
+  NTextCell | NCheckboxCell | NSelectCell | NMultiSelectCell |
+  NDateTimeCell
 
 export class NTable implements Table {
   id: string
@@ -244,6 +275,8 @@ function createNProperty(
       return new NSelectProperty(propertyId, rawProperty)
     case 'multi_select':
       return new NMultiSelectProperty(propertyId, rawProperty)
+    case 'date':
+      return new NDateTimeProperty(propertyId, rawProperty)
     default:
       return new NTextProperty(propertyId, rawProperty)
   }
@@ -261,7 +294,25 @@ function createNCell(
       return new NSelectCell(property, record, rawValue)
     case 'multi_select':
       return new NMultiSelectCell(property, record, rawValue)
+    case 'date':
+      return new NDateTimeCell(property, record, rawValue)
     default:
       return new NTextCell(property, record, rawValue)
+  }
+}
+
+function arrayAccessMayFail(arrayLike) {
+  return function (i) {
+    /** Call with no parameter to signal the end of the access chain. */
+    if (typeof i === 'undefined') {
+      return arrayLike
+    }
+    /** Access the array. */
+    if (Array.isArray(arrayLike)) {
+      return arrayAccessMayFail(arrayLike[i])
+    } else {
+      /** Throw when you want to access the array but no way to do. */
+      throw new Error(arrayLike)
+    }
   }
 }
