@@ -21,7 +21,7 @@
     "@dnpr/logger": "^0.2.0",
     "@dnpr/task-manager": "^1.0.0",
     "nast-util-from-notionapi": "^1.0.0",
-    "nast-util-to-react": "^1.0.0",
+    "nast-util-to-react": "1.1.0",
     "notionapi-agent": "^1.2.0",
     "squirrelly": "^7.9.2"
   },
