@@ -1,10 +1,10 @@
-# notablog
+# Notablog
 
 ![version](https://img.shields.io/npm/v/notablog.svg?style=flat-square&color=007acc&label=version) ![license](https://img.shields.io/github/license/dragonman225/notablog.svg?style=flat-square&label=license&color=08CE5D)
 
 Generate a minimalistic blog from a Notion.so table.
 
-Here are some images of [my blog](https://dragonman225.js.org/), using [`notablog-starter`'s default theme](https://github.com/dragonman225/notablog-starter/tree/master/themes/pure). 🙂
+Below are some screenshots of [my blog](https://dragonman225.js.org/). 🙂
 
 |            Mobile             |            Desktop             |
 | :---------------------------: | :----------------------------: |
@@ -55,22 +55,28 @@ Here are some images of [my blog](https://dragonman225.js.org/), using [`notablo
    notablog generate .
    ```
 
-7. After it finishes, go to `notablog-starter/public/` directory, open `index.html` with a browser to preview your site. Or, you can change `previewBrowser` field in `config.json` to the path of a browser you use and run  command:
+7. After it finishes, go to `notablog-starter/public/` directory, open `index.html` with a browser to preview your site.
+
+* Optionally, you could change the `previewBrowser` field in `config.json` to the path of a browser executable you have on your computer and issue the following command anywhere to preview.
 
    ```bash
-   notablog preview .
+   notablog preview <path_to_the_notablog-starter>
    ```
 
-### Your site is ready now!
+### Congratulations! Your website is ready now!
 
-* You can copy files in  `notablog-starter/public/` directory to your server or upload them to any static hosting service to share your content with the world.
+* You can copy files in  `notablog-starter/public/` directory to a server or upload them to any static hosting service to share your content with the world.
+
 * Whenever you want to update your site, go into `notablog-starter/` directory and issue command `notablog generate .`, or issue the command from outside `notablog-starter/` with the pattern `notablog generate <path_to_the_notablog-starter>`.
 
 * Some options for static hosting services:
+
   * [Github Pages](https://pages.github.com/)
   * [Netlify](https://www.netlify.com/)
   * [surge.sh](https://surge.sh)
+
 * Some options for self-hosting:
+
   * [nginx](https://www.nginx.com/)
   * [lighttpd](https://www.lighttpd.net/)
   * [Apache httpd](https://httpd.apache.org/)
