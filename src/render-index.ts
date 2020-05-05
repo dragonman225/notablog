@@ -4,6 +4,10 @@ import Sqrl from 'squirrelly'
 
 import { log } from './util'
 
+function escapeTag(tag: string) {
+  return tag.replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '-');
+}
+
 export function renderIndex(task) {
   const siteMeta = task.data.siteMeta
   const templateProvider = task.tools.templateProvider
@@ -13,6 +17,7 @@ export function renderIndex(task) {
   const indexPath = path.join(outDir, 'index.html')
 
   Sqrl.autoEscaping(false)
+  Sqrl.defineFilter('escapeTag', (str: string) => escapeTag(str))
 
   log.info('Render home page')
   const html = Sqrl.Render(templateProvider.get('index'), {
@@ -27,6 +32,6 @@ export function renderIndex(task) {
       tagName: tagVal,
       pages: pageMetas
     })
-    fs.writeFileSync(`${config.tagDir}/${tagVal}.html`, html, { encoding: 'utf-8' })
+    fs.writeFileSync(`${config.tagDir}/${escapeTag(tagVal)}.html`, html, { encoding: 'utf-8' })
   })
 }
