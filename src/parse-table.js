@@ -90,6 +90,18 @@ column with id "${propertyId}" is used`)
    */
 
   /**
+  * Check if page is actually link and replace if necessary.
+  */
+  pagesValid.forEach(page => {
+    if (page.title[0][1]) {
+      let title = page.title[0][1][0][1]['title'];
+      let uri = page.title[0][1][0][1]['uri'];
+      page.title = title;
+      page.uri = uri;
+    }
+  })
+  
+  /**
    * @type {PageMetadata[]}
    */
   let pagesConverted = pagesValid
