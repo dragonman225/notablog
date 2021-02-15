@@ -14,7 +14,13 @@ Available <command>:
   preview <path_to_notablog-starter>   Open a browser to preview the blog.
 
 Available <option>:
-  -v, --verbose  Print more messages for debugging.`)
+  -v, --verbose  Print more messages for debugging.
+  
+Note:
+  If you have just updated notablog, don't forget to also update 
+  notablog-starter (https://github.com/dragonman225/notablog-starter), 
+  or layout may be broken due to mismatch of generated HTML markup and 
+  the CSS theme.`)
 }
 
 async function cmdGenerate(opts, logger) {
