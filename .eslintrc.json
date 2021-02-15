@@ -72,12 +72,14 @@
           "requireLast": false
         }
       }
-    ]
+    ],
+    "@typescript-eslint/no-explicit-any": "off"
   },
   "overrides": [
     {
       "files": [
-        "*.js"
+        "*.js",
+        "src/renderer.ts"
       ],
       "rules": {
         "@typescript-eslint/no-var-requires": "off"

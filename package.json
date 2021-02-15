@@ -26,6 +26,7 @@
     "@dnpr/fsutil": "^0.1.3",
     "@dnpr/logger": "^0.2.0",
     "@dnpr/task-manager": "^1.0.0",
+    "ejs": "^3.1.6",
     "nast-util-from-notionapi": "1.1.1",
     "nast-util-to-react": "1.1.1",
     "notionapi-agent": "^1.2.0",

@@ -65,7 +65,7 @@ export class Cache {
 function getCircularReplacer() {
   const seen = new WeakSet()
   return (_key, value) => {
-    if (typeof value === "object" && value !== null) {
+    if (typeof value === 'object' && value !== null) {
       if (seen.has(value)) {
         return
       }

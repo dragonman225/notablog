@@ -1,6 +1,7 @@
 import path from 'path'
 import { spawn } from 'child_process'
-import { getConfig, outDir } from './util'
+import { Config } from './config'
+import { outDir } from './util'
 
 /**
  * Open `index` with `bin`.
@@ -18,9 +19,9 @@ function open(bin, index) {
  * @param {string} workDir 
  */
 export function preview(workDir) {
-  const c = getConfig(workDir)
-  if (c.previewBrowser) {
-    open(c.previewBrowser, path.join(outDir(workDir), 'index.html'))
+  const c = new Config(path.join(workDir, 'config.json'))
+  if (c.get('previewBrowser')) {
+    open(c.get('previewBrowser'), path.join(outDir(workDir), 'index.html'))
   } else {
     throw new Error('"previewBrowser" property is not set in your Notablog config file.')
   }

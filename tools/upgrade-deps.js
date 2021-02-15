@@ -19,6 +19,7 @@ let args = ['upgrade']
 args = args.concat(devDepsLatest)
 args = args.concat(depsLatest)
 
+// TODO: Spawn detached process
 const upgrade = spawn(bin, args)
 
 upgrade.stdout.on('data', (data) => {

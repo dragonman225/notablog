@@ -3,9 +3,9 @@ import fsPromises = fs.promises
 import path from 'path'
 import { getOnePageAsTree } from 'nast-util-from-notionapi'
 import { renderToHTML } from 'nast-util-to-react'
-import Sqrl from 'squirrelly'
+const Sqrl = require('squirrelly')
 
-import { log, parseJSON } from './util'
+import { log } from './util'
 import { toDashID } from './notion-utils'
 
 /**
@@ -17,12 +17,11 @@ export async function renderPost(task) {
   const siteMeta = task.data.siteMeta
   const templateProvider = task.tools.templateProvider
   const notion = task.tools.notion
+  const cache = task.tools.cache
   const page = task.data.page
   const config = task.config
 
   const pageID = toDashID(page.id)
-  const cacheFileName = page.id + '.json'
-  const cacheFilePath = path.join(config.cacheDir, cacheFileName)
 
   let nast, contentHTML
 
@@ -30,14 +29,11 @@ export async function renderPost(task) {
   if (config.doFetchPage) {
     log.info(`Fetch data of page "${pageID}"`)
     nast = await getOnePageAsTree(pageID, notion)
-    fs.writeFile(cacheFilePath, JSON.stringify(nast), (err) => {
-      if (err) console.error(err)
-      else log.info(`Cache of "${pageID}" is saved`)
-    })
+    cache.set('notion', pageID, nast)
+    log.info(`Cache of "${pageID}" is saved`)
   } else {
     log.info(`Read cache of page "${pageID}"`)
-    let cache = await fsPromises.readFile(cacheFilePath, { encoding: 'utf-8' })
-    let _nast = parseJSON(cache)
+    const _nast = cache.get('notion', pageID)
     if (_nast != null) nast = _nast
     else throw new Error(`\
 Cache of page "${pageID}" is corrupted, delete source/notion_cache to rebuild`)
@@ -51,7 +47,7 @@ Cache of page "${pageID}" is corrupted, delete source/notion_cache to rebuild`)
     const postPath = path.join(outDir, page.url)
 
     Sqrl.autoEscaping(false)
-    const html = Sqrl.Render(templateProvider.get(page.template), {
+    const html = Sqrl.Render(templateProvider.get(page.template).content, {
       siteMeta,
       post: {
         ...page,

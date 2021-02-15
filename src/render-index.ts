@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import Sqrl from 'squirrelly'
+const Sqrl = require('squirrelly')
 
 import { log } from './util'
 
@@ -15,14 +15,14 @@ export function renderIndex(task) {
   Sqrl.autoEscaping(false)
 
   log.info('Render home page')
-  const html = Sqrl.Render(templateProvider.get('index'), {
+  const html = Sqrl.Render(templateProvider.get('index').content, {
     siteMeta
   })
   fs.writeFileSync(indexPath, html, { encoding: 'utf-8' })
 
   siteMeta.tagMap.forEach((pageMetas, tagVal) => {
     log.info(`Render tag "${tagVal}"`)
-    const html = Sqrl.Render(templateProvider.get('tag'), {
+    const html = Sqrl.Render(templateProvider.get('tag').content, {
       siteMeta,
       tagName: tagVal,
       pages: pageMetas

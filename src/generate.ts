@@ -3,32 +3,18 @@ import path from 'path'
 import { createAgent } from 'notionapi-agent'
 import { TaskManager2 } from '@dnpr/task-manager'
 import { copyDirSync } from '@dnpr/fsutil'
+import { Cache } from './cache'
+import { Config } from './config'
 import { TemplateProvider } from './template-provider'
 import { parseTable } from './parse-table'
 import { renderIndex } from './render-index'
 import { renderPost } from './render-post'
-import { log, getConfig } from './util'
+import { log } from './util'
+import { toDashID } from './notion-utils'
 
 type GenerateOptions = {
   concurrency?: number
   verbose?: boolean
-}
-
-/**
- * Check if a page is newer than its cached version.
- * @param {string} uri 
- * @param {number} lastEditedTime 
- * @param {string} cacheDir 
- */
-function isPageUpdated(pageId, lastEditedTime, cacheDir) {
-  const cacheFileName = pageId + '.json'
-  const cacheFilePath = path.join(cacheDir, cacheFileName)
-  if (fs.existsSync(cacheFilePath)) {
-    const lastCacheTime = fs.statSync(cacheFilePath).mtimeMs
-    return lastEditedTime > lastCacheTime
-  } else {
-    return true
-  }
 }
 
 /**
@@ -47,17 +33,14 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   const concurrency = opts.concurrency
   const verbose = opts.verbose
   const notion = createAgent({ debug: verbose })
-  const config = getConfig(workDir)
+  const cache = new Cache(path.join(workDir, 'cache'))
+  const config = new Config(path.join(workDir, 'config.json'))
 
   /** Init dir paths. */
-  const cacheDir = path.join(workDir, 'source/notion_cache')
-  if (!fs.existsSync(cacheDir)) {
-    fs.mkdirSync(cacheDir, { recursive: true })
-  }
-
-  const themeDir = path.join(workDir, `themes/${config.theme}`)
+  const theme = config.get('theme')
+  const themeDir = path.join(workDir, `themes/${theme}`)
   if (!fs.existsSync(themeDir)) {
-    throw new Error(`Cannot find "${config.theme}" in themes/ folder`)
+    throw new Error(`Cannot find "${theme}" in themes/ folder`)
   }
 
   const outDir = path.join(workDir, 'public')
@@ -71,11 +54,12 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   }
 
   const dirs = {
-    workDir, cacheDir, themeDir, outDir, tagDir
+    workDir, themeDir, outDir, tagDir
   }
 
   /** Create TemplateProvider instance. */
-  const templateProvider = new TemplateProvider(themeDir)
+  const templateDir = path.join(themeDir, 'layout')
+  const templateProvider = new TemplateProvider(templateDir)
 
   /** Copy theme assets. */
   log.info('Copy theme assets')
@@ -84,7 +68,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
 
   /** Fetch site metadata. */
   log.info('Fetch Site Metadata')
-  const siteMeta = await parseTable(config.url, notion)
+  const siteMeta = await parseTable(config.get('url'), notion)
 
   /** Render site entry. */
   log.info('Render site entry')
@@ -104,7 +88,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   log.info('Fetch and render pages')
   const { pagesUpdated, pagesNotUpdated } = siteMeta.pages
     .reduce((data, page) => {
-      if (isPageUpdated(page.id, page.lastEditedTime, cacheDir)) {
+      if (cache.shouldUpdate('notion', toDashID(page.id), page.lastEditedTime)) {
         data.pagesUpdated.push(page)
       } else {
         data.pagesNotUpdated.push(page)
@@ -113,7 +97,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
     }, {
       pagesUpdated: [], pagesNotUpdated: []
     } as {
-      pagesUpdated: typeof siteMeta.pages,
+      pagesUpdated: typeof siteMeta.pages
       pagesNotUpdated: typeof siteMeta.pages
     })
 
@@ -132,7 +116,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
         siteMeta, page
       },
       tools: {
-        templateProvider, notion
+        templateProvider, notion, cache
       },
       config: {
         ...dirs,
@@ -146,7 +130,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
         siteMeta, page
       },
       tools: {
-        templateProvider, notion
+        templateProvider, notion, cache
       },
       config: {
         ...dirs,

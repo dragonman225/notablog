@@ -1,8 +1,8 @@
-import { numToOrder } from "./util"
+import { numToOrder } from './util'
 
 interface PropertyValue {
   type: Notion.Collection.ColumnPropertyType
-  value: any,
+  value: any
   groupKeys?: string[]
 }
 
@@ -17,20 +17,20 @@ function parsePropertyValue(
    */
   const data = (row.properties || {})[columnId]
   switch (column.type) {
-    case "title":
+    case 'title':
       return {
         type: column.type,
         value: row.title
       }
-    case "checkbox":
+    case 'checkbox':
       return {
         type: column.type,
-        value: data ? data[0][0] === "Yes" : false,
-        groupKeys: [data ? (data[0][0] === "Yes").toString() : "false"]
+        value: data ? data[0][0] === 'Yes' : false,
+        groupKeys: [data ? (data[0][0] === 'Yes').toString() : 'false']
       }
-    case "select":
-    case "multi_select": {
-      const optionNames = data ? data[0][0].split(",") : []
+    case 'select':
+    case 'multi_select': {
+      const optionNames = data ? data[0][0].split(',') : []
       const optionVals = optionNames.map(optionName => {
         const option = (column.options || [])
           .find(o => o.value === optionName)
@@ -38,7 +38,7 @@ function parsePropertyValue(
           console.log(`Select option "${optionName}" is \
 not found on property "${columnId}:${column.name}".`)
           return {
-            color: "default",
+            color: 'default',
             value: optionName
           }
         } else {
@@ -55,18 +55,18 @@ not found on property "${columnId}:${column.name}".`)
       }
     }
     // TODO: NAST currently do not have the following 2 information.
-    case "created_by":
-    case "last_edited_by":
+    case 'created_by':
+    case 'last_edited_by':
       return {
         type: column.type,
-        value: "Someone"
+        value: 'Someone'
       }
-    case "created_time":
+    case 'created_time':
       return {
         type: column.type,
         value: row.createdTime
       }
-    case "last_edited_time":
+    case 'last_edited_time':
       return {
         type: column.type,
         value: row.lastEditedTime
@@ -84,7 +84,7 @@ export interface ISchema {
     [key in Notion.Collection.ColumnID]: Notion.Collection.ColumnProperty
   }
   nameIdsMap: {
-    [key in Notion.Collection.ColumnProperty["name"]]: Notion.Collection.ColumnID[]
+    [key in Notion.Collection.ColumnProperty['name']]: Notion.Collection.ColumnID[]
   }
   lookupIdsByName: (name: string) => Notion.Collection.ColumnID[]
 }
@@ -98,7 +98,7 @@ export interface IRecord {
   fullWidth: boolean
   schema: Schema
   getPropertyValueById: (id: Notion.Collection.ColumnID) => PropertyValue | undefined
-  getPropertyValuesByName: (name: Notion.Collection.ColumnProperty["name"]) => PropertyValue[]
+  getPropertyValuesByName: (name: Notion.Collection.ColumnProperty['name']) => PropertyValue[]
 }
 
 export interface ITable {
@@ -117,10 +117,10 @@ export class Schema implements ISchema {
     [key in Notion.Collection.ColumnID]: Notion.Collection.ColumnProperty
   }
   nameIdsMap: {
-    [key in Notion.Collection.ColumnProperty["name"]]: Notion.Collection.ColumnID[]
+    [key in Notion.Collection.ColumnProperty['name']]: Notion.Collection.ColumnID[]
   }
 
-  constructor(rawSchema: NAST.Collection["schema"]) {
+  constructor(rawSchema: NAST.Collection['schema']) {
     this.idPropertyMap = rawSchema
     this.nameIdsMap = Object.entries(rawSchema).reduce((map, pair) => {
       const propertyId = pair[0]
@@ -172,7 +172,7 @@ export class Record implements IRecord {
   }
 
   /** Properties may have the same name. */
-  getPropertyValuesByName(name: Notion.Collection.ColumnProperty["name"]) {
+  getPropertyValuesByName(name: Notion.Collection.ColumnProperty['name']) {
     const propertyIds = this.schema.lookupIdsByName(name)
     const propertyValues = propertyIds.reduce((pvs, id) => {
       const pv = this.getPropertyValueById(id)
@@ -225,7 +225,7 @@ Return all records as ungrouped.`)
       if (!propertyValue) {
         console.log(`\
 Cannot get property value on record \
-"${record.title.reduce((str, ss) => str += ss[0], "")}", \
+"${record.title.reduce((str, ss) => str += ss[0], '')}", \
 but the requested property exists in schema.
 Is the table broken?`)
         ungrouped.push(record)
