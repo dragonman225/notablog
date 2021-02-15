@@ -30,7 +30,8 @@
     "nast-util-from-notionapi": "1.1.1",
     "nast-util-to-react": "1.1.1",
     "notionapi-agent": "^1.2.0",
-    "squirrelly": "^7.9.2"
+    "squirrelly": "^7.9.2",
+    "unist-util-visit": "^2.0.3"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^2.1.0",

@@ -9,6 +9,7 @@ export interface Tag {
 }
 
 export interface PageMetadata {
+  /** No dashes. */
   id: string
   icon: string | undefined
   iconHTML: string
