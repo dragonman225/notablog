@@ -101,7 +101,7 @@ export function numToOrder(n: number) {
  * @param objLike - An object (or an array).
  */
 export function objAccess(objLike) {
-  return function (key) {
+  return function (key: string | number | undefined) {
     /** Call with no parameter to signal the end of the access chain. */
     if (typeof key === 'undefined') {
       return objLike

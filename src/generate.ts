@@ -11,6 +11,7 @@ import { renderIndex } from './render-index'
 import { renderPost } from './render-post'
 import { log } from './util'
 import { toDashID } from './notion-utils'
+import { RenderPostTask } from './types'
 
 type GenerateOptions = {
   concurrency?: number
@@ -32,7 +33,7 @@ type GenerateOptions = {
 export async function generate(workDir: string, opts: GenerateOptions = {}) {
   const concurrency = opts.concurrency
   const verbose = opts.verbose
-  const notion = createAgent({ debug: verbose })
+  const notionAgent = createAgent({ debug: verbose })
   const cache = new Cache(path.join(workDir, 'cache'))
   const config = new Config(path.join(workDir, 'config.json'))
 
@@ -68,13 +69,13 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
 
   /** Fetch site metadata. */
   log.info('Fetch Site Metadata')
-  const siteMeta = await parseTable(config.get('url'), notion)
+  const siteContext = await parseTable(config.get('url'), notionAgent)
 
   /** Render site entry. */
   log.info('Render site entry')
   renderIndex({
     data: {
-      siteMeta
+      siteMeta: siteContext
     },
     tools: {
       templateProvider
@@ -86,7 +87,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
 
   /** Render pages. */
   log.info('Fetch and render pages')
-  const { pagesUpdated, pagesNotUpdated } = siteMeta.pages
+  const { pagesUpdated, pagesNotUpdated } = siteContext.pages
     .reduce((data, page) => {
       if (cache.shouldUpdate('notion', toDashID(page.id), page.lastEditedTime)) {
         data.pagesUpdated.push(page)
@@ -97,46 +98,46 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
     }, {
       pagesUpdated: [], pagesNotUpdated: []
     } as {
-      pagesUpdated: typeof siteMeta.pages
-      pagesNotUpdated: typeof siteMeta.pages
+      pagesUpdated: typeof siteContext.pages
+      pagesNotUpdated: typeof siteContext.pages
     })
 
-  const pageTotalCount = siteMeta.pages.length
+  const pageTotalCount = siteContext.pages.length
   const pageUpdatedCount = pagesUpdated.length
-  const pagePublishedCount = siteMeta.pages
+  const pagePublishedCount = siteContext.pages
     .filter(page => page.publish).length
   log.info(`${pageUpdatedCount} of ${pageTotalCount} posts have been updated`)
   log.info(`${pagePublishedCount} of ${pageTotalCount} posts are published`)
 
   const tm2 = new TaskManager2({ concurrency })
   const tasks = []
-  pagesUpdated.forEach(page => {
+  pagesUpdated.forEach(pageMetadata => {
     tasks.push(tm2.queue(renderPost, [{
       data: {
-        siteMeta, page
+        siteContext, pageMetadata
       },
       tools: {
-        templateProvider, notion, cache
+        templateProvider, notionAgent, cache
       },
       config: {
         ...dirs,
         doFetchPage: true
       }
-    }]) as never)
+    } as RenderPostTask]) as never)
   })
-  pagesNotUpdated.forEach(page => {
+  pagesNotUpdated.forEach(pageMetadata => {
     tasks.push(tm2.queue(renderPost, [{
       data: {
-        siteMeta, page
+        siteContext, pageMetadata
       },
       tools: {
-        templateProvider, notion, cache
+        templateProvider, notionAgent, cache
       },
       config: {
         ...dirs,
         doFetchPage: false
       }
-    }]) as never)
+    } as RenderPostTask]) as never)
   })
   await Promise.all(tasks)
   return 0

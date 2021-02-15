@@ -1,29 +1,35 @@
+import { createAgent } from 'notionapi-agent'
 import { getOnePageAsTree } from 'nast-util-from-notionapi'
 import { renderToHTML } from 'nast-util-to-react'
+import { SemanticString } from 'nast-types'
 import { getPageIDFromCollectionPageURL } from './notion-utils'
-import { log } from './util'
+import { log, objAccess } from './util'
+import { SiteContext, PageMetadata } from './types'
 
 /**
  * Extract interested data for blog generation from a Notion table.
  */
-export async function parseTable(collectionPageURL, notionAgent) {
-  let pageID = getPageIDFromCollectionPageURL(collectionPageURL)
-  let pageCollection = (await getOnePageAsTree(pageID, notionAgent)) as NAST.CollectionPage
+export async function parseTable(
+  collectionPageURL: string, 
+  notionAgent: ReturnType<typeof createAgent>
+): Promise<SiteContext> {
+  const pageID = getPageIDFromCollectionPageURL(collectionPageURL)
+  const pageCollection = (await getOnePageAsTree(pageID, notionAgent)) as NAST.CollectionPage
 
   /**
-   * Create map for property_name -> property_id.
-   * Notion uses random strings in schema to prevent probable repeated
-   * property names defined by user.
+   * Create map for property_name (column name) -> property_id (column id).
+   * Notion uses random strings to identify columns because it allows users 
+   * to create multiple columns that have the same name.
    */
-  let schemaMap = {}
-  for (let [key, value] of Object.entries(pageCollection.schema)) {
-    let propertyId = key
-    let propertyString = value.name
-    if (schemaMap[propertyString]) {
-      log.warn(`Duplicate column name "${propertyString}", \
-column with id "${propertyId}" is used`)
+  const mapColNameToId = {}
+  for (const [key, value] of Object.entries(pageCollection.schema)) {
+    const colId = key
+    const colName = value.name
+    if (mapColNameToId[colName]) {
+      log.warn(`Duplicate column name "${colName}", \
+column with id "${colId}" is used`)
     } else {
-      schemaMap[propertyString] = key
+      mapColNameToId[colName] = key
     }
   }
 
@@ -32,58 +38,57 @@ column with id "${propertyId}" is used`)
    * 
    * - `title` is required by Notion.
    */
-  let requiredProps =
+  const requiredCols =
     ['tags', 'publish', 'inMenu', 'inList', 'template', 'url', 'description', 'date']
-  for (let prop of requiredProps) {
-    if (typeof pageCollection.schema[schemaMap[prop]] === 'undefined') {
-      throw new Error(`Required column "${prop}" is missing in table.`)
+  for (const colName of requiredCols) {
+    if (typeof pageCollection.schema[mapColNameToId[colName]] === 'undefined') {
+      throw new Error(`Required column "${colName}" is missing in table.`)
     }
   }
 
   /**
    * Create map for tag -> color
    */
-  let tagColorMap = {}
-  let classPrefix = '';
-  (pageCollection.schema[schemaMap['tags']].options || []).forEach(tag => {
-    tagColorMap[tag.value] = `${classPrefix}${tag.color}`
+  const mapTagToColor = {}
+  const classPrefix = '';
+  (pageCollection.schema[mapColNameToId['tags']].options || []).forEach(tag => {
+    mapTagToColor[tag.value] = `${classPrefix}${tag.color}`
   })
 
   /** Remove empty rows */
-  let pagesValid = pageCollection.children
-    .filter(page => page.properties)
+  const validPages = pageCollection.children
+    .filter(page => !!page.properties)
 
-
-  let pagesConverted = pagesValid
+  const pageMetadatas: PageMetadata[] = validPages
     .map(row => {
       return {
-        id: (row.uri.split('/').pop() || "").split('?')[0],
+        id: (row.uri.split('/').pop() || '').split('?')[0],
         icon: row.icon,
         iconHTML: renderIconToHTML(row.icon),
         cover: row.cover,
         title: row.title,
-        tags: getMultiSelect(row, schemaMap['tags']).map(tag => {
+        tags: getMultiSelect(row, mapColNameToId['tags']).map(tag => {
           return {
             value: tag,
-            color: tagColorMap[tag]
+            color: mapTagToColor[tag]
           }
         }),
-        publish: getCheckbox(row, schemaMap['publish']),
-        inMenu: getCheckbox(row, schemaMap['inMenu']),
-        inList: getCheckbox(row, schemaMap['inList']),
-        template: getSingleSelect(row, schemaMap['template']),
-        url: getRealUrl(row, schemaMap['url']),
-        description: getTextRaw(row, schemaMap['description']),
-        descriptionPlain: getTextPlain(row, schemaMap['description']),
-        descriptionHTML: getTextHTML(row, schemaMap['description']),
-        date: getDateRaw(row, schemaMap['date']),
-        dateString: getDateString(row, schemaMap['date']),
+        publish: getCheckbox(row, mapColNameToId['publish']),
+        inMenu: getCheckbox(row, mapColNameToId['inMenu']),
+        inList: getCheckbox(row, mapColNameToId['inList']),
+        template: getSingleSelect(row, mapColNameToId['template']),
+        url: getRealUrl(row, mapColNameToId['url']),
+        description: getTextRaw(row, mapColNameToId['description']),
+        descriptionPlain: getTextPlain(row, mapColNameToId['description']),
+        descriptionHTML: getTextHTML(row, mapColNameToId['description']),
+        date: getDateRaw(row, mapColNameToId['date']),
+        dateString: getDateString(row, mapColNameToId['date']),
         createdTime: row.createdTime,
         lastEditedTime: row.lastEditedTime
       }
     })
 
-  let siteMeta = {
+  const siteContext = {
     icon: pageCollection.icon,
     iconHTML: renderIconToHTML(pageCollection.icon),
     cover: pageCollection.cover,
@@ -94,7 +99,7 @@ column with id "${propertyId}" is used`)
     /**
      * Sort the pages so that the most recent post is at the top.
      */
-    pages: pagesConverted.sort((later, former) => {
+    pages: pageMetadatas.sort((later, former) => {
       const laterTimestamp = later.date
         ? (new Date(later.date)).getTime() : 0
       const formerTimestamp = former.date
@@ -109,17 +114,17 @@ column with id "${propertyId}" is used`)
   /**
    * Create tagMap
    */
-  siteMeta.pages.forEach(page => {
+  siteContext.pages.forEach(page => {
     page.tags.forEach(tag => {
-      if (!siteMeta.tagMap.has(tag.value)) {
-        siteMeta.tagMap.set(tag.value, [page])
+      if (!siteContext.tagMap.has(tag.value)) {
+        siteContext.tagMap.set(tag.value, [page])
       } else {
-        siteMeta.tagMap.get(tag.value).push(page)
+        siteContext.tagMap.get(tag.value).push(page)
       }
     })
   })
 
-  return siteMeta
+  return siteContext
 }
 
 /**
@@ -132,8 +137,8 @@ column with id "${propertyId}" is used`)
  * @param {string} propId
  * @returns {boolean}
  */
-function getCheckbox(page, propId) {
-  let prop = page.properties[propId]
+function getCheckbox(page: NAST.Page, propId: string) {
+  const prop = objAccess(page)('properties')(propId)()
   if (prop) return prop[0][0] === 'Yes'
   else return false
 }
@@ -145,7 +150,7 @@ function getCheckbox(page, propId) {
  * @returns {Notion.StyledString[]}
  */
 function getTextRaw(page, propId) {
-  let prop = page.properties[propId]
+  const prop = page.properties[propId]
   if (prop) return prop
   else return []
 }
@@ -157,12 +162,12 @@ function getTextRaw(page, propId) {
  * @returns {string}
  */
 function getTextPlain(page, propId) {
-  let prop = page.properties[propId]
+  const prop = page.properties[propId]
   if (prop) return renderStyledStringToTXT(prop)
   else return ''
 }
 
-function renderStyledStringToTXT(styledStringArr) {
+function renderStyledStringToTXT(styledStringArr: SemanticString[] | undefined): string {
   if (styledStringArr) return styledStringArr.map(str => str[0]).join('')
   else return ''
 }
@@ -174,12 +179,12 @@ function renderStyledStringToTXT(styledStringArr) {
  * @returns {string}
  */
 function getTextHTML(page, propId) {
-  let prop = page.properties[propId]
+  const prop = page.properties[propId]
   if (prop) return renderStyledStringToHTML(prop)
   else return ''
 }
 
-function renderStyledStringToHTML(styledStringArr) {
+function renderStyledStringToHTML(styledStringArr: SemanticString[] | undefined): string {
   if (styledStringArr) return renderToHTML(styledStringArr)
   else return ''
 }
@@ -194,7 +199,7 @@ function renderStyledStringToHTML(styledStringArr) {
  * @returns {string[]}
  */
 function getMultiSelect(page, propId) {
-  let prop = page.properties[propId]
+  const prop = page.properties[propId]
   if (prop) return prop[0][0].split(',')
   else return []
 }
@@ -206,7 +211,7 @@ function getMultiSelect(page, propId) {
  * @returns {string}
  */
 function getSingleSelect(page, propId) {
-  let options = getMultiSelect(page, propId)
+  const options = getMultiSelect(page, propId)
   if (options.length > 0) return options[0]
   else return ''
 }
@@ -217,12 +222,8 @@ function getSingleSelect(page, propId) {
  * @param {string} propId
  * @returns {string | undefined} YYYY-MM-DD
  */
-function getDateRaw(page, propId) {
-  let prop = page.properties[propId]
-  if (prop) {
-    let dateString = prop[0][1][0][1].start_date
-    return dateString
-  } else return undefined
+function getDateRaw(page: NAST.Page, propId: string): string | undefined {
+  return objAccess(page)('properties')(propId)(0)(1)(0)(1)('start_date')()
 }
 
 /**
@@ -232,10 +233,10 @@ function getDateRaw(page, propId) {
  * @returns {string | undefined} WWW, MMM DD, YYY
  */
 function getDateString(page, propId) {
-  let dateRaw = getDateRaw(page, propId)
+  const dateRaw = getDateRaw(page, propId)
   if (dateRaw) {
-    let options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }
-    let dateString = (new Date(dateRaw)).toLocaleDateString('en-US', options)
+    const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }
+    const dateString = (new Date(dateRaw)).toLocaleDateString('en-US', options)
     return dateString
   } else return undefined
 }
@@ -254,9 +255,9 @@ function getDateString(page, propId) {
  * @returns {string}
  */
 function getRealUrl(page, propId) {
-  let wantUrl = getTextPlain(page, propId)
-  let safeUrl = getSafeUrl(wantUrl)
-  let realUrl = (safeUrl.length > 0) ?
+  const wantUrl = getTextPlain(page, propId)
+  const safeUrl = getSafeUrl(wantUrl)
+  const realUrl = (safeUrl.length > 0) ?
     `${safeUrl}.html` : `${page.uri.split('/').pop().split('?')[0]}.html`
   return realUrl
 }
