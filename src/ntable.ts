@@ -1,5 +1,5 @@
 import { getPageIDFromPageURL } from './notion-utils'
-import { objAccess } from './util'
+import { objAccess } from './utils'
 
 type SelectOption = {
   id: string

@@ -6,7 +6,7 @@ import { renderToHTML } from 'nast-util-to-react'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Sqrl = require('squirrelly')
 
-import { log } from './util'
+import { log } from './utils'
 import { toDashID } from './notion-utils'
 import { RenderPostTask } from './types'
 
@@ -25,7 +25,7 @@ export async function renderPost(task: RenderPostTask) {
 
   const pageID = toDashID(pageMetadata.id)
 
-  let nast, contentHTML
+  let nast: NAST.Block
 
   /** Fetch page. */
   if (config.doFetchPage) {
@@ -36,15 +36,15 @@ export async function renderPost(task: RenderPostTask) {
   } else {
     log.info(`Read cache of page "${pageID}"`)
     const _nast = cache.get('notion', pageID)
-    if (_nast != null) nast = _nast
+    if (_nast != null) nast = _nast as NAST.Block
     else throw new Error(`\
-Cache of page "${pageID}" is corrupted, delete source/notion_cache to rebuild`)
+Cache of page "${pageID}" is corrupted, delete cache/ to rebuild`)
   }
 
   /** Render with template. */
   if (pageMetadata.publish) {
     log.info(`Render page "${pageID}"`)
-    contentHTML = renderToHTML(nast)
+    const contentHTML = renderToHTML(nast)
     const outDir = config.outDir
     const postPath = path.join(outDir, pageMetadata.url)
 

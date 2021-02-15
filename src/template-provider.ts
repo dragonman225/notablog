@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { log } from './util'
+import { log } from './utils'
 
 export class TemplateProvider {
   private templateDir: string

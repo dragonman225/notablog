@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 const Sqrl = require('squirrelly')
 
-import { log } from './util'
+import { log } from './utils'
 
 export function renderIndex(task) {
   const siteMeta = task.data.siteMeta

@@ -9,7 +9,7 @@ import { TemplateProvider } from './template-provider'
 import { parseTable } from './parse-table'
 import { renderIndex } from './render-index'
 import { renderPost } from './render-post'
-import { log } from './util'
+import { log } from './utils'
 import { toDashID } from './notion-utils'
 import { RenderPostTask } from './types'
 

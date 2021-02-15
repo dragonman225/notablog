@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { promises as fsPromises } from 'fs'
-import { log } from './util'
+import { log } from './utils'
 
 export class Config {
   private configPath: string
