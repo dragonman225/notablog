@@ -53,7 +53,7 @@ function createLinkTransformer(siteContext: SiteContext) {
         const page = siteContext.pages.find(page => page.id === pageId)
         if (!page) continue
 
-        log.debug(`Replace link: ${pageInline.uri} -> ${page.url}`);
+        log.debug(`Replace link: ${pageInline.uri} -> ${page.url}`)
         pageInline.uri = page.url
 
         continue
@@ -82,7 +82,7 @@ function createLinkTransformer(siteContext: SiteContext) {
           /** Ignore unsupported links. */
           if (toPath.includes('?')) {
             const newPath = `https://www.notion.so${toPath}`
-            log.debug(`Replace link: ${toPath} -> ${newPath}`);
+            log.debug(`Replace link: ${toPath} -> ${newPath}`)
             mark[1] = newPath
             return
           }
@@ -98,7 +98,7 @@ function createLinkTransformer(siteContext: SiteContext) {
             if (!page) return
 
             const newPath = page.url
-            log.debug(`Replace link: ${toPath} -> ${newPath}`);
+            log.debug(`Replace link: ${toPath} -> ${newPath}`)
             mark[1] = newPath
 
             return
@@ -113,7 +113,7 @@ function createLinkTransformer(siteContext: SiteContext) {
             if (!page) return
 
             const newPath = `${page.url}#https://www.notion.so/${ids[1]}`
-            log.debug(`Replace link: ${toPath} -> ${newPath}`);
+            log.debug(`Replace link: ${toPath} -> ${newPath}`)
             mark[1] = newPath
 
             return
