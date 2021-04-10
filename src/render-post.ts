@@ -37,7 +37,9 @@ function createLinkTransformer(siteContext: SiteContext) {
     }
 
     /** Inline mention or link. */
-    const richTextStrs = node.title || []
+    /** `node` may be any block with text, specifying text block here is 
+        to eliminate type errors.  */
+    const richTextStrs = (node as NAST.Text).title || []
     for (let i = 0; i < richTextStrs.length; i++) {
       const richTextStr = richTextStrs[i]
 
@@ -148,6 +150,7 @@ export async function renderPost(task: RenderPostTask) {
     log.info(`Fetch data of page "${pageID}"`)
     nast = await getOnePageAsTree(pageID, notionAgent)
     /** Use internal links for pages in the table. */
+    /** @ts-ignore */
     visit(nast, createLinkTransformer(siteContext))
     cache.set('notion', pageID, nast)
     log.info(`Cache of "${pageID}" is saved`)
