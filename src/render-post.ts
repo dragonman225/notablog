@@ -53,10 +53,14 @@ function createLinkTransformer(siteContext: SiteContext) {
         if (!pageId) continue
 
         const page = siteContext.pages.find(page => page.id === pageId)
-        if (!page) continue
-
-        log.debug(`Replace link: ${pageInline.uri} -> ${page.url}`)
-        pageInline.uri = page.url
+        if (page) {
+          log.debug(`Replace link: ${pageInline.uri} -> ${page.url}`)
+          pageInline.uri = page.url
+        } else {
+          const newLink = `https://www.notion.so/${pageId}`
+          pageInline.uri = newLink
+          log.debug(`Replace link: ${pageInline.uri} -> ${newLink}`)
+        }
 
         continue
       }
@@ -91,33 +95,23 @@ function createLinkTransformer(siteContext: SiteContext) {
 
           const ids = toPath.replace(/\//g, '').split('#')
 
-          /** Link to a page. */
-          if (1 === ids.length) {
+          if (ids.length > 0) {
+            const targetPage = ids[0]
+            const targetBlock = ids[1]
+            const pageInfo = siteContext.pages.find(page => page.id === targetPage)
 
-            const pageId = ids[0]
+            if (pageInfo) {
+              /** The page is in the table. */
+              const newLink =
+                `${pageInfo.url}${targetBlock ? '#https://www.notion.so/' + targetBlock : ''}`
+              mark[1] = newLink
+            } else {
+              /** The page is not in the table. */
+              const newLink = `https://www.notion.so${toPath}`
+              mark[1] = newLink
+            }
 
-            const page = siteContext.pages.find(page => page.id === pageId)
-            if (!page) return
-
-            const newPath = page.url
-            log.debug(`Replace link: ${toPath} -> ${newPath}`)
-            mark[1] = newPath
-
-            return
-          }
-
-          /** Link to a block in a page. */
-          if (2 === ids.length) {
-
-            const pageId = ids[0]
-
-            const page = siteContext.pages.find(page => page.id === pageId)
-            if (!page) return
-
-            const newPath = `${page.url}#https://www.notion.so/${ids[1]}`
-            log.debug(`Replace link: ${toPath} -> ${newPath}`)
-            mark[1] = newPath
-
+            log.debug(`Replace link: ${toPath} -> ${mark[1]}`)
             return
           }
         }
