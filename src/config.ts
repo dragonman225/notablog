@@ -31,6 +31,6 @@ export class Config {
 
   /** Sync changes to file. */
   sync() {
-    return fsPromises.writeFile(this.configPath, this.configObj)
+    return fsPromises.writeFile(this.configPath, JSON.stringify(this.configObj))
   }
 }
