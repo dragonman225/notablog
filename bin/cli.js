@@ -16,6 +16,8 @@ Available <command>:
 
 Available <option>:
   -v, --verbose  Print more messages for debugging.
+  --fresh        Generate without cache. Useful when you get stalled result
+                 after upgrading.
   
 Note:
   If you have just updated notablog, don't forget to also update 
@@ -58,6 +60,7 @@ function cmdPreview(workDir, logger) {
 async function main() {
   const { args, flags } = parseArgv(process.argv)
   const verbose = parseFlagVal(flags, '(-v|--verbose)', FlagTypes.boolean, false)
+  const ignoreCache = parseFlagVal(flags, '--fresh', FlagTypes.boolean, false)
   const subCmd = args[0]
   const workDir = args[1]
   const logger = new Logger('notablog-cli', {
@@ -78,7 +81,8 @@ async function main() {
       const opts = {
         concurrency: 3,
         verbose,
-        workDir
+        workDir,
+        ignoreCache
       }
       cmdGenerate(opts, logger)
       break

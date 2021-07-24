@@ -16,6 +16,7 @@ import { RenderPostTask } from './types'
 type GenerateOptions = {
   concurrency?: number
   verbose?: boolean
+  ignoreCache?: boolean
 }
 
 /**
@@ -33,6 +34,7 @@ type GenerateOptions = {
 export async function generate(workDir: string, opts: GenerateOptions = {}) {
   const concurrency = opts.concurrency
   const verbose = opts.verbose
+  const ignoreCache = opts.ignoreCache
   const notionAgent = createAgent({ debug: verbose })
   const cache = new Cache(path.join(workDir, 'cache'))
   const config = new Config(path.join(workDir, 'config.json'))
@@ -89,7 +91,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   log.info('Fetch and render pages')
   const { pagesUpdated, pagesNotUpdated } = siteContext.pages
     .reduce((data, page) => {
-      if (cache.shouldUpdate('notion', toDashID(page.id), page.lastEditedTime)) {
+      if (ignoreCache || cache.shouldUpdate('notion', toDashID(page.id), page.lastEditedTime)) {
         data.pagesUpdated.push(page)
       } else {
         data.pagesNotUpdated.push(page)
