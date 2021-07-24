@@ -8,13 +8,11 @@ Below are some screenshots of [my blog](https://dragonman225.js.org/). 🙂
 
 |            Mobile             |            Desktop             |
 | :---------------------------: | :----------------------------: |
-| ![](assets/v0.3.0_mobile.png) | ![](assets/v0.3.0_desktop.png) |
+| ![](assets/v0.6.0_mobile.jpg) | ![](assets/v0.6.0_desktop.jpg) |
 
 | Management Interface on Notion.so |
 | :-------------------------------: |
-|   ![](assets/v0.3.0_manage.png)   |
-
-### :construction: This is under construction, there may be breaking changes often ! :construction:
+|   ![](assets/v0.6.0_manage.jpg)   |
 
 
 
@@ -99,43 +97,42 @@ This is the documentation of [Notion table template](https://www.notion.so/b6fcf
 | `description` |     `Text`     |         Short intro of the page. Styles are working.         |
 |    `date`     |     `Date`     | User customizable date, convenient for importing posts from other platforms or adjusting the order of posts. |
 
-* **Hack**: Check `publish` but leave `inMenu` and `inList` unchecked to make a page seem like *hidden* because people can only view it when they know its URL.
+* **Tip**: Check `publish` but leave `inMenu` and `inList` unchecked to make a page seem like *hidden* because people can only view it when they know its URL.
 
 
 
 
-## API Reference (Outdated)
+## API Reference
 
 ### Introduction
 
-`notablog` itself is designed to be installed as a dependency, and invoked from NPM script. This way we can separate application code and user assets so that it's less confusing for a user. To make things even more simple, I have prepared [`notablog-starter`](https://github.com/dragonman225/notablog-starter), so a user doesn't have to setup folder structure manually. The concept is inspired by a popular project [hexo](https://github.com/hexojs/hexo).
+Notablog is a command-line tool that works on a [`notablog-starter`](https://github.com/dragonman225/notablog-starter) to generate sites. `notablog-starter` contains user config and customizable themes, and is used to store cached data and generated site. The design is inspired by [hexo](https://github.com/hexojs/hexo), a popular static site generator.
 
-With the design, a user only sees `notablog-starter` when using, therefore the following documentation will be in the context of `notablog-starter`.
-
-### Simplified Folder Structure
+### Folder Structure of `notablog-starter`
 
 ```
 notablog-starter
 ├── config.json
 ├── public
-├── source
-│   └── notion_cache
+├── cache
 └── themes
-    └── pure
+    ├── pure
+    └── pure-ejs
 ```
 
-- `config.json` - Site config.
+- `config.json` - User configuration.
 
   | Field |  Type  |                         Description                          |
   | :---: | :----: | :----------------------------------------------------------: |
   |  url  | string |     The URL of a Notion table compatible with Notablog.      |
   | theme | string | The theme to use. It should be one of the folder names in `themes/`. |
+  | previewBrowser | string | The path to the browser executable for previewing. |
 
-- `public/` - Contains generated static assets of the blog.
+- `public/` - Contains generated static assets.
 
-- `source/notion_cache/` - Cached JSON files of Notion pages. They are used when a user runs `npm run generate`, if a page contains no changes, the generator reads data from these cached files.
+- `cache/` - Stores cached NAST representation of Notion pages. When running `notablog generate ...`, if a page is not updated since last run, Notablog use the cached data to render.
 
-- `themes/` - Store themes.
+- `themes/` - Stores themes.
 
 ### Theme
 
@@ -145,67 +142,53 @@ A theme contains layout templates, CSS files, fonts, and other assets that shape
 
 ```
 <name>
-├── layout
-└── assets
+├── layouts
+├── assets
+└── manifest.json
 ```
 
 * `<name>` - Theme folder name, also the name to be used in `notablog-starter/config.json`.
-* `layout/` - Contains page templates. It is required to have at least one index layout (`index.html`) and one post layout (`post.html`). You can have more templates, and a user can use those bonus templates by specifying the template's filename in `template` field on Notion.
-* `assets/` - Other assets. Anything in this folder will be copied to `notablog-starter/public/` when running `npm run generate`.
+* `layouts/` - Contains page templates. It is required to have one index layout (`index.html`), one post layout (`post.html`), and one tag layout (`tag.html`). You can have more templates, and a user can use them by specifying the template's filename in `template` column on Notion table.
+* `assets/` - Other assets. Anything in this folder will be copied to `notablog-starter/public/` when running `notablog generate ...`.
+* `manifest.json` - Theme configuration.
+
+  | Field |  Type  |                         Description                          |
+  | :---: | :----: | :----------------------------------------------------------: |
+  | notablogVersion | string |     Supported Notablog version.     |
+  | templateEngine | string | The template engine to use. Depends the template language you use. It should be either "ejs" or "squirrelly" (v7). |
 
 #### Template Language
 
-* Currently, I use [Squirrelly.js](https://squirrelly.js.org/) as template engine.
+* [Squirrelly](https://squirrelly.js.org/) (v7 only, deprecated) and [EJS](https://ejs.co/) (recommended) are supported.
 
-* Template `index.html` gets the following structure of data :
+* Template `index.html` gets the following object:
 
-  ```
+  ```typescript
   {
-		siteMeta {
-			icon // Emoji or URL
-			iconHTML // Rendered HTML
-			cover // URL
-			title // String
-			description // Raw array, do not use
-			descriptionPlain // Rendered plain text, no style
-			descriptionHTML // Rendered HTML, with style
-			pages { // An array of page
-				id // Notion's page id
-				icon // Emoji or URL
-				iconHTML // Rendered HTML
-				cover // URL
-				title // String
-				tags // An array, [{ color: string, value: string }]
-				publish // Boolean, `true` if publish is checked.
-				inMenu // Boolean, `true` if inMenu is checked.
-				inList // Boolean, `true` if inList is checked.
-				template // Template name
-				url // URL of the page relative to site root
-				description // Raw array, do not use
-				descriptionPlain // Rendered plain text, no style
-				descriptionHTML // Rendered HTML, with style
-				date // Raw string, e.g. 2019-08-09
-				dateString // Formatted, e.g. Fri, Aug 9, 2019
-				createdTime // Unix timestamp
-				lastEditedTime // Unix timestamp
-			}
-		}
+    siteMeta: SiteContext
   }
   ```
 
-* Template `post.html` or others gets the following structure of data :
+* Template `tag.html` gets the following object:
 
-  ```
+  ```typescript
   {
-		siteMeta // The same as "siteMeta" in index.html
-		post {
-			...post // All properties of a page in "siteMeta.pages"
-			contentHTML // HTML of post body
-		}
+    siteMeta: SiteContext
+    tagName: string
+    pages: PageMetadata[]
   }
   ```
 
-> It is highly recommended to take a look at [notablog-theme-pure](https://github.com/dragonman225/notablog-theme-pure) if you want to make your own !
+* Template `post.html` or others gets the following object:
+
+  ```typescript
+  {
+    siteMeta: SiteContext
+    post: PageMetadata & { contentHTML: string } // All properties of PageMetadata plus contentHTML.
+  }
+  ```
+
+> It is highly recommended to take a look at [the default theme "pure-ejs"](https://github.com/dragonman225/notablog-starter/tree/master/themes/pure-ejs) if you want to make your own!
 
 
 
