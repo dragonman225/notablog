@@ -1,4 +1,6 @@
 import typescript from '@rollup/plugin-typescript'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 
 const pkg = require('./package.json')
 
@@ -7,12 +9,14 @@ export default {
   output: [
     {
       file: 'dist/index.js',
-      format: 'cjs'
+      format: 'cjs',
+      sourcemap: true
     }, {
       file: 'dist/index.esm.js',
-      format: 'es'
+      format: 'es',
+      sourcemap: true
     }
   ],
   plugins: [typescript()],
-  external: [...Object.keys(pkg.dependencies), 'crypto', 'fs', 'path', 'child_process']
+  external: [...Object.keys(pkg.dependencies), 'crypto', 'fs', 'path', 'child_process'],
 }

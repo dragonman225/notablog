@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-const { parseArgs, parseFlagVal } = require('@dnpr/cli')
+const { FlagTypes, parseArgv, parseFlagVal } = require('@dnpr/cli')
 const { Logger } = require('@dnpr/logger')
+
 const { generate, preview } = require('..')
 
 function printHelp() {
@@ -9,7 +10,7 @@ function printHelp() {
 Usage: notablog <command> [<option>]
 
 Available <command>:
-  help                                 Show this help.
+  help                                 Show this text.
   generate <path_to_notablog-starter>  Generate the blog.
   preview <path_to_notablog-starter>   Open a browser to preview the blog.
 
@@ -19,13 +20,13 @@ Available <option>:
 Note:
   If you have just updated notablog, don't forget to also update 
   notablog-starter (https://github.com/dragonman225/notablog-starter), 
-  or layout may be broken due to mismatch of generated HTML markup and 
+  or layout may be broken due to mismatch between the generated HTML and 
   the CSS theme.`)
 }
 
 async function cmdGenerate(opts, logger) {
   if (!opts.workDir) {
-    console.log('You must specify a path to a notablog-starter to generate.')
+    console.log('You must specify the path to a notablog-starter to generate.')
     process.exit(1)
   }
 
@@ -35,7 +36,7 @@ async function cmdGenerate(opts, logger) {
     const endTime = Date.now()
     const timeElapsed = (endTime - startTime) / 1000
     logger.info(`\
-Generation complete in ${timeElapsed}s. Run 'notablog preview ${opts.workDir}' to preview`)
+Done in ${timeElapsed}s. Run 'notablog preview ${opts.workDir}' to preview`)
   } catch (error) {
     logger.error(error)
   }
@@ -43,7 +44,7 @@ Generation complete in ${timeElapsed}s. Run 'notablog preview ${opts.workDir}' t
 
 function cmdPreview(workDir, logger) {
   if (!workDir) {
-    console.log('You must specify a path to a notablog-starter to preview.')
+    console.log('You must specify the path to a notablog-starter to preview.')
     process.exit(1)
   }
 
@@ -55,8 +56,8 @@ function cmdPreview(workDir, logger) {
 }
 
 async function main() {
-  const { args, flags } = parseArgs(process.argv)
-  const verbose = parseFlagVal(flags, '(-v|--verbose)', 'boolean', false)
+  const { args, flags } = parseArgv(process.argv)
+  const verbose = parseFlagVal(flags, '(-v|--verbose)', FlagTypes.boolean, false)
   const subCmd = args[0]
   const workDir = args[1]
   const logger = new Logger('notablog-cli', {
@@ -86,7 +87,7 @@ async function main() {
       cmdPreview(workDir, logger)
       break
     default:
-      logger.error(`'${subCmd}' is not a notablog command. See 'notablog help'`)
+      logger.error(`'${subCmd}' is not a valid command. See 'notablog help'`)
   }
 }
 
