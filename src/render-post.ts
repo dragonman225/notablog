@@ -1,14 +1,11 @@
-import fs from 'fs'
-import fsPromises = fs.promises
+import { promises as fsPromises } from 'fs'
 import path from 'path'
 import visit from 'unist-util-visit'
 import { getOnePageAsTree } from 'nast-util-from-notionapi'
 import { renderToHTML } from 'nast-util-to-react'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const Sqrl = require('squirrelly')
 
-import { log, objAccess } from './utils'
 import { toDashID } from './notion-utils'
+import { log, objAccess } from './utils'
 import { RenderPostTask, SiteContext } from './types'
 
 function createLinkTransformer(siteContext: SiteContext) {
@@ -128,53 +125,51 @@ function createLinkTransformer(siteContext: SiteContext) {
  */
 export async function renderPost(task: RenderPostTask) {
 
-  const siteContext = task.data.siteContext
-  const templateProvider = task.tools.templateProvider
-  const notionAgent = task.tools.notionAgent
-  const cache = task.tools.cache
-  const pageMetadata = task.data.pageMetadata
+  const { doFetchPage, pageMetadata, siteContext } = task.data
+  const { cache, notionAgent, renderer } = task.tools
   const config = task.config
 
   const pageID = toDashID(pageMetadata.id)
-
-  let nast: NAST.Block
+  let tree: NAST.Block
 
   /** Fetch page. */
-  if (config.doFetchPage) {
+  if (doFetchPage) {
     log.info(`Fetch data of page "${pageID}"`)
-    nast = await getOnePageAsTree(pageID, notionAgent)
+
+    tree = await getOnePageAsTree(pageID, notionAgent)
     /** Use internal links for pages in the table. */
     /** @ts-ignore */
-    visit(nast, createLinkTransformer(siteContext))
-    cache.set('notion', pageID, nast)
+    visit(tree, createLinkTransformer(siteContext))
+    cache.set('notion', pageID, tree)
+
     log.info(`Cache of "${pageID}" is saved`)
   } else {
     log.info(`Read cache of page "${pageID}"`)
-    const _nast = cache.get('notion', pageID)
-    if (_nast != null) nast = _nast as NAST.Block
+
+    const cachedTree = cache.get('notion', pageID)
+
+    if (cachedTree != null) tree = cachedTree as NAST.Block
     else throw new Error(`\
-Cache of page "${pageID}" is corrupted, delete cache/ to rebuild`)
+Cache of page "${pageID}" is corrupted, run "notablog generate --fresh <path_to_starter>" to fix`)
   }
 
   /** Render with template. */
   if (pageMetadata.publish) {
-    log.info(`Render page "${pageID}"`)
-    const contentHTML = renderToHTML(nast)
-    const outDir = config.outDir
-    const postPath = path.join(outDir, pageMetadata.url)
+    log.info(`Render published page "${pageID}"`)
 
-    Sqrl.autoEscaping(false)
-    const html = Sqrl.Render(
-      templateProvider.get(pageMetadata.template).content,
-      {
-        siteMeta: siteContext,
-        post: {
-          ...pageMetadata,
-          contentHTML
-        }
+    const outDir = config.outDir
+    const outPath = path.join(outDir, pageMetadata.url)
+
+    const contentHTML = renderToHTML(tree)
+    const pageHTML = renderer.render(pageMetadata.template, {
+      siteMeta: siteContext,
+      post: {
+        ...pageMetadata,
+        contentHTML
       }
-    )
-    await fsPromises.writeFile(postPath, html, { encoding: 'utf-8' })
+    })
+
+    await fsPromises.writeFile(outPath, pageHTML, { encoding: 'utf-8' })
     return 0
   } else {
     log.info(`Skip rendering of unpublished page "${pageID}"`)

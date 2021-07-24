@@ -1,11 +1,25 @@
 import { createAgent } from 'notionapi-agent'
 import { SemanticString } from 'nast-types'
-import { TemplateProvider } from './template-provider'
+
 import { Cache } from './cache'
+import { Renderer } from './renderer'
 
 export interface Tag {
   value: string
   color: string
+}
+
+export interface SiteContext {
+  icon: string | undefined
+  iconHTML: string
+  cover: string | undefined
+  title: SemanticString[]
+  description: SemanticString[] | undefined
+  descriptionPlain: string
+  descriptionHTML: string
+  pages: PageMetadata[]
+  /** tag name -> pages */
+  tagMap: Map<string, PageMetadata[]>
 }
 
 export interface PageMetadata {
@@ -30,34 +44,36 @@ export interface PageMetadata {
   lastEditedTime: number
 }
 
-export interface SiteContext {
-  icon: string | undefined
-  iconHTML: string
-  cover: string | undefined
-  title: SemanticString[]
-  description: SemanticString[] | undefined
-  descriptionPlain: string
-  descriptionHTML: string
-  pages: PageMetadata[]
-  /** tag name -> pages */
-  tagMap: Map<string, PageMetadata[]>
-}
-
-export interface RenderPostTask {
-  data: {
-    siteContext: SiteContext
-    pageMetadata: PageMetadata
-  }
+export interface RenderTask {
+  data: {}
   tools: {
-    templateProvider: TemplateProvider
+    renderer: Renderer
     notionAgent: ReturnType<typeof createAgent>
     cache: Cache
   }
   config: {
-    doFetchPage: boolean
     workDir: string
     themeDir: string
     outDir: string
     tagDir: string
   }
+}
+
+export interface RenderIndexTask extends RenderTask {
+  data: {
+    siteContext: SiteContext
+  }
+}
+
+export interface RenderPostTask extends RenderTask {
+  data: {
+    siteContext: SiteContext
+    pageMetadata: PageMetadata
+    doFetchPage: boolean
+  }
+}
+
+export interface ThemeManifest {
+  notablogVersion: string
+  templateEngine: string
 }

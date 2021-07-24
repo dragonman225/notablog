@@ -3,15 +3,16 @@ import path from 'path'
 import { createAgent } from 'notionapi-agent'
 import { TaskManager2 } from '@dnpr/task-manager'
 import { copyDirSync } from '@dnpr/fsutil'
+
 import { Cache } from './cache'
 import { Config } from './config'
-import { TemplateProvider } from './template-provider'
 import { parseTable } from './parse-table'
+import { EJSStrategy, Renderer, SqrlStrategy } from './renderer'
 import { renderIndex } from './render-index'
 import { renderPost } from './render-post'
-import { log } from './utils'
+import { log, parseJSON } from './utils'
 import { toDashID } from './notion-utils'
-import { RenderPostTask } from './types'
+import { RenderPostTask, ThemeManifest } from './types'
 
 type GenerateOptions = {
   concurrency?: number
@@ -32,9 +33,8 @@ type GenerateOptions = {
  * Generate a blog.
  */
 export async function generate(workDir: string, opts: GenerateOptions = {}) {
-  const concurrency = opts.concurrency
-  const verbose = opts.verbose
-  const ignoreCache = opts.ignoreCache
+  const { concurrency, verbose, ignoreCache } = opts
+
   const notionAgent = createAgent({ debug: verbose })
   const cache = new Cache(path.join(workDir, 'cache'))
   const config = new Config(path.join(workDir, 'config.json'))
@@ -43,7 +43,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   const theme = config.get('theme')
   const themeDir = path.join(workDir, `themes/${theme}`)
   if (!fs.existsSync(themeDir)) {
-    throw new Error(`Cannot find "${theme}" in themes/ folder`)
+    throw new Error(`Cannot find theme "${theme}" in themes/`)
   }
 
   const outDir = path.join(workDir, 'public')
@@ -61,8 +61,16 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   }
 
   /** Create TemplateProvider instance. */
-  const templateDir = path.join(themeDir, 'layout')
-  const templateProvider = new TemplateProvider(templateDir)
+  const templateDir = path.join(themeDir, 'layouts')
+  if (!fs.existsSync(templateDir)) {
+    throw new Error(`Cannot find layouts/ in theme "${theme}"`)
+  }
+  const themeManifestPath = path.join(themeDir, 'manifest.json')
+  const themeManifest = parseJSON(fs.readFileSync(themeManifestPath)) as ThemeManifest
+  const templateEngine = themeManifest.templateEngine
+  const renderStrategy = templateEngine === 'ejs' ? 
+    new EJSStrategy(templateDir) : new SqrlStrategy(templateDir)
+  const renderer = new Renderer(renderStrategy)
 
   /** Copy theme assets. */
   log.info('Copy theme assets')
@@ -70,17 +78,19 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   copyDirSync(assetDir, outDir)
 
   /** Fetch site metadata. */
-  log.info('Fetch Site Metadata')
+  log.info('Fetch site metadata')
   const siteContext = await parseTable(config.get('url'), notionAgent)
 
-  /** Render site entry. */
-  log.info('Render site entry')
+  /** Render home page and tags */
+  log.info('Render home page and tags')
   renderIndex({
     data: {
-      siteMeta: siteContext
+      siteContext: siteContext
     },
     tools: {
-      templateProvider
+      renderer,
+      notionAgent,
+      cache
     },
     config: {
       ...dirs
@@ -116,28 +126,26 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   pagesUpdated.forEach(pageMetadata => {
     tasks.push(tm2.queue(renderPost, [{
       data: {
-        siteContext, pageMetadata
+        siteContext, pageMetadata, doFetchPage: true
       },
       tools: {
-        templateProvider, notionAgent, cache
+        renderer, notionAgent, cache
       },
       config: {
-        ...dirs,
-        doFetchPage: true
+        ...dirs
       }
     } as RenderPostTask]) as never)
   })
   pagesNotUpdated.forEach(pageMetadata => {
     tasks.push(tm2.queue(renderPost, [{
       data: {
-        siteContext, pageMetadata
+        siteContext, pageMetadata, doFetchPage: false
       },
       tools: {
-        templateProvider, notionAgent, cache
+        renderer, notionAgent, cache
       },
       config: {
-        ...dirs,
-        doFetchPage: false
+        ...dirs
       }
     } as RenderPostTask]) as never)
   })

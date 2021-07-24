@@ -1,28 +1,24 @@
 import fs from 'fs'
 import path from 'path'
-const Sqrl = require('squirrelly')
 
 import { log } from './utils'
+import { RenderIndexTask } from './types'
 
-export function renderIndex(task) {
-  const siteMeta = task.data.siteMeta
-  const templateProvider = task.tools.templateProvider
+export function renderIndex(task: RenderIndexTask) {
+  const siteMeta = task.data.siteContext
+  const { renderer } = task.tools
   const config = task.config
 
   const outDir = config.outDir
   const indexPath = path.join(outDir, 'index.html')
-
-  Sqrl.autoEscaping(false)
-
+  
   log.info('Render home page')
-  const html = Sqrl.Render(templateProvider.get('index').content, {
-    siteMeta
-  })
+  const html = renderer.render('index', { siteMeta })
   fs.writeFileSync(indexPath, html, { encoding: 'utf-8' })
 
   siteMeta.tagMap.forEach((pageMetas, tagVal) => {
     log.info(`Render tag "${tagVal}"`)
-    const html = Sqrl.Render(templateProvider.get('tag').content, {
+    const html = renderer.render('tag', {
       siteMeta,
       tagName: tagVal,
       pages: pageMetas

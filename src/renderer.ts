@@ -1,5 +1,6 @@
 import ejs from 'ejs'
 const sqrl = require('squirrelly') // cannot use import
+
 import { TemplateProvider } from './template-provider'
 import { DEPRECATE } from './utils'
 

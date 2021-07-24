@@ -2,6 +2,7 @@ import { createAgent } from 'notionapi-agent'
 import { getOnePageAsTree } from 'nast-util-from-notionapi'
 import { renderToHTML } from 'nast-util-to-react'
 import { SemanticString } from 'nast-types'
+
 import { getPageIDFromCollectionPageURL } from './notion-utils'
 import { log, objAccess } from './utils'
 import { SiteContext, PageMetadata } from './types'

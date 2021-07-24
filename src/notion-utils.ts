@@ -3,9 +3,9 @@ const noDashIDLen = '0eeee000ccccbbbbaaaa123450000000'.length
 
 export function getPageIDFromPageURL(str: string): string {
   let splitArr = str.split('/')
-  splitArr = (splitArr.pop() || "").split('-')
+  splitArr = (splitArr.pop() || '').split('-')
 
-  let pageID = splitArr.pop()
+  const pageID = splitArr.pop()
   if (pageID && pageID.length === noDashIDLen) {
     return toDashID(pageID)
   } else {
@@ -15,10 +15,10 @@ export function getPageIDFromPageURL(str: string): string {
 
 export function getPageIDFromCollectionPageURL(str: string): string {
   let splitArr = str.split('/')
-  splitArr = (splitArr.pop() || "").split('-')
-  splitArr = (splitArr.pop() || "").split('?')
+  splitArr = (splitArr.pop() || '').split('-')
+  splitArr = (splitArr.pop() || '').split('?')
 
-  let pageID = splitArr[0]
+  const pageID = splitArr[0]
   if (pageID && pageID.length === noDashIDLen) {
     return toDashID(pageID)
   } else {
@@ -28,10 +28,10 @@ export function getPageIDFromCollectionPageURL(str: string): string {
 
 export function getBookmarkLinkFromPageURL(str: string): string {
   let splitArr = str.split('/')
-  splitArr = (splitArr.pop() || "").split('-')
-  splitArr = (splitArr.pop() || "").split('#')
+  splitArr = (splitArr.pop() || '').split('-')
+  splitArr = (splitArr.pop() || '').split('#')
 
-  let blockID = splitArr[1]
+  const blockID = splitArr[1]
   if (blockID && blockID.length === noDashIDLen) {
     return `#${toDashID(blockID)}`
   } else {
@@ -44,12 +44,12 @@ export function toDashID(str: string): string {
     return str
   }
 
-  let s = str.replace(/-/g, '')
+  const s = str.replace(/-/g, '')
   if (s.length !== noDashIDLen) {
     return str
   }
 
-  let res =
+  const res =
     str.substring(0, 8) + '-' + str.substring(8, 12) + '-' +
     str.substring(12, 16) + '-' + str.substring(16, 20) + '-' +
     str.substring(20)
