@@ -4,35 +4,30 @@ import { createAgent } from 'notionapi-agent'
 import { TaskManager2 } from '@dnpr/task-manager'
 import { copyDirSync } from '@dnpr/fsutil'
 
-import { Cache } from './cache'
-import { Config } from './config'
-import { parseTable } from './parse-table'
-import { EJSStrategy, Renderer } from './renderer'
-import { renderIndex } from './render-index'
-import { renderPost } from './render-post'
-import { log, parseJSON } from './utils'
-import { toDashID } from './notion-utils'
-import { RenderPostTask, ThemeManifest } from './types'
+import { Cache } from '../cache'
+import { Config } from '../config'
+import { parseTable } from '../parse-table'
+import { EJSStrategy, Renderer } from '../renderer'
+import { renderIndex } from '../render-index'
+import { renderPost } from '../render-post'
+import { log, parseJSON } from '../utils'
+import { toDashID } from '../notion-utils'
+import { RenderPostTask, ThemeConfig } from '../types'
 
 type GenerateOptions = {
+  /** Concurrency for Notion page downloading and rendering. */
   concurrency?: number
+  /** Whether to print more messages for debugging. */
   verbose?: boolean
+  /** Do not check cache and fetch all pages from Notion. */
   ignoreCache?: boolean
 }
 
-/**
- * @typedef {Object} GenerateOptions
- * @property {string} workDir - A valid Notablog starter directory.
- * @property {number} concurrency - Concurrency for Notion page
- * downloading and rendering.
- * @property {boolean} verbose - Whether to print more messages for
- * debugging.
- */
-
-/**
- * Generate a blog.
- */
-export async function generate(workDir: string, opts: GenerateOptions = {}) {
+/** Generate a Notablog static site. */
+export async function generate(
+  workDir: string,
+  opts: GenerateOptions = {}
+): Promise<number> {
   const { concurrency, verbose, ignoreCache } = opts
 
   const notionAgent = createAgent({ debug: verbose })
@@ -40,7 +35,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   const config = new Config(path.join(workDir, 'config.json'))
 
   /** Init dir paths. */
-  const theme = config.get('theme') as string
+  const theme = config.get('theme')
   const themeDir = path.join(workDir, `themes/${theme}`)
   if (!fs.existsSync(themeDir)) {
     throw new Error(`Cannot find theme "${theme}" in themes/`)
@@ -71,7 +66,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   const themeManifestPath = path.join(themeDir, 'manifest.json')
   const themeManifest = parseJSON(
     fs.readFileSync(themeManifestPath, { encoding: 'utf-8' })
-  ) as ThemeManifest
+  ) as ThemeConfig
   const templateEngine = themeManifest.templateEngine
   const renderStrategy = new EJSStrategy(templateDir)
   const renderer = new Renderer(renderStrategy)

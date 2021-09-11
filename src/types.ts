@@ -33,7 +33,7 @@ export interface PageMetadata {
   inList: boolean
   template: string
   url: string
-  description: string | undefined
+  description: SemanticString[] | undefined
   descriptionPlain: string
   descriptionHTML: string
   date: string | undefined
@@ -71,7 +71,13 @@ export interface RenderPostTask extends RenderTask {
   }
 }
 
-export interface ThemeManifest {
+export interface NotablogStarterConfig {
+  url: string
+  theme: string
+  previewBrowser: string
+}
+
+export interface ThemeConfig {
   notablogVersion: string
   templateEngine: string
 }
