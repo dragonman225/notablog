@@ -10,8 +10,8 @@ import { parseTable } from '../parse-table'
 import { EJSStrategy, Renderer } from '../renderer'
 import { renderIndex } from '../render-index'
 import { renderPost } from '../render-post'
-import { log, parseJSON } from '../utils'
-import { toDashID } from '../notion-utils'
+import { log, parseJSON } from '../utils/misc'
+import { toDashID } from '../utils/notion'
 import { RenderPostTask, ThemeConfig } from '../types'
 
 type GenerateOptions = {

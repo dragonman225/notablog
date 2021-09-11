@@ -2,7 +2,7 @@ import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 
-import { log } from './utils'
+import { log } from './utils/misc'
 
 export class Cache {
   private cacheDir: string

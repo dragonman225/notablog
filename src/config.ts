@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { promises as fsPromises } from 'fs'
 
-import { log } from './utils'
+import { log } from './utils/misc'
 import { NotablogStarterConfig } from './types'
 
 export class Config {

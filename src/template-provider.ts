@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import { log } from './utils'
+import { log } from './utils/misc'
 
 interface Template {
   content: string

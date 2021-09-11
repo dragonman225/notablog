@@ -1,6 +1,6 @@
 import { FormattingMentionDate } from 'nast-types'
 
-import { getPageIDFromPageURL } from './notion-utils'
+import { getPageIDFromPageURL } from './utils/notion'
 
 interface Property {
   id: string

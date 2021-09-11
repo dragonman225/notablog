@@ -4,8 +4,8 @@ import visit from 'unist-util-visit'
 import { getOnePageAsTree } from 'nast-util-from-notionapi'
 import { renderToHTML } from 'nast-util-to-react'
 
-import { toDashID } from './notion-utils'
-import { log, objAccess } from './utils'
+import { toDashID } from './utils/notion'
+import { log, objAccess } from './utils/misc'
 import { RenderPostTask, SiteContext } from './types'
 
 function createLinkTransformer(siteContext: SiteContext) {

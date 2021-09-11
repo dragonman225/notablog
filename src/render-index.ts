@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import { log } from './utils'
+import { log } from './utils/misc'
 import { RenderIndexTask } from './types'
 
 export function renderIndex(task: RenderIndexTask): void {

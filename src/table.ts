@@ -1,4 +1,4 @@
-import { numToOrder } from './utils'
+import { numToOrder } from './utils/misc'
 
 interface PropertyValue {
   type: Notion.Collection.ColumnPropertyType

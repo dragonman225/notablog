@@ -17,7 +17,7 @@ import {
   NTextCell,
   NTextProperty,
 } from './ntable'
-import { getPageIDFromCollectionPageURL } from './notion-utils'
+import { getPageIDFromCollectionPageURL } from './utils/notion'
 import { SiteContext, PageMetadata } from './types'
 
 /** Extract interested data for blog generation from a Notion table. */

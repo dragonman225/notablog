@@ -2,7 +2,7 @@ import path from 'path'
 import { spawn } from 'child_process'
 
 import { Config } from '../config'
-import { outDir } from '../utils'
+import { outDir } from '../utils/misc'
 
 /**
  * Open `index` with `bin`.
