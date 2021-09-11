@@ -12,7 +12,7 @@ function parsePropertyValue(
   row: NAST.Page
 ): PropertyValue {
   /**
-   * A common place to get the column value. 
+   * A common place to get the column value.
    * However, some types of column values are at other places.
    */
   const data = (row.properties || {})[columnId]
@@ -20,38 +20,37 @@ function parsePropertyValue(
     case 'title':
       return {
         type: column.type,
-        value: row.title
+        value: row.title,
       }
     case 'checkbox':
       return {
         type: column.type,
         value: data ? data[0][0] === 'Yes' : false,
-        groupKeys: [data ? (data[0][0] === 'Yes').toString() : 'false']
+        groupKeys: [data ? (data[0][0] === 'Yes').toString() : 'false'],
       }
     case 'select':
     case 'multi_select': {
       const optionNames = data ? data[0][0].split(',') : []
       const optionVals = optionNames.map(optionName => {
-        const option = (column.options || [])
-          .find(o => o.value === optionName)
+        const option = (column.options || []).find(o => o.value === optionName)
         if (!option) {
           console.log(`Select option "${optionName}" is \
 not found on property "${columnId}:${column.name}".`)
           return {
             color: 'default',
-            value: optionName
+            value: optionName,
           }
         } else {
           return {
             color: option.color,
-            value: option.value
+            value: option.value,
           }
         }
       })
       return {
         type: column.type,
         value: optionVals,
-        groupKeys: optionVals.map(o => o.value)
+        groupKeys: optionVals.map(o => o.value),
       }
     }
     // TODO: NAST currently do not have the following 2 information.
@@ -59,22 +58,22 @@ not found on property "${columnId}:${column.name}".`)
     case 'last_edited_by':
       return {
         type: column.type,
-        value: 'Someone'
+        value: 'Someone',
       }
     case 'created_time':
       return {
         type: column.type,
-        value: row.createdTime
+        value: row.createdTime,
       }
     case 'last_edited_time':
       return {
         type: column.type,
-        value: row.lastEditedTime
+        value: row.lastEditedTime,
       }
     default:
       return {
         type: column.type,
-        value: (row.properties || {})[columnId]
+        value: (row.properties || {})[columnId],
       }
   }
 }
@@ -97,8 +96,12 @@ export interface IRecord {
   coverPosition: number
   fullWidth: boolean
   schema: Schema
-  getPropertyValueById: (id: Notion.Collection.ColumnID) => PropertyValue | undefined
-  getPropertyValuesByName: (name: Notion.Collection.ColumnProperty['name']) => PropertyValue[]
+  getPropertyValueById: (
+    id: Notion.Collection.ColumnID
+  ) => PropertyValue | undefined
+  getPropertyValuesByName: (
+    name: Notion.Collection.ColumnProperty['name']
+  ) => PropertyValue[]
 }
 
 export interface ITable {
@@ -165,10 +168,8 @@ export class Record implements IRecord {
   /** A property has an unique id. */
   getPropertyValueById(id: Notion.Collection.ColumnID) {
     const property = this.schema.idPropertyMap[id]
-    if (property)
-      return parsePropertyValue(property, id, this._rawRecord)
-    else
-      return undefined
+    if (property) return parsePropertyValue(property, id, this._rawRecord)
+    else return undefined
   }
 
   /** Properties may have the same name. */
@@ -201,8 +202,9 @@ export class Table implements ITable {
     this.cover = rawTable.cover
     this.coverPosition = rawTable.coverPosition
     this.schema = new Schema(rawTable.schema)
-    this.records = rawTable.children
-      .map(record => new Record(record, this.schema))
+    this.records = rawTable.children.map(
+      record => new Record(record, this.schema)
+    )
   }
 
   recordsGroupByProperty(propertyName: string, which: number = 1) {
@@ -220,12 +222,11 @@ Return all records as ungrouped.`)
 
     for (let i = 0; i < this.records.length; i++) {
       const record = this.records[i]
-      const propertyValue =
-        record.getPropertyValueById(selectedPropertyId)
+      const propertyValue = record.getPropertyValueById(selectedPropertyId)
       if (!propertyValue) {
         console.log(`\
 Cannot get property value on record \
-"${record.title.reduce((str, ss) => str += ss[0], '')}", \
+"${record.title.reduce((str, ss) => (str += ss[0]), '')}", \
 but the requested property exists in schema.
 Is the table broken?`)
         ungrouped.push(record)
@@ -251,8 +252,8 @@ Cannot group records by property name "${propertyName}" of type \
     }
 
     return {
-      groups, ungrouped
+      groups,
+      ungrouped,
     }
   }
 }
-

@@ -2,6 +2,10 @@ import fs from 'fs'
 import path from 'path'
 import { log } from './utils'
 
+interface Template {
+  content: string
+  filePath: string
+}
 export class TemplateProvider {
   private templateDir: string
   private templateMap: {
@@ -15,21 +19,14 @@ export class TemplateProvider {
 
   /**
    * Get template as a string by its name.
-   * 
-   * The name of a template is its filename without extension. 
+   *
+   * The name of a template is its filename without extension.
    */
-  get(templateName: string) {
+  get(templateName: string): Template {
     log.debug(`Get template "${templateName}"`)
 
     const template = this.templateMap[templateName]
     const templatePath = this._templatePath(templateName)
-
-    if (typeof templateName !== 'string') {
-      return {
-        content: `"${templateName}" must be a string.`,
-        filePath: templatePath
-      }
-    }
 
     if (template) {
       return { content: template, filePath: templatePath }
@@ -40,15 +37,16 @@ export class TemplateProvider {
 
   /**
    * Load a template as a string into cache and return it.
-   * 
+   *
    * If failed to load, return an error string.
    */
   private _load(templateName: string) {
     log.debug(`Load template "${templateName}"`)
     const templatePath = this._templatePath(templateName)
     try {
-      this.templateMap[templateName] =
-        fs.readFileSync(templatePath, { encoding: 'utf-8' })
+      this.templateMap[templateName] = fs.readFileSync(templatePath, {
+        encoding: 'utf-8',
+      })
       return this.templateMap[templateName]
     } catch (err) {
       log.warn(err)

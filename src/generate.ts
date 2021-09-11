@@ -7,7 +7,7 @@ import { copyDirSync } from '@dnpr/fsutil'
 import { Cache } from './cache'
 import { Config } from './config'
 import { parseTable } from './parse-table'
-import { EJSStrategy, Renderer, SqrlStrategy } from './renderer'
+import { EJSStrategy, Renderer } from './renderer'
 import { renderIndex } from './render-index'
 import { renderPost } from './render-post'
 import { log, parseJSON } from './utils'
@@ -23,9 +23,9 @@ type GenerateOptions = {
 /**
  * @typedef {Object} GenerateOptions
  * @property {string} workDir - A valid Notablog starter directory.
- * @property {number} concurrency - Concurrency for Notion page 
+ * @property {number} concurrency - Concurrency for Notion page
  * downloading and rendering.
- * @property {boolean} verbose - Whether to print more messages for 
+ * @property {boolean} verbose - Whether to print more messages for
  * debugging.
  */
 
@@ -40,7 +40,7 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   const config = new Config(path.join(workDir, 'config.json'))
 
   /** Init dir paths. */
-  const theme = config.get('theme')
+  const theme = config.get('theme') as string
   const themeDir = path.join(workDir, `themes/${theme}`)
   if (!fs.existsSync(themeDir)) {
     throw new Error(`Cannot find theme "${theme}" in themes/`)
@@ -57,7 +57,10 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   }
 
   const dirs = {
-    workDir, themeDir, outDir, tagDir
+    workDir,
+    themeDir,
+    outDir,
+    tagDir,
   }
 
   /** Create TemplateProvider instance. */
@@ -66,10 +69,11 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
     throw new Error(`Cannot find layouts/ in theme "${theme}"`)
   }
   const themeManifestPath = path.join(themeDir, 'manifest.json')
-  const themeManifest = parseJSON(fs.readFileSync(themeManifestPath)) as ThemeManifest
+  const themeManifest = parseJSON(
+    fs.readFileSync(themeManifestPath, { encoding: 'utf-8' })
+  ) as ThemeManifest
   const templateEngine = themeManifest.templateEngine
-  const renderStrategy = templateEngine === 'ejs' ? 
-    new EJSStrategy(templateDir) : new SqrlStrategy(templateDir)
+  const renderStrategy = new EJSStrategy(templateDir)
   const renderer = new Renderer(renderStrategy)
 
   /** Copy theme assets. */
@@ -85,69 +89,92 @@ export async function generate(workDir: string, opts: GenerateOptions = {}) {
   log.info('Render home page and tags')
   renderIndex({
     data: {
-      siteContext: siteContext
+      siteContext: siteContext,
     },
     tools: {
       renderer,
       notionAgent,
-      cache
+      cache,
     },
     config: {
-      ...dirs
-    }
+      ...dirs,
+    },
   })
 
   /** Render pages. */
   log.info('Fetch and render pages')
-  const { pagesUpdated, pagesNotUpdated } = siteContext.pages
-    .reduce((data, page) => {
-      if (ignoreCache || cache.shouldUpdate('notion', toDashID(page.id), page.lastEditedTime)) {
+  const { pagesUpdated, pagesNotUpdated } = siteContext.pages.reduce(
+    (data, page) => {
+      if (
+        ignoreCache ||
+        cache.shouldUpdate('notion', toDashID(page.id), page.lastEditedTime)
+      ) {
         data.pagesUpdated.push(page)
       } else {
         data.pagesNotUpdated.push(page)
       }
       return data
-    }, {
-      pagesUpdated: [], pagesNotUpdated: []
+    },
+    {
+      pagesUpdated: [],
+      pagesNotUpdated: [],
     } as {
       pagesUpdated: typeof siteContext.pages
       pagesNotUpdated: typeof siteContext.pages
-    })
+    }
+  )
 
   const pageTotalCount = siteContext.pages.length
   const pageUpdatedCount = pagesUpdated.length
-  const pagePublishedCount = siteContext.pages
-    .filter(page => page.publish).length
+  const pagePublishedCount = siteContext.pages.filter(
+    page => page.publish
+  ).length
   log.info(`${pageUpdatedCount} of ${pageTotalCount} posts have been updated`)
   log.info(`${pagePublishedCount} of ${pageTotalCount} posts are published`)
 
   const tm2 = new TaskManager2({ concurrency })
   const tasks = []
   pagesUpdated.forEach(pageMetadata => {
-    tasks.push(tm2.queue(renderPost, [{
-      data: {
-        siteContext, pageMetadata, doFetchPage: true
-      },
-      tools: {
-        renderer, notionAgent, cache
-      },
-      config: {
-        ...dirs
-      }
-    } as RenderPostTask]) as never)
+    tasks.push(
+      tm2.queue(renderPost, [
+        {
+          data: {
+            siteContext,
+            pageMetadata,
+            doFetchPage: true,
+          },
+          tools: {
+            renderer,
+            notionAgent,
+            cache,
+          },
+          config: {
+            ...dirs,
+          },
+        } as RenderPostTask,
+      ]) as never
+    )
   })
   pagesNotUpdated.forEach(pageMetadata => {
-    tasks.push(tm2.queue(renderPost, [{
-      data: {
-        siteContext, pageMetadata, doFetchPage: false
-      },
-      tools: {
-        renderer, notionAgent, cache
-      },
-      config: {
-        ...dirs
-      }
-    } as RenderPostTask]) as never)
+    tasks.push(
+      tm2.queue(renderPost, [
+        {
+          data: {
+            siteContext,
+            pageMetadata,
+            doFetchPage: false,
+          },
+          tools: {
+            renderer,
+            notionAgent,
+            cache,
+          },
+          config: {
+            ...dirs,
+          },
+        } as RenderPostTask,
+      ]) as never
+    )
   })
   await Promise.all(tasks)
   return 0

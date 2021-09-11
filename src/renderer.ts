@@ -1,11 +1,9 @@
-import ejs from 'ejs'
-const sqrl = require('squirrelly') // cannot use import
+import { render as renderWithEjs } from 'ejs'
 
 import { TemplateProvider } from './template-provider'
-import { DEPRECATE } from './utils'
 
 export interface RenderStrategy {
-  render: (templateName: string, data: any) => string
+  render: (templateName: string, data: Record<string, unknown>) => string
 }
 
 export class EJSStrategy implements RenderStrategy {
@@ -15,27 +13,11 @@ export class EJSStrategy implements RenderStrategy {
     this.templateProvider = new TemplateProvider(templateDir)
   }
 
-  render(templateName, data) {
+  render(templateName: string, data: Record<string, unknown>): string {
     const template = this.templateProvider.get(templateName)
-    return ejs.render(template.content, data, {
-      filename: template.filePath
+    return renderWithEjs(template.content, data, {
+      filename: template.filePath,
     })
-  }
-}
-
-export class SqrlStrategy implements RenderStrategy {
-  private templateProvider: TemplateProvider
-
-  constructor(templateDir: string) {
-    DEPRECATE('Squirrelly templates will be deprecated, please migrate \
-to EJS templates (https://ejs.co/).')
-    this.templateProvider = new TemplateProvider(templateDir)
-    sqrl.autoEscaping(false)
-  }
-
-  render(templateName, data) {
-    const template = this.templateProvider.get(templateName)
-    return sqrl.Render(template.content, data)
   }
 }
 
@@ -46,7 +28,7 @@ export class Renderer {
     this.strategy = strategy
   }
 
-  render(templateName: string, data: object) {
+  render(templateName: string, data: Record<string, unknown>): string {
     return this.strategy.render(templateName, data)
   }
 }

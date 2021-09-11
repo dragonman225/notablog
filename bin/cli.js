@@ -59,18 +59,23 @@ function cmdPreview(workDir, logger) {
 
 async function main() {
   const { args, flags } = parseArgv(process.argv)
-  const verbose = parseFlagVal(flags, '(-v|--verbose)', FlagTypes.boolean, false)
+  const verbose = parseFlagVal(
+    flags,
+    '(-v|--verbose)',
+    FlagTypes.boolean,
+    false
+  )
   const ignoreCache = parseFlagVal(flags, '--fresh', FlagTypes.boolean, false)
   const subCmd = args[0]
   const workDir = args[1]
   const logger = new Logger('notablog-cli', {
     logLevel: verbose ? 'debug' : 'info',
-    useColor: process.env.NO_COLOR ? false : true
+    useColor: process.env.NO_COLOR ? false : true,
   })
 
   if (!subCmd) {
     printHelp()
-    process.exit()
+    return
   }
 
   switch (subCmd) {
@@ -82,7 +87,7 @@ async function main() {
         concurrency: 3,
         verbose,
         workDir,
-        ignoreCache
+        ignoreCache,
       }
       cmdGenerate(opts, logger)
       break

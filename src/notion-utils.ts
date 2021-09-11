@@ -50,8 +50,14 @@ export function toDashID(str: string): string {
   }
 
   const res =
-    str.substring(0, 8) + '-' + str.substring(8, 12) + '-' +
-    str.substring(12, 16) + '-' + str.substring(16, 20) + '-' +
+    str.substring(0, 8) +
+    '-' +
+    str.substring(8, 12) +
+    '-' +
+    str.substring(12, 16) +
+    '-' +
+    str.substring(16, 20) +
+    '-' +
     str.substring(20)
   return res
 }

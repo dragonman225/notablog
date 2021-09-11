@@ -10,8 +10,7 @@ export interface Tag {
 }
 
 export interface SiteContext {
-  icon: string | undefined
-  iconHTML: string
+  iconUrl: string | undefined
   cover: string | undefined
   title: SemanticString[]
   description: SemanticString[] | undefined
@@ -25,8 +24,7 @@ export interface SiteContext {
 export interface PageMetadata {
   /** No dashes. */
   id: string
-  icon: string | undefined
-  iconHTML: string
+  iconUrl: string | undefined
   cover: string | undefined
   title: SemanticString[]
   tags: Tag[]
@@ -45,7 +43,7 @@ export interface PageMetadata {
 }
 
 export interface RenderTask {
-  data: {}
+  data: Record<string, unknown>
   tools: {
     renderer: Renderer
     notionAgent: ReturnType<typeof createAgent>

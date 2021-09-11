@@ -94,8 +94,11 @@ class NDateTimeProperty extends NProperty {
 }
 
 type NPropertyUnion =
-  NTextProperty | NCheckboxProperty | NSelectProperty |
-  NMultiSelectProperty | NDateTimeProperty
+  | NTextProperty
+  | NCheckboxProperty
+  | NSelectProperty
+  | NMultiSelectProperty
+  | NDateTimeProperty
 
 class NRecord implements Record {
   id: string
@@ -134,8 +137,11 @@ class NCell implements Cell {
 class NTextCell extends NCell {
   value: NAST.SemanticString[]
 
-  constructor(property: NTextProperty, record: NRecord,
-    rawValue: NAST.SemanticString[]) {
+  constructor(
+    property: NTextProperty,
+    record: NRecord,
+    rawValue: NAST.SemanticString[]
+  ) {
     super(property, record)
     this.value = rawValue
   }
@@ -144,8 +150,11 @@ class NTextCell extends NCell {
 class NCheckboxCell extends NCell {
   value: boolean
 
-  constructor(property: NCheckboxProperty, record: NRecord,
-    rawValue: NAST.SemanticString[]) {
+  constructor(
+    property: NCheckboxProperty,
+    record: NRecord,
+    rawValue: NAST.SemanticString[]
+  ) {
     super(property, record)
     this.value = rawValue ? rawValue[0][0] === 'Yes' : false
   }
@@ -154,8 +163,11 @@ class NCheckboxCell extends NCell {
 class NSelectCell extends NCell {
   value: SelectOption | undefined
 
-  constructor(property: NSelectProperty, record: NRecord,
-    rawValue: NAST.SemanticString[]) {
+  constructor(
+    property: NSelectProperty,
+    record: NRecord,
+    rawValue: NAST.SemanticString[]
+  ) {
     super(property, record)
     const optionNames = rawValue ? rawValue[0][0].split(',') : []
     this.value = property.options.find(o => o.value === optionNames[0])
@@ -165,8 +177,11 @@ class NSelectCell extends NCell {
 class NMultiSelectCell extends NCell {
   value: SelectOption[]
 
-  constructor(property: NMultiSelectProperty, record: NRecord,
-    rawValue: NAST.SemanticString[]) {
+  constructor(
+    property: NMultiSelectProperty,
+    record: NRecord,
+    rawValue: NAST.SemanticString[]
+  ) {
     super(property, record)
     const optionNames = rawValue ? rawValue[0][0].split(',') : []
     this.value = optionNames.reduce((result, optionName) => {
@@ -180,8 +195,11 @@ class NMultiSelectCell extends NCell {
 class NDateTimeCell extends NCell {
   value: NAST.DateTime | undefined
 
-  constructor(property: NDateTimeProperty, record: NRecord,
-    rawValue: NAST.SemanticString[]) {
+  constructor(
+    property: NDateTimeProperty,
+    record: NRecord,
+    rawValue: NAST.SemanticString[]
+  ) {
     super(property, record)
     /**
      * rawValue
@@ -195,8 +213,11 @@ class NDateTimeCell extends NCell {
 }
 
 type NCellUnion =
-  NTextCell | NCheckboxCell | NSelectCell | NMultiSelectCell |
-  NDateTimeCell
+  | NTextCell
+  | NCheckboxCell
+  | NSelectCell
+  | NMultiSelectCell
+  | NDateTimeCell
 
 export class NTable implements Table {
   id: string
@@ -208,7 +229,7 @@ export class NTable implements Table {
 
     const rawTableColumnProps = rawTable.views[0].format.table_properties
     /**
-     * Using rawTableColumnProps to initialize schema make the order of 
+     * Using rawTableColumnProps to initialize schema make the order of
      * properties match the order of columns in the UI.
      */
     if (rawTableColumnProps) {
@@ -252,8 +273,8 @@ export class NTable implements Table {
       const record = this.records[i]
       let row = ''
       record.properties.forEach((cell, property) => {
-        row += cell.constructor.name
-          .padEnd(property.constructor.name.length) + ' '
+        row +=
+          cell.constructor.name.padEnd(property.constructor.name.length) + ' '
       })
       row += '-> ' + record.constructor.name
       console.log(row)

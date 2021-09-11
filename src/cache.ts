@@ -14,7 +14,7 @@ export class Cache {
     }
   }
 
-  get(namespace: string, id: string): object | undefined {
+  get(namespace: string, id: string): unknown | undefined {
     const fPath = this.fPath(namespace, id)
     /** Read file. */
     if (!fs.existsSync(fPath)) {
@@ -24,21 +24,27 @@ export class Cache {
     const data = fs.readFileSync(fPath, { encoding: 'utf-8' })
     /** Parse file. */
     try {
-      const obj = JSON.parse(data)
+      const obj = JSON.parse(data) as unknown
       return obj
     } catch (error) {
-      log.debug(`Cache object "${id}" of namespace "${namespace}" is corrupted.`)
+      log.debug(
+        `Cache object "${id}" of namespace "${namespace}" is corrupted.`
+      )
       log.debug(error)
       return undefined
     }
   }
 
-  set(namespace: string, id: string, obj: object) {
+  set(namespace: string, id: string, obj: unknown): void {
     const fPath = this.fPath(namespace, id)
     fs.writeFileSync(fPath, JSON.stringify(obj, getCircularReplacer()))
   }
 
-  shouldUpdate(namespace: string, id: string, lastModifiedTime: number) {
+  shouldUpdate(
+    namespace: string,
+    id: string,
+    lastModifiedTime: number
+  ): boolean {
     const fPath = this.fPath(namespace, id)
     if (fs.existsSync(fPath)) {
       const lastModifiedTimeOfCache = fs.statSync(fPath).mtimeMs
@@ -48,7 +54,7 @@ export class Cache {
     }
   }
 
-  fPath(namespace: string, id: string) {
+  fPath(namespace: string, id: string): string {
     return path.join(this.cacheDir, this._hash(namespace + id))
   }
 

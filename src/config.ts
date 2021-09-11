@@ -14,11 +14,12 @@ export class Config {
   constructor(configPath: string) {
     this.configPath = configPath
     try {
-      this.configObj =
-        JSON.parse(fs.readFileSync(configPath, { encoding: 'utf-8' }))
+      this.configObj = JSON.parse(
+        fs.readFileSync(configPath, { encoding: 'utf-8' })
+      )
     } catch (error) {
       log.error(`Failed to load config from "${configPath}".`)
-      throw (error)
+      throw error
     }
   }
 
