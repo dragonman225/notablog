@@ -109,10 +109,26 @@ type NPropertyUnion =
   | NMultiSelectProperty
   | NDateTimeProperty
 
-class NRecord implements Record {
-  id: string
-  propertyCellMap: Map<NPropertyUnion, NCellUnion>
+type NCellOf<T extends NProperty> = T extends NTextProperty
+  ? NTextCell
+  : T extends NCheckboxProperty
+  ? NCheckboxCell
+  : T extends NSelectProperty
+  ? NSelectCell
+  : T extends NMultiSelectProperty
+  ? NMultiSelectCell
+  : T extends NDateTimeProperty
+  ? NDateTimeCell
+  : NCell
 
+interface NPropertyCellMap extends Map<NProperty, NCell> {
+  /** Call `get` with X type of `NProperty` returns X type of `NCell`. */
+  get: <T extends NProperty>(property: T) => NCellOf<T> | undefined
+}
+
+interface NRecord extends Record {
+  id: string
+  propertyCellMap: NPropertyCellMap
   uri: NAST.URI
   title: NAST.SemanticString[]
   icon?: NAST.Emoji | NAST.PublicUrl
@@ -121,7 +137,9 @@ class NRecord implements Record {
   fullWidth: boolean
   createdTime: NAST.TimestampNumber
   lastEditedTime: NAST.TimestampNumber
+}
 
+class NRecord implements NRecord {
   constructor(rawPage: NAST.Page) {
     this.id = getPageIDFromPageURL(rawPage.uri)
     this.propertyCellMap = new Map()

@@ -4,17 +4,13 @@ import { renderToHTML } from 'nast-util-to-react'
 import { SemanticString } from 'nast-types'
 
 import {
-  NCheckboxCell,
   NCheckboxProperty,
-  NDateTimeCell,
-  NMultiSelectCell,
+  NDateTimeProperty,
   NMultiSelectProperty,
   NProperty,
   NPropertyType,
-  NSelectCell,
   NSelectProperty,
   NTable,
-  NTextCell,
   NTextProperty,
 } from './ntable'
 import { getPageIDFromCollectionPageURL } from './utils/notion'
@@ -72,56 +68,54 @@ export async function parseTable(
       iconUrl: getIconUrl(record.icon),
       cover: record.cover,
       title: record.title,
-      tags: record.propertyCellMap.get(
-        propertyAccessMap.get('tags') as NMultiSelectProperty
-      )?.value as NMultiSelectCell['value'],
-      publish: record.propertyCellMap.get(
-        propertyAccessMap.get('publish') as NCheckboxProperty
-      )?.value as NCheckboxCell['value'],
-      inMenu: record.propertyCellMap.get(
-        propertyAccessMap.get('inMenu') as NCheckboxProperty
-      )?.value as NCheckboxCell['value'],
-      inList: record.propertyCellMap.get(
-        propertyAccessMap.get('inList') as NCheckboxProperty
-      )?.value as NCheckboxCell['value'],
+      tags:
+        record.propertyCellMap.get(
+          propertyAccessMap.get('tags') as NMultiSelectProperty
+        )?.value || [],
+      publish:
+        record.propertyCellMap.get(
+          propertyAccessMap.get('publish') as NCheckboxProperty
+        )?.value || false,
+      inMenu:
+        record.propertyCellMap.get(
+          propertyAccessMap.get('inMenu') as NCheckboxProperty
+        )?.value || false,
+      inList:
+        record.propertyCellMap.get(
+          propertyAccessMap.get('inList') as NCheckboxProperty
+        )?.value || false,
       template:
-        (
-          record.propertyCellMap.get(
-            propertyAccessMap.get('template') as NSelectProperty
-          )?.value as NSelectCell['value']
-        )?.value || '',
+        record.propertyCellMap.get(
+          propertyAccessMap.get('template') as NSelectProperty
+        )?.value?.value || '',
       url: getPageUrl(
         record.uri,
         renderNodesToText(
           record.propertyCellMap.get(
             propertyAccessMap.get('url') as NTextProperty
-          )?.value as NTextCell['value']
+          )?.value
         )
       ),
       description: record.propertyCellMap.get(
         propertyAccessMap.get('description') as NTextProperty
-      )?.value as NTextCell['value'],
+      )?.value,
       descriptionPlain: renderNodesToText(
         record.propertyCellMap.get(
           propertyAccessMap.get('description') as NTextProperty
-        )?.value as NTextCell['value']
+        )?.value
       ),
       descriptionHTML: renderNodesToHtml(
         record.propertyCellMap.get(
           propertyAccessMap.get('description') as NTextProperty
-        )?.value as NTextCell['value']
+        )?.value
       ),
-      date: (
-        record.propertyCellMap.get(
-          propertyAccessMap.get('date') as NTextProperty
-        )?.value as NDateTimeCell['value']
-      )?.start_date,
+      date: record.propertyCellMap.get(
+        propertyAccessMap.get('date') as NDateTimeProperty
+      )?.value?.start_date,
       dateString: getDateString(
-        (
-          record.propertyCellMap.get(
-            propertyAccessMap.get('date') as NTextProperty
-          )?.value as NDateTimeCell['value']
-        )?.start_date
+        record.propertyCellMap.get(
+          propertyAccessMap.get('date') as NDateTimeProperty
+        )?.value?.start_date
       ),
       createdTime: record.createdTime,
       lastEditedTime: record.lastEditedTime,
