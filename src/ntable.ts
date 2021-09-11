@@ -1,11 +1,6 @@
-import { getPageIDFromPageURL } from './notion-utils'
-import { objAccess } from './utils'
+import { FormattingMentionDate } from 'nast-types'
 
-type SelectOption = {
-  id: string
-  color: Notion.Collection.ColumnPropertyOptionColor
-  value: string
-}
+import { getPageIDFromPageURL } from './notion-utils'
 
 interface Property {
   id: string
@@ -15,7 +10,7 @@ interface Property {
 
 interface Record {
   id: string
-  properties: Map<Property, Cell>
+  propertyCellMap: Map<Property, Cell>
 }
 
 interface Cell {
@@ -25,11 +20,25 @@ interface Cell {
 
 interface Table {
   id: string
-  schema: Property[]
+  properties: Property[]
   records: Record[]
 }
 
-class NProperty implements Property {
+export enum NPropertyType {
+  Text = 'text',
+  Checkbox = 'checkbox',
+  Select = 'select',
+  MultiSelect = 'multi_select',
+  Date = 'date',
+}
+
+export type NSelectOption = {
+  id: string
+  color: Notion.Collection.ColumnPropertyOptionColor
+  value: string
+}
+
+export class NProperty implements Property {
   id: string
   type: string
   records: Map<NRecord, NCell>
@@ -44,52 +53,52 @@ class NProperty implements Property {
   }
 }
 
-class NTextProperty extends NProperty {
-  type: 'text'
+export class NTextProperty extends NProperty {
+  type: NPropertyType.Text
 
   constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
     super(id, rawProperty)
-    this.type = 'text'
+    this.type = NPropertyType.Text
   }
 }
 
-class NCheckboxProperty extends NProperty {
-  type: 'checkbox'
+export class NCheckboxProperty extends NProperty {
+  type: NPropertyType.Checkbox
 
   constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
     super(id, rawProperty)
-    this.type = 'checkbox'
+    this.type = NPropertyType.Checkbox
   }
 }
 
-class NSelectProperty extends NProperty {
-  type: 'select'
-  options: SelectOption[]
+export class NSelectProperty extends NProperty {
+  type: NPropertyType.Select
+  options: NSelectOption[]
 
   constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
     super(id, rawProperty)
-    this.type = 'select'
+    this.type = NPropertyType.Select
     this.options = rawProperty.options || []
   }
 }
 
-class NMultiSelectProperty extends NProperty {
-  type: 'multi_select'
-  options: SelectOption[]
+export class NMultiSelectProperty extends NProperty {
+  type: NPropertyType.MultiSelect
+  options: NSelectOption[]
 
   constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
     super(id, rawProperty)
-    this.type = 'multi_select'
+    this.type = NPropertyType.MultiSelect
     this.options = rawProperty.options || []
   }
 }
 
-class NDateTimeProperty extends NProperty {
-  type: 'date'
+export class NDateTimeProperty extends NProperty {
+  type: NPropertyType.Date
 
   constructor(id: string, rawProperty: Notion.Collection.ColumnProperty) {
     super(id, rawProperty)
-    this.type = 'date'
+    this.type = NPropertyType.Date
   }
 }
 
@@ -102,7 +111,7 @@ type NPropertyUnion =
 
 class NRecord implements Record {
   id: string
-  properties: Map<NPropertyUnion, NCellUnion>
+  propertyCellMap: Map<NPropertyUnion, NCellUnion>
 
   uri: NAST.URI
   title: NAST.SemanticString[]
@@ -110,10 +119,12 @@ class NRecord implements Record {
   cover?: NAST.PublicUrl
   coverPosition: number
   fullWidth: boolean
+  createdTime: NAST.TimestampNumber
+  lastEditedTime: NAST.TimestampNumber
 
   constructor(rawPage: NAST.Page) {
     this.id = getPageIDFromPageURL(rawPage.uri)
-    this.properties = new Map()
+    this.propertyCellMap = new Map()
 
     this.uri = rawPage.uri
     this.title = rawPage.title
@@ -121,6 +132,8 @@ class NRecord implements Record {
     this.cover = rawPage.cover
     this.coverPosition = rawPage.coverPosition
     this.fullWidth = rawPage.fullWidth
+    this.createdTime = rawPage.createdTime
+    this.lastEditedTime = rawPage.lastEditedTime
   }
 }
 
@@ -134,7 +147,7 @@ class NCell implements Cell {
   }
 }
 
-class NTextCell extends NCell {
+export class NTextCell extends NCell {
   value: NAST.SemanticString[]
 
   constructor(
@@ -147,7 +160,7 @@ class NTextCell extends NCell {
   }
 }
 
-class NCheckboxCell extends NCell {
+export class NCheckboxCell extends NCell {
   value: boolean
 
   constructor(
@@ -160,8 +173,8 @@ class NCheckboxCell extends NCell {
   }
 }
 
-class NSelectCell extends NCell {
-  value: SelectOption | undefined
+export class NSelectCell extends NCell {
+  value: NSelectOption | undefined
 
   constructor(
     property: NSelectProperty,
@@ -174,8 +187,8 @@ class NSelectCell extends NCell {
   }
 }
 
-class NMultiSelectCell extends NCell {
-  value: SelectOption[]
+export class NMultiSelectCell extends NCell {
+  value: NSelectOption[]
 
   constructor(
     property: NMultiSelectProperty,
@@ -188,11 +201,11 @@ class NMultiSelectCell extends NCell {
       const option = property.options.find(o => o.value === optionName)
       if (option) result.push(option)
       return result
-    }, [] as SelectOption[])
+    }, [] as NSelectOption[])
   }
 }
 
-class NDateTimeCell extends NCell {
+export class NDateTimeCell extends NCell {
   value: NAST.DateTime | undefined
 
   constructor(
@@ -208,7 +221,11 @@ class NDateTimeCell extends NCell {
      * [0][1][0]: FormattingMentionDate
      * [0][1][0][1]: DateTime
      */
-    this.value = objAccess(rawValue)(0)(1)(0)(1)()
+    const node = rawValue && rawValue[0]
+    const attrs = node && node[1]
+    const formattingDate = attrs && (attrs[0] as FormattingMentionDate)
+    const dataTime = formattingDate && formattingDate[1]
+    this.value = dataTime
   }
 }
 
@@ -221,7 +238,7 @@ type NCellUnion =
 
 export class NTable implements Table {
   id: string
-  schema: NPropertyUnion[]
+  properties: NPropertyUnion[]
   records: NRecord[]
 
   constructor(rawTable: NAST.Collection) {
@@ -233,7 +250,7 @@ export class NTable implements Table {
      * properties match the order of columns in the UI.
      */
     if (rawTableColumnProps) {
-      this.schema = rawTableColumnProps
+      this.properties = rawTableColumnProps
         /** Filter out properties that do not exist in schema. */
         .filter(tableProperty => rawTable.schema[tableProperty.property])
         .map(tableProperty => {
@@ -242,7 +259,7 @@ export class NTable implements Table {
           return createNProperty(propertyId, rawProperty)
         })
     } else {
-      this.schema = Object.entries(rawTable.schema).map(tuple => {
+      this.properties = Object.entries(rawTable.schema).map(tuple => {
         const [propertyId, rawProperty] = tuple
         return createNProperty(propertyId, rawProperty)
       })
@@ -252,27 +269,27 @@ export class NTable implements Table {
     rawTable.children.forEach(rawPage => {
       const record = new NRecord(rawPage)
       this.records.push(record)
-      this.schema.forEach(property => {
+      this.properties.forEach(property => {
         const rawPropertyValue = (rawPage.properties || {})[property.id]
         const cell = createNCell(property, record, rawPropertyValue)
         property.records.set(record, cell)
-        record.properties.set(property, cell)
+        record.propertyCellMap.set(property, cell)
       })
     })
   }
 
   /** Print the table structure so you can see what it looks like. */
-  peekStructure() {
+  peek(): void {
     let head = ''
-    for (let i = 0; i < this.schema.length; i++) {
-      head += this.schema[i].constructor.name + ' '
+    for (let i = 0; i < this.properties.length; i++) {
+      head += this.properties[i].constructor.name + ' '
     }
     console.log(head)
     console.log(''.padEnd(head.length, '-'))
     for (let i = 0; i < this.records.length; i++) {
       const record = this.records[i]
       let row = ''
-      record.properties.forEach((cell, property) => {
+      record.propertyCellMap.forEach((cell, property) => {
         row +=
           cell.constructor.name.padEnd(property.constructor.name.length) + ' '
       })
@@ -306,13 +323,13 @@ function createNCell(
   rawValue: NAST.SemanticString[]
 ): NCellUnion {
   switch (property.type) {
-    case 'checkbox':
+    case NPropertyType.Checkbox:
       return new NCheckboxCell(property, record, rawValue)
-    case 'select':
+    case NPropertyType.Select:
       return new NSelectCell(property, record, rawValue)
-    case 'multi_select':
+    case NPropertyType.MultiSelect:
       return new NMultiSelectCell(property, record, rawValue)
-    case 'date':
+    case NPropertyType.Date:
       return new NDateTimeCell(property, record, rawValue)
     default:
       return new NTextCell(property, record, rawValue)

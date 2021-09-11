@@ -3,13 +3,24 @@ import { getOnePageAsTree } from 'nast-util-from-notionapi'
 import { renderToHTML } from 'nast-util-to-react'
 import { SemanticString } from 'nast-types'
 
+import {
+  NCheckboxCell,
+  NCheckboxProperty,
+  NDateTimeCell,
+  NMultiSelectCell,
+  NMultiSelectProperty,
+  NProperty,
+  NPropertyType,
+  NSelectCell,
+  NSelectProperty,
+  NTable,
+  NTextCell,
+  NTextProperty,
+} from './ntable'
 import { getPageIDFromCollectionPageURL } from './notion-utils'
-import { log, objAccess } from './utils'
 import { SiteContext, PageMetadata } from './types'
 
-/**
- * Extract interested data for blog generation from a Notion table.
- */
+/** Extract interested data for blog generation from a Notion table. */
 export async function parseTable(
   collectionPageURL: string,
   notionAgent: ReturnType<typeof createAgent>
@@ -19,83 +30,101 @@ export async function parseTable(
     pageID,
     notionAgent
   )) as NAST.CollectionPage
+  const table = new NTable(pageCollection)
+
+  const propertyAccessMap = new Map<string, NProperty>()
+  table.properties.forEach(property => {
+    propertyAccessMap.set(property.name, property)
+  })
 
   /**
-   * Create map for property_name (column name) -> property_id (column id).
-   * Notion uses random strings to identify columns because it allows users
-   * to create multiple columns that have the same name.
-   */
-  const mapColNameToId = {}
-  for (const [key, value] of Object.entries(pageCollection.schema)) {
-    const colId = key
-    const colName = value.name
-    if (mapColNameToId[colName]) {
-      log.warn(`Duplicate column name "${colName}", \
-column with id "${colId}" is used`)
-    } else {
-      mapColNameToId[colName] = key
-    }
-  }
-
-  /**
-   * Check if table has all required columns.
+   * Check if the Notion table has all required properties.
    *
-   * - `title` is required by Notion.
+   * Note: Some information like `title` exists on the page itself, so we
+   * don't need to check.
    */
-  const requiredCols = [
-    'tags',
-    'publish',
-    'inMenu',
-    'inList',
-    'template',
-    'url',
-    'description',
-    'date',
+  const requiredPropertyDescriptors = [
+    ['tags', NPropertyType.MultiSelect],
+    ['publish', NPropertyType.Checkbox],
+    ['inMenu', NPropertyType.Checkbox],
+    ['inList', NPropertyType.Checkbox],
+    ['template', NPropertyType.Select],
+    ['url', NPropertyType.Text],
+    ['description', NPropertyType.Text],
+    ['date', NPropertyType.Date],
   ]
-  for (const colName of requiredCols) {
-    if (typeof pageCollection.schema[mapColNameToId[colName]] === 'undefined') {
-      throw new Error(`Required column "${colName}" is missing in table.`)
+  for (const descriptor of requiredPropertyDescriptors) {
+    const property = propertyAccessMap.get(descriptor[0])
+    if (!property) {
+      throw new Error(
+        `Required property "${descriptor[0]}" is missing in the Notion table.`
+      )
+    } else if (property.type !== descriptor[1]) {
+      throw new Error(
+        `The type of property "${descriptor[0]}" should be "${descriptor[1]}", but got "${property.type}".`
+      )
     }
   }
 
-  /**
-   * Create map for tag -> color
-   */
-  const mapTagToColor = {}
-  const classPrefix = ''
-  ;(pageCollection.schema[mapColNameToId['tags']].options || []).forEach(
-    tag => {
-      mapTagToColor[tag.value] = `${classPrefix}${tag.color}`
-    }
-  )
-
-  /** Remove empty rows */
-  const validPages = pageCollection.children.filter(page => !!page.properties)
-
-  const pageMetadatas: PageMetadata[] = validPages.map(row => {
+  const pages: PageMetadata[] = table.records.map(record => {
     return {
-      id: (row.uri.split('/').pop() || '').split('?')[0],
-      iconUrl: getIconUrl(row.icon),
-      cover: row.cover,
-      title: row.title,
-      tags: getMultiSelect(row, mapColNameToId['tags']).map(tag => {
-        return {
-          value: tag,
-          color: mapTagToColor[tag],
-        }
-      }),
-      publish: getCheckbox(row, mapColNameToId['publish']),
-      inMenu: getCheckbox(row, mapColNameToId['inMenu']),
-      inList: getCheckbox(row, mapColNameToId['inList']),
-      template: getSingleSelect(row, mapColNameToId['template']),
-      url: getRealUrl(row, mapColNameToId['url']),
-      description: getTextRaw(row, mapColNameToId['description']),
-      descriptionPlain: getTextPlain(row, mapColNameToId['description']),
-      descriptionHTML: getTextHTML(row, mapColNameToId['description']),
-      date: getDateRaw(row, mapColNameToId['date']),
-      dateString: getDateString(row, mapColNameToId['date']),
-      createdTime: row.createdTime,
-      lastEditedTime: row.lastEditedTime,
+      id: extractIdFromUri(record.uri),
+      iconUrl: getIconUrl(record.icon),
+      cover: record.cover,
+      title: record.title,
+      tags: record.propertyCellMap.get(
+        propertyAccessMap.get('tags') as NMultiSelectProperty
+      )?.value as NMultiSelectCell['value'],
+      publish: record.propertyCellMap.get(
+        propertyAccessMap.get('publish') as NCheckboxProperty
+      )?.value as NCheckboxCell['value'],
+      inMenu: record.propertyCellMap.get(
+        propertyAccessMap.get('inMenu') as NCheckboxProperty
+      )?.value as NCheckboxCell['value'],
+      inList: record.propertyCellMap.get(
+        propertyAccessMap.get('inList') as NCheckboxProperty
+      )?.value as NCheckboxCell['value'],
+      template:
+        (
+          record.propertyCellMap.get(
+            propertyAccessMap.get('template') as NSelectProperty
+          )?.value as NSelectCell['value']
+        )?.value || '',
+      url: getPageUrl(
+        record.uri,
+        renderNodesToText(
+          record.propertyCellMap.get(
+            propertyAccessMap.get('url') as NTextProperty
+          )?.value as NTextCell['value']
+        )
+      ),
+      description: record.propertyCellMap.get(
+        propertyAccessMap.get('description') as NTextProperty
+      )?.value as NTextCell['value'],
+      descriptionPlain: renderNodesToText(
+        record.propertyCellMap.get(
+          propertyAccessMap.get('description') as NTextProperty
+        )?.value as NTextCell['value']
+      ),
+      descriptionHTML: renderNodesToHtml(
+        record.propertyCellMap.get(
+          propertyAccessMap.get('description') as NTextProperty
+        )?.value as NTextCell['value']
+      ),
+      date: (
+        record.propertyCellMap.get(
+          propertyAccessMap.get('date') as NTextProperty
+        )?.value as NDateTimeCell['value']
+      )?.start_date,
+      dateString: getDateString(
+        (
+          record.propertyCellMap.get(
+            propertyAccessMap.get('date') as NTextProperty
+          )?.value as NDateTimeCell['value']
+        )?.start_date
+      ),
+      createdTime: record.createdTime,
+      lastEditedTime: record.lastEditedTime,
     }
   })
 
@@ -104,24 +133,13 @@ column with id "${colId}" is used`)
     cover: pageCollection.cover,
     title: pageCollection.name,
     description: pageCollection.description,
-    descriptionPlain: renderStyledStringToTXT(pageCollection.description),
-    descriptionHTML: renderStyledStringToHTML(pageCollection.description),
-    /**
-     * Sort the pages so that the most recent post is at the top.
-     */
-    pages: pageMetadatas.sort((later, former) => {
-      const laterTimestamp = later.date ? new Date(later.date).getTime() : 0
-      const formerTimestamp = former.date ? new Date(former.date).getTime() : 0
-      if (laterTimestamp > formerTimestamp) return -1
-      else if (laterTimestamp < formerTimestamp) return 1
-      else return 0
-    }),
+    descriptionPlain: renderNodesToText(pageCollection.description),
+    descriptionHTML: renderNodesToHtml(pageCollection.description),
+    pages: pages.sort(dateDescending),
     tagMap: new Map(),
   }
 
-  /**
-   * Create tagMap
-   */
+  /** Create tagMap. */
   siteContext.pages.forEach(page => {
     page.tags.forEach(tag => {
       const pagesForTag = siteContext.tagMap.get(tag.value)
@@ -140,103 +158,18 @@ column with id "${colId}" is used`)
  * Utility functions to get useful values from properties of Nast.Page
  */
 
-/**
- * Get value of a checkbox-typed property
- * @param {Nast.Page} page
- * @param {string} propId
- * @returns {boolean}
- */
-function getCheckbox(page: NAST.Page, propId: string) {
-  const prop = objAccess(page)('properties')(propId)()
-  if (prop) return prop[0][0] === 'Yes'
-  else return false
-}
-
-/**
- * Get raw value of a text-typed property
- * @param {Nast.Page} page
- * @param {string} propId
- * @returns {Notion.StyledString[]}
- */
-function getTextRaw(page, propId) {
-  const prop = page.properties[propId]
-  if (prop) return prop
-  else return []
-}
-
-/**
- * Get plain string from a text-typed property
- * @param {Nast.Page} page
- * @param {string} propId
- * @returns {string}
- */
-function getTextPlain(page, propId) {
-  const prop = page.properties[propId]
-  if (prop) return renderStyledStringToTXT(prop)
-  else return ''
-}
-
-function renderStyledStringToTXT(
+function renderNodesToText(
   styledStringArr: SemanticString[] | undefined
 ): string {
   if (styledStringArr) return styledStringArr.map(str => str[0]).join('')
   else return ''
 }
 
-/**
- * Get HTML string from a text-typed property
- * @param {Nast.Page} page
- * @param {string} propId
- * @returns {string}
- */
-function getTextHTML(page, propId) {
-  const prop = page.properties[propId]
-  if (prop) return renderStyledStringToHTML(prop)
-  else return ''
-}
-
-function renderStyledStringToHTML(
+function renderNodesToHtml(
   styledStringArr: SemanticString[] | undefined
 ): string {
   if (styledStringArr) return renderToHTML(styledStringArr)
   else return ''
-}
-
-/**
- * Get option array of a multi-select-typed property
- *
- * Raw options look like this:
- * { '<propId>': [ [ 'css,web' ] ] }
- * @param {Nast.Page} page
- * @param {string} propId
- * @returns {string[]}
- */
-function getMultiSelect(page, propId) {
-  const prop = page.properties[propId]
-  if (prop) return prop[0][0].split(',')
-  else return []
-}
-
-/**
- * Get option of a single-select-typed property
- * @param {Nast.Page} page
- * @param {string} propId
- * @returns {string}
- */
-function getSingleSelect(page, propId) {
-  const options = getMultiSelect(page, propId)
-  if (options.length > 0) return options[0]
-  else return ''
-}
-
-/**
- * Get raw string of a date-typed property
- * @param {Nast.Page} page
- * @param {string} propId
- * @returns {string | undefined} YYYY-MM-DD
- */
-function getDateRaw(page: NAST.Page, propId: string): string | undefined {
-  return objAccess(page)('properties')(propId)(0)(1)(0)(1)('start_date')()
 }
 
 /**
@@ -245,8 +178,7 @@ function getDateRaw(page: NAST.Page, propId: string): string | undefined {
  * @param {string} propId
  * @returns {string | undefined} WWW, MMM DD, YYY
  */
-function getDateString(page, propId) {
-  const dateRaw = getDateRaw(page, propId)
+function getDateString(dateRaw: string | undefined): string | undefined {
   if (dateRaw) {
     const options: Parameters<Date['toLocaleDateString']>['1'] = {
       weekday: 'short',
@@ -272,13 +204,10 @@ function getDateString(page, propId) {
  * @param {string} propId
  * @returns {string}
  */
-function getRealUrl(page, propId) {
-  const wantUrl = getTextPlain(page, propId)
-  const safeUrl = getSafeUrl(wantUrl)
+function getPageUrl(uri: string, slug: string): string {
+  const safeUrl = getSafeUrl(slug)
   const realUrl =
-    safeUrl.length > 0
-      ? `${safeUrl}.html`
-      : `${page.uri.split('/').pop().split('?')[0]}.html`
+    safeUrl.length > 0 ? `${safeUrl}.html` : `${extractIdFromUri(uri)}.html`
   return realUrl
 }
 
@@ -301,4 +230,17 @@ function getIconUrl(icon?: string): string | undefined {
   } else {
     return `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text text-anchor=%22middle%22 dominant-baseline=%22middle%22 x=%2250%22 y=%2255%22 font-size=%2280%22>${icon}</text></svg>`
   }
+}
+
+function extractIdFromUri(uri: string): string {
+  return (uri.split('/').pop() || '').split('?')[0]
+}
+
+/** A comparator to sort `PageMetadata` by date descending. */
+function dateDescending(later: PageMetadata, former: PageMetadata) {
+  const laterTimestamp = later.date ? new Date(later.date).getTime() : 0
+  const formerTimestamp = former.date ? new Date(former.date).getTime() : 0
+  if (laterTimestamp > formerTimestamp) return -1
+  else if (laterTimestamp < formerTimestamp) return 1
+  else return 0
 }
