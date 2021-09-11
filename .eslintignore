@@ -1,2 +1,6 @@
+bin/*
 dist/*
 test/*
+*.json
+.eslintrc.js
+rollup.config.js
