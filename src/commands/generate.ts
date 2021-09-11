@@ -67,7 +67,9 @@ export async function generate(
   const themeManifest = parseJSON(
     fs.readFileSync(themeManifestPath, { encoding: 'utf-8' })
   ) as ThemeConfig
-  const templateEngine = themeManifest.templateEngine
+  if (!themeManifest)
+    throw new Error(`The theme is not supported by Notablog v0.6.0 or above.`)
+  // const templateEngine = themeManifest.templateEngine
   const renderStrategy = new EJSStrategy(templateDir)
   const renderer = new Renderer(renderStrategy)
 
