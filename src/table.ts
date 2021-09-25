@@ -134,7 +134,7 @@ export class Schema implements ISchema {
         map[propertyName] = [propertyId]
       }
       return map
-    }, {})
+    }, {} as { [key: string]: string[] })
   }
 
   lookupIdsByName(name: string) {
@@ -207,7 +207,7 @@ export class Table implements ITable {
     )
   }
 
-  recordsGroupByProperty(propertyName: string, which: number = 1) {
+  recordsGroupByProperty(propertyName: string, which = 1) {
     const groups: { [key: string]: Record[] } = {}
     const ungrouped: Record[] = []
     const propertyIds = this.schema.lookupIdsByName(propertyName)

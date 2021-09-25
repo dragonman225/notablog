@@ -16,7 +16,7 @@
     "build:dependency-graph": "npx depcruise --exclude '^node_modules' --output-type dot --prefix 'https://github.com/dragonman225/notablog/tree/master/' src/index.ts | dot -T svg > assets/deps_graph.svg",
     "build:tsviz": "tsviz src/ntable.ts assets/ntable.png",
     "dev": "rollup -cw",
-    "test": "ts-node test/ntable.spec.ts",
+    "test": "ts-node --skip-project --log-error test/ntable.spec.ts",
     "release": "npm run build && npm publish",
     "release:beta": "npm run build && npm publish --tag beta",
     "upgrade": "node tools/upgrade-deps.js"
