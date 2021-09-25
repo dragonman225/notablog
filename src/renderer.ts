@@ -1,6 +1,6 @@
 import { render as renderWithEjs } from 'ejs'
 
-import { TemplateProvider } from './template-provider'
+import { TemplateProvider } from './templateProvider'
 
 export interface RenderStrategy {
   render: (templateName: string, data: Record<string, unknown>) => string
