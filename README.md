@@ -143,10 +143,10 @@ A theme contains layout templates, CSS files, fonts, and other assets that shape
 - `assets/` - Other assets. Anything in this folder will be copied to `notablog-starter/public/` when running `notablog generate ...`.
 - `manifest.json` - Theme configuration.
 
-  |      Field      |  Type  |                                                    Description                                                     |
-  | :-------------: | :----: | :----------------------------------------------------------------------------------------------------------------: |
-  | notablogVersion | string |                                            Supported Notablog version.                                             |
-  | templateEngine  | string | The template engine to use. Depends the template language you use. It should be either "ejs" or "squirrelly" (v7). |
+  |      Field      |  Type  |                                              Description                                               |
+  | :-------------: | :----: | :----------------------------------------------------------------------------------------------------: |
+  | notablogVersion | string |                                      Supported Notablog version.                                       |
+  | templateEngine  | string | The template engine to use, depending on the template language you use. Currently only "ejs" is valid. |
 
 #### Template Language
 
