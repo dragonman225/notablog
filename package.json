@@ -1,6 +1,6 @@
 {
   "name": "notablog",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Generate a minimalistic blog from a Notion.so table.",
   "author": "dragonman225",
   "license": "MIT",
