@@ -1,11 +1,7 @@
 {
+  "extends": "@tsconfig/node12/tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "target": "esnext",
-    "module": "esnext",
-    "lib": [
-      "es7"
-    ],
     "moduleResolution": "node",
     "strict": true,
     "allowSyntheticDefaultImports": true,
