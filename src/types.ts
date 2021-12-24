@@ -75,6 +75,7 @@ export interface NotablogStarterConfig {
   url: string
   theme: string
   previewBrowser: string
+  autoSlug: boolean
 }
 
 export interface ThemeConfig {
