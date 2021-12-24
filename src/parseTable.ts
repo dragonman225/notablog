@@ -213,7 +213,7 @@ function getPageUrl(pageUri: string, customSlug: string, title: string, config: 
   if (url.length == 0) {
     if (config.get("autoSlug")) {
       const partialId = [...extractIdFromUri(pageUri)].slice(0, 6).join("");
-      url = `${partialId}-${getSlugFromTitle(title)}.html`
+      url = `${getSlugFromTitle(title)}-${partialId}.html`
     } else {
       url = `${extractIdFromUri(pageUri)}.html`
     }
