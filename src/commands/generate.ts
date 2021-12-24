@@ -80,7 +80,7 @@ export async function generate(
 
   /** Fetch site metadata. */
   log.info('Fetch site metadata')
-  const siteContext = await parseTable(config.get('url'), notionAgent)
+  const siteContext = await parseTable(config.get('url') as string, notionAgent, config)
 
   /** Render home page and tags */
   log.info('Render home page and tags')

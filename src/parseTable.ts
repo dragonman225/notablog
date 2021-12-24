@@ -3,6 +3,7 @@ import { getOnePageAsTree } from 'nast-util-from-notionapi'
 import { renderToHTML } from 'nast-util-to-react'
 import { SemanticString } from 'nast-types'
 
+import { Config } from './config'
 import {
   NCheckboxProperty,
   NDateTimeProperty,
@@ -19,7 +20,8 @@ import { SiteContext, PageMetadata } from './types'
 /** Extract interested data for blog generation from a Notion table. */
 export async function parseTable(
   collectionPageURL: string,
-  notionAgent: ReturnType<typeof createAgent>
+  notionAgent: ReturnType<typeof createAgent>,
+  config: Config
 ): Promise<SiteContext> {
   const pageID = getPageIDFromCollectionPageURL(collectionPageURL)
   const pageCollection = (await getOnePageAsTree(
@@ -94,7 +96,13 @@ export async function parseTable(
           record.propertyCellMap.get(
             propertyAccessMap.get('url') as NTextProperty
           )?.value
-        )
+        ),
+        renderNodesToText(
+          record.propertyCellMap.get(
+            propertyAccessMap.get('title') as NTextProperty
+          )?.value
+        ),
+        config
       ),
       description: record.propertyCellMap.get(
         propertyAccessMap.get('description') as NTextProperty
@@ -194,15 +202,43 @@ function getDateString(dateRaw: string | undefined): string | undefined {
  * First, `/` and `\` are removed since they can't exist in file path.
  * Second, if the escaped url is a empty string or user doesn't specify an
  * url, use page id as the url.
- * @param {Nast.Page} page
- * @param {string} propId
+ * @param {string} pageUri
+ * @param {string} customSlug
+ * @param {string} title
+ * @param {Config} config
  * @returns {string}
  */
-function getPageUrl(uri: string, slug: string): string {
-  const safeUrl = getSafeUrl(slug)
-  const realUrl =
-    safeUrl.length > 0 ? `${safeUrl}.html` : `${extractIdFromUri(uri)}.html`
-  return realUrl
+function getPageUrl(pageUri: string, customSlug: string, title: string, config: Config): string {
+  var url = getSafeUrl(customSlug)
+  if (url.length == 0) {
+    if (config.get("autoSlug")) {
+      const partialId = [...extractIdFromUri(pageUri)].slice(0, 6).join("");
+      url = `${partialId}-${getSlugFromTitle(title)}.html`
+    } else {
+      url = `${extractIdFromUri(pageUri)}.html`
+    }
+  }
+  return url
+}
+
+/**
+ * Returns a formatted slug from a title by stripping non-alphanumeric chars, and
+ * replacing spaces with dashes.
+ * @param {string} title 
+ * @returns {string}
+ */
+function getSlugFromTitle(title: string): string {
+  var outputSlug: string[] = [];
+  [...title].forEach(char => {
+    if (char.match(/\w/)) {
+      outputSlug.push(char);
+    } else if (char.match(/\s/)) {
+      outputSlug.push("-");
+    } else {
+      return
+    }
+  });
+  return outputSlug.join("");
 }
 
 /**
