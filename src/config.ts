@@ -20,15 +20,13 @@ export class Config {
     }
   }
 
-  get(
-    key: keyof NotablogStarterConfig
-  ): NotablogStarterConfig[keyof NotablogStarterConfig] {
+  get<T extends keyof NotablogStarterConfig>(key: T): NotablogStarterConfig[T] {
     return this.configObj[key]
   }
 
-  set(
-    key: keyof NotablogStarterConfig,
-    data: NotablogStarterConfig[keyof NotablogStarterConfig]
+  set<T extends keyof NotablogStarterConfig>(
+    key: T,
+    data: NotablogStarterConfig[T]
   ): void {
     this.configObj[key] = data
   }
