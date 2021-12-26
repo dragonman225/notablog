@@ -201,7 +201,8 @@ function getDateString(dateRaw: string | undefined): string | undefined {
  *
  * First, `/` and `\` are removed since they can't exist in file path.
  * Second, if the escaped url is a empty string or user doesn't specify an
- * url, use page id as the url.
+ * url, generate a slug from the title (if `autoSlug` is `true` in `Config`) and page id,
+ * otherwise use the page id.s
  * @param {string} pageUri
  * @param {string} customSlug
  * @param {string} title
@@ -212,7 +213,7 @@ function getPageUrl(pageUri: string, customSlug: string, title: string, config: 
   var url = getSafeUrl(customSlug)
   if (url.length == 0) {
     if (config.get("autoSlug")) {
-      const partialId = [...extractIdFromUri(pageUri)].slice(0, 6).join("");
+      const partialId = extractIdFromUri(pageUri).slice(0, 6);
       url = `${getSlugFromTitle(title)}-${partialId}`
     } else {
       url = `${extractIdFromUri(pageUri)}`
@@ -228,17 +229,7 @@ function getPageUrl(pageUri: string, customSlug: string, title: string, config: 
  * @returns {string}
  */
 function getSlugFromTitle(title: string): string {
-  var outputSlug: string[] = [];
-  [...title].forEach(char => {
-    if (char.match(/\w/)) {
-      outputSlug.push(char);
-    } else if (char.match(/\s/)) {
-      outputSlug.push("-");
-    } else {
-      return
-    }
-  });
-  return outputSlug.join("");
+  return title.replaceAll(/\s/g, "-").replaceAll(/[^\w-]/g, "").toLowerCase();
 }
 
 /**
