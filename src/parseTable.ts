@@ -201,8 +201,9 @@ function getDateString(dateRaw: string | undefined): string | undefined {
  *
  * First, `/` and `\` are removed since they can't exist in file path.
  * Second, if the escaped url is a empty string or user doesn't specify an
- * url, generate a slug from the title (if `autoSlug` is `true` in `Config`) and page id,
- * otherwise use the page id.s
+ * url, generate a slug from the title (if `autoSlug` is `true` in `Config`)
+ * and use it along with page id as the filename,
+ * otherwise just use the page id as is.
  * @param {string} pageUri
  * @param {string} customSlug
  * @param {string} title
