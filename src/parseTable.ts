@@ -211,8 +211,8 @@ function getDateString(dateRaw: string | undefined): string | undefined {
  * @returns {string}
  */
 function getPageUrl(pageUri: string, customSlug: string, title: string, config: Config): string {
-  var url = getSafeUrl(customSlug)
-  if (url.length == 0) {
+  let url = getSafeUrl(customSlug)
+  if (url.length === 0) {
     if (config.get("autoSlug")) {
       const partialId = extractIdFromUri(pageUri).slice(0, 6);
       url = `${getSlugFromTitle(title)}-${partialId}`
@@ -230,7 +230,7 @@ function getPageUrl(pageUri: string, customSlug: string, title: string, config: 
  * @returns {string}
  */
 function getSlugFromTitle(title: string): string {
-  return title.replaceAll(/\s/g, "-").replaceAll(/[^\w-]/g, "").toLowerCase();
+  return title.replaceAll(/[\s\\\/]/g, "-").replaceAll(/[^\w-]/g, "").toLowerCase();
 }
 
 /**
