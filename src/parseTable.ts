@@ -210,11 +210,16 @@ function getDateString(dateRaw: string | undefined): string | undefined {
  * @param {Config} config
  * @returns {string}
  */
-function getPageUrl(pageUri: string, customSlug: string, title: string, config: Config): string {
+function getPageUrl(
+  pageUri: string,
+  customSlug: string,
+  title: string,
+  config: Config
+): string {
   let url = getSafeUrl(customSlug)
   if (url.length === 0) {
-    if (config.get("autoSlug")) {
-      const partialId = extractIdFromUri(pageUri).slice(0, 6);
+    if (config.get('autoSlug')) {
+      const partialId = extractIdFromUri(pageUri).slice(0, 6)
       url = `${getSlugFromTitle(title)}-${partialId}`
     } else {
       url = `${extractIdFromUri(pageUri)}`
@@ -226,11 +231,14 @@ function getPageUrl(pageUri: string, customSlug: string, title: string, config: 
 /**
  * Returns a formatted slug from a title by stripping non-alphanumeric chars, and
  * replacing spaces with dashes.
- * @param {string} title 
+ * @param {string} title
  * @returns {string}
  */
 function getSlugFromTitle(title: string): string {
-  return title.replaceAll(/[\s\\\/]/g, "-").replaceAll(/[^\w-]/g, "").toLowerCase();
+  return title
+    .replaceAll(/[\s\\\/]/g, '-')
+    .replaceAll(/[^\w-]/g, '')
+    .toLowerCase()
 }
 
 /**
