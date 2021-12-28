@@ -2,9 +2,9 @@
 
 ![version](https://img.shields.io/npm/v/notablog.svg?style=flat-square&color=007acc&label=version) ![license](https://img.shields.io/github/license/dragonman225/notablog.svg?style=flat-square&label=license&color=08CE5D)
 
-Generate a minimalistic blog from a Notion.so table.
+Generate a minimalistic blog from a [Notion](https://www.notion.so/) table, so you can tell stories of your work with Notion.
 
-Below are some screenshots of [my blog](https://dragonman225.js.org/). 🙂
+Below are some screenshots of [Alexander Wang (@dragonman225)'s blog](https://dragonman225.js.org/). 🙂
 
 |            Mobile             |            Desktop             |
 | :---------------------------: | :----------------------------: |
@@ -23,7 +23,7 @@ Below are some screenshots of [my blog](https://dragonman225.js.org/). 🙂
 
 ## Getting Started
 
-> Make sure you have Node.js v12.0.0 or higher. Check with command `node -v`.
+> Make sure you have Node.js **v15.0.0** or higher. Check with command `node -v`.
 
 > For existing users who want to upgrade from v0.3.x, please go through all below steps (do a clean install), except that you can continue to use your Notion table.
 
@@ -113,11 +113,12 @@ notablog-starter
 
 - `config.json` - User configuration.
 
-  |     Field      |  Type  |                             Description                              |
-  | :------------: | :----: | :------------------------------------------------------------------: |
-  |      url       | string |         The URL of a Notion table compatible with Notablog.          |
-  |     theme      | string | The theme to use. It should be one of the folder names in `themes/`. |
-  | previewBrowser | string |          The path to the browser executable for previewing.          |
+  |     Field      |  Type   |                         Description                          |
+  | :------------: | :-----: | :----------------------------------------------------------: |
+  |      url       | string  |     The URL of a Notion table compatible with Notablog.      |
+  |     theme      | string  | The theme to use. It should be one of the folder names in `themes/`. |
+  | previewBrowser | string  |      The path to the browser executable for previewing.      |
+  |    autoSlug    | boolean |      Generate URL slugs for pages without custom ones.       |
 
 - `public/` - Contains generated static assets.
 
