@@ -20,7 +20,8 @@
     "test:renderer": "ts-node --skip-project --log-error test/renderer/renderer.spec.ts",
     "release": "npm run build && npm publish",
     "release:beta": "npm run build && npm publish --tag beta",
-    "upgrade": "node tools/upgrade-deps.js"
+    "upgrade": "node tools/upgrade-deps.js",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@dnpr/cli": "^2.0.0",
@@ -47,6 +48,8 @@
     "eslint": "^7.24.0",
     "eslint-config-prettier": "^8.2.0",
     "eslint-plugin-prettier": "^3.3.1",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.1.4",
     "nast-types": "1.2.1",
     "prettier": "^2.2.1",
     "rollup": "^2.53.3",
@@ -74,5 +77,8 @@
   },
   "engines": {
     "node": ">=15"
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix"
   }
 }
