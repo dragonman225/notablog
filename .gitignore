@@ -29,3 +29,6 @@ yarn.lock
 dist/
 typedoc/
 test/renderer/*.html
+
+# Lint cache
+.eslintcache
