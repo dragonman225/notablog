@@ -12,7 +12,7 @@ export interface Tag {
 export interface SiteContext {
   iconUrl: string | undefined
   cover: string | undefined
-  title: SemanticString[]
+  title: string
   description: SemanticString[] | undefined
   descriptionPlain: string
   descriptionHTML: string
@@ -26,7 +26,7 @@ export interface PageMetadata {
   id: string
   iconUrl: string | undefined
   cover: string | undefined
-  title: SemanticString[]
+  title: string
   tags: Tag[]
   publish: boolean
   inMenu: boolean

@@ -69,7 +69,7 @@ export async function parseTable(
       id: extractIdFromUri(record.uri),
       iconUrl: getIconUrl(record.icon),
       cover: record.cover,
-      title: record.title,
+      title: record.title?.[0]?.[0],
       tags:
         record.propertyCellMap.get(
           propertyAccessMap.get('tags') as NMultiSelectProperty
@@ -133,7 +133,7 @@ export async function parseTable(
   const siteContext: SiteContext = {
     iconUrl: getIconUrl(pageCollection.icon),
     cover: pageCollection.cover,
-    title: pageCollection.name,
+    title: pageCollection.name?.[0]?.[0],
     description: pageCollection.description,
     descriptionPlain: renderNodesToText(pageCollection.description),
     descriptionHTML: renderNodesToHtml(pageCollection.description),
@@ -236,7 +236,7 @@ function getPageUrl(
  */
 function getSlugFromTitle(title: string): string {
   return title
-    .replaceAll(/[\s\\\/]/g, '-')
+    .replaceAll(/[\s\\/]/g, '-')
     .replaceAll(/[^\w-]/g, '')
     .toLowerCase()
 }
