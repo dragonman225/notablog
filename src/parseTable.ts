@@ -69,7 +69,7 @@ export async function parseTable(
       id: extractIdFromUri(record.uri),
       iconUrl: getIconUrl(record.icon),
       cover: record.cover,
-      title: record.title?.[0]?.[0],
+      title: renderNodesToText(record.title),
       tags:
         record.propertyCellMap.get(
           propertyAccessMap.get('tags') as NMultiSelectProperty
@@ -133,7 +133,7 @@ export async function parseTable(
   const siteContext: SiteContext = {
     iconUrl: getIconUrl(pageCollection.icon),
     cover: pageCollection.cover,
-    title: pageCollection.name?.[0]?.[0],
+    title: renderNodesToText(pageCollection.name),
     description: pageCollection.description,
     descriptionPlain: renderNodesToText(pageCollection.description),
     descriptionHTML: renderNodesToHtml(pageCollection.description),
