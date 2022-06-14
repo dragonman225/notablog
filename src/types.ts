@@ -76,6 +76,7 @@ export interface NotablogStarterConfig {
   theme: string
   previewBrowser: string
   autoSlug: boolean
+  locale: string | undefined
 }
 
 export interface ThemeConfig {
