@@ -123,7 +123,8 @@ export async function parseTable(
       dateString: getDateString(
         record.propertyCellMap.get(
           propertyAccessMap.get('date') as NDateTimeProperty
-        )?.value?.start_date
+        )?.value?.start_date,
+        config
       ),
       createdTime: record.createdTime,
       lastEditedTime: record.lastEditedTime,
@@ -176,11 +177,14 @@ function renderNodesToHtml(
 
 /**
  * Get formatted string from a date-typed property
- * @param {Nast.Page} page
- * @param {string} propId
+ * @param {string | undefined} dateRaw
+ * @param {Config} config
  * @returns {string | undefined} WWW, MMM DD, YYY
  */
-function getDateString(dateRaw: string | undefined): string | undefined {
+function getDateString(
+  dateRaw: string | undefined,
+  config: Config
+): string | undefined {
   if (dateRaw) {
     const options: Parameters<Date['toLocaleDateString']>['1'] = {
       weekday: 'short',
@@ -188,7 +192,8 @@ function getDateString(dateRaw: string | undefined): string | undefined {
       month: 'short',
       day: 'numeric',
     }
-    const dateString = new Date(dateRaw).toLocaleDateString('en-US', options)
+    const locale = config.get('locale') || 'en-US'
+    const dateString = new Date(dateRaw).toLocaleDateString(locale, options)
     return dateString
   } else return undefined
 }
