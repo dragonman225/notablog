@@ -113,12 +113,13 @@ notablog-starter
 
 - `config.json` - User configuration.
 
-  |     Field      |  Type   |                         Description                          |
-  | :------------: | :-----: | :----------------------------------------------------------: |
-  |      url       | string  |     The URL of a Notion table compatible with Notablog.      |
-  |     theme      | string  | The theme to use. It should be one of the folder names in `themes/`. |
-  | previewBrowser | string  |      The path to the browser executable for previewing.      |
-  |    autoSlug    | boolean |      Generate URL slugs for pages without custom ones.       |
+  |     Field      |  Type            |                         Description                          |
+  | :------------: | :--------------: | :----------------------------------------------------------: |
+  |      url       | string           |     The URL of a Notion table compatible with Notablog.      |
+  |     theme      | string           | The theme to use. It should be one of the folder names in `themes/`. |
+  | previewBrowser | string           |      The path to the browser executable for previewing.      |
+  |    autoSlug    | boolean          |      Generate URL slugs for pages without custom ones.       |
+  |    locales     | string/string[]  | The locales which are used to generate string of a date (passed as first argument to Date.prototype.toLocaleDateString()) |
 
 - `public/` - Contains generated static assets.
 
