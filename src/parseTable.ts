@@ -192,8 +192,8 @@ function getDateString(
       month: 'short',
       day: 'numeric',
     }
-    const locale = config.get('locale') || 'en-US'
-    const dateString = new Date(dateRaw).toLocaleDateString(locale, options)
+    const locales = config.get('locales') || 'en-US'
+    const dateString = new Date(dateRaw).toLocaleDateString(locales, options)
     return dateString
   } else return undefined
 }
