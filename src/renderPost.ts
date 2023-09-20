@@ -127,54 +127,59 @@ function createLinkTransformer(siteContext: SiteContext) {
  * @param task
  */
 export async function renderPost(task: RenderPostTask): Promise<number> {
-  const { doFetchPage, pageMetadata, siteContext } = task.data
-  const { cache, notionAgent, renderer } = task.tools
-  const config = task.config
+  try {
+    const { doFetchPage, pageMetadata, siteContext } = task.data
+    const { cache, notionAgent, renderer } = task.tools
+    const config = task.config
 
-  const pageID = toDashID(pageMetadata.id)
-  let tree: NAST.Block
+    const pageID = toDashID(pageMetadata.id)
+    let tree: NAST.Block
 
-  /** Fetch page. */
-  if (doFetchPage) {
-    log.info(`Fetch data of page "${pageID}"`)
+    /** Fetch page. */
+    if (doFetchPage) {
+      log.info(`Fetch data of page "${pageID}"`)
 
-    tree = await getOnePageAsTree(pageID, notionAgent)
-    /** Use internal links for pages in the table. */
-    visit(tree, createLinkTransformer(siteContext))
-    cache.set('notion', pageID, tree)
+      tree = await getOnePageAsTree(pageID, notionAgent)
+      /** Use internal links for pages in the table. */
+      visit(tree, createLinkTransformer(siteContext))
+      cache.set('notion', pageID, tree)
 
-    log.info(`Cache of "${pageID}" is saved`)
-  } else {
-    log.info(`Read cache of page "${pageID}"`)
+      log.info(`Cache of "${pageID}" is saved`)
+    } else {
+      log.info(`Read cache of page "${pageID}"`)
 
-    const cachedTree = cache.get('notion', pageID)
+      const cachedTree = cache.get('notion', pageID)
 
-    if (cachedTree != null) tree = cachedTree as NAST.Block
-    else
-      throw new Error(`\
+      if (cachedTree != null) tree = cachedTree as NAST.Block
+      else
+        throw new Error(`\
 Cache of page "${pageID}" is corrupted, run "notablog generate --fresh <path_to_starter>" to fix`)
-  }
+    }
 
-  /** Render with template. */
-  if (pageMetadata.publish) {
-    log.info(`Render published page "${pageID}"`)
+    /** Render with template. */
+    if (pageMetadata.publish) {
+      log.info(`Render published page "${pageID}"`)
 
-    const outDir = config.outDir
-    const outPath = path.join(outDir, pageMetadata.url)
+      const outDir = config.outDir
+      const outPath = path.join(outDir, pageMetadata.url)
 
-    const contentHTML = renderToHTML(tree)
-    const pageHTML = renderer.render(pageMetadata.template, {
-      siteMeta: siteContext,
-      post: {
-        ...pageMetadata,
-        contentHTML,
-      },
-    })
+      const contentHTML = renderToHTML(tree)
+      const pageHTML = renderer.render(pageMetadata.template, {
+        siteMeta: siteContext,
+        post: {
+          ...pageMetadata,
+          contentHTML,
+        },
+      })
 
-    await fsPromises.writeFile(outPath, pageHTML, { encoding: 'utf-8' })
-    return 0
-  } else {
-    log.info(`Skip rendering of unpublished page "${pageID}"`)
-    return 1
+      await fsPromises.writeFile(outPath, pageHTML, { encoding: 'utf-8' })
+      return 0
+    } else {
+      log.info(`Skip rendering of unpublished page "${pageID}"`)
+      return 1
+    }
+  } catch (error) {
+    log.error(error)
+    return 2
   }
 }
